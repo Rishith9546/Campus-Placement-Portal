@@ -1,0 +1,512 @@
+.view-applicants-page {
+    min-height: 100vh;
+    padding: 40px;
+    background: transparent;
+    color: white;
+    font-family: "Open Sans", sans-serif;
+}
+
+.view-applicants-page .back-button {
+    background-color: transparent;
+    border: none;
+    font-family: inherit;
+    color: #c7e8ff;
+    font-size: 15px;
+    cursor: pointer;
+    margin-bottom: 40px;
+}
+
+.view-applicants-header {
+    margin-bottom: 30px;
+}
+
+.view-applicants-header h1 {
+    margin: 0 0 8px;
+    font-size: 30px;
+}
+
+.view-applicants-header p {
+    color: #c7d5dc;
+    margin: 0;
+}
+
+.view-applicants-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.view-applicant-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: 0.3s ease;
+}
+
+.view-applicant-card:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.11);
+}
+
+.view-applicant-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    padding-bottom: 15px;
+}
+
+.view-applicant-header h2 {
+    margin: 0 0 5px;
+    font-size: 21px;
+}
+
+.view-applicant-header p {
+    margin: 0;
+    color: #c7d5dc;
+}
+
+.view-applicant-header span {
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: rgba(37, 99, 235, 0.8);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.view-job-info {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.18);
+    border-radius: 8px;
+}
+
+.view-job-info h3 {
+    margin: 0 0 12px;
+    color: #8fd3ff;
+}
+
+.view-job-info p {
+    margin: 7px 0;
+    color: #d5e0e5;
+}
+
+.view-student-details {
+    margin-top: 20px;
+}
+
+.view-student-details p {
+    margin: 10px 0;
+    color: #d5e0e5;
+}
+
+.view-applicant-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+}
+
+.view-applicant-actions button {
+    border: none;
+    padding: 9px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #2563eb;
+    color: white;
+    font-size: 14px;
+}
+
+.view-applicant-actions button:hover {
+    background: #1d4ed8;
+}
+
+.view-applicant-actions button:nth-child(2) {
+    background: rgba(71, 85, 105, 0.9);
+}
+
+.view-applicant-actions button:nth-child(2):hover {
+    background: #64748b;
+}
+
+.view-applicant-actions button:nth-child(3) {
+    background: #16a34a;
+}
+
+.view-applicant-actions button:nth-child(3):hover {
+    background: #15803d;
+}
+
+.view-applicant-actions button:nth-child(4) {
+    background: #dc2626;
+}
+
+.view-applicant-actions button:nth-child(4):hover {
+    background: #b91c1c;
+}
+
+
+/* =========================================
+   PROFILE POPUP OVERLAY
+========================================= */
+
+.profile-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0, 0, 0, 0.72);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+
+    box-sizing: border-box;
+
+    z-index: 1000;
+}
+
+
+/* =========================================
+   PROFILE POPUP
+========================================= */
+
+.profile-popup {
+    position: relative;
+
+    width: 500px;
+    max-width: 95%;
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    background: #ffffff;
+
+    color: #1e293b;
+
+    border-radius: 18px;
+
+    padding: 30px;
+
+    box-sizing: border-box;
+
+    box-shadow:
+            0 20px 60px rgba(0, 0, 0, 0.45);
+
+    animation: popupOpen 0.25s ease;
+}
+
+
+/* =========================================
+   POPUP SCROLLBAR
+========================================= */
+
+.profile-popup::-webkit-scrollbar {
+    width: 6px;
+}
+
+.profile-popup::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.profile-popup::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+
+/* =========================================
+   POPUP ANIMATION
+========================================= */
+
+@keyframes popupOpen {
+
+    from {
+        opacity: 0;
+        transform: scale(0.85) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+
+}
+
+
+/* =========================================
+   CLOSE X BUTTON
+========================================= */
+
+.profile-popup-close {
+    position: absolute;
+
+    top: 12px;
+    right: 15px;
+
+    width: 35px;
+    height: 35px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #475569;
+
+    font-size: 28px;
+
+    cursor: pointer;
+
+    line-height: 1;
+
+    border-radius: 50%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    z-index: 2;
+}
+
+.profile-popup-close:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+
+/* =========================================
+   PROFILE PHOTO
+========================================= */
+
+.profile-popup-photo {
+    display: block;
+
+    width: 120px;
+    height: 120px;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+
+    margin: 5px auto 18px;
+
+    border: 4px solid #0f172a;
+
+    box-shadow:
+            0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+
+/* =========================================
+   NO PHOTO
+========================================= */
+
+.profile-popup-no-photo {
+    width: 120px;
+    height: 120px;
+
+    border-radius: 50%;
+
+    margin: 5px auto 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #e2e8f0;
+
+    color: #64748b;
+
+    font-size: 14px;
+
+    border: 4px solid #cbd5e1;
+}
+
+
+/* =========================================
+   POPUP TITLE
+========================================= */
+
+.profile-popup h2 {
+    text-align: center;
+
+    margin: 0 0 25px;
+
+    color: #0f172a;
+
+    font-size: 26px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================
+   PROFILE DETAILS
+========================================= */
+
+.profile-popup-details {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+
+/* =========================================
+   PROFILE DETAIL ROW
+========================================= */
+
+.profile-popup-details p {
+    margin: 0;
+
+    padding: 12px 14px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 9px;
+
+    font-size: 15px;
+
+    color: #334155;
+
+    line-height: 1.5;
+
+    word-break: break-word;
+}
+
+
+/* =========================================
+   LABEL
+========================================= */
+
+.profile-popup-details strong {
+    display: inline-block;
+
+    min-width: 105px;
+
+    color: #0f172a;
+
+    font-weight: 700;
+}
+
+
+/* =========================================
+   HIGHLIGHTED DATA
+========================================= */
+
+.profile-popup-details p:first-child {
+    background: #f1f5f9;
+}
+
+
+/* =========================================
+   CLOSE PROFILE BUTTON
+========================================= */
+
+.close-profile-button {
+    width: 100%;
+
+    margin-top: 25px;
+
+    padding: 12px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #0f172a;
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.close-profile-button:hover {
+    background: #1e293b;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 800px) {
+
+    .view-applicants-page {
+        padding: 20px;
+    }
+
+    .view-applicants-container {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 500px) {
+
+    .view-applicants-page {
+        padding: 15px;
+    }
+
+    .view-applicant-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .view-applicant-actions {
+        flex-direction: column;
+    }
+
+    .view-applicant-actions button {
+        width: 100%;
+    }
+
+    .profile-popup {
+        width: 95%;
+
+        padding: 22px 18px;
+
+        max-height: 92vh;
+    }
+
+    .profile-popup-photo,
+    .profile-popup-no-photo {
+        width: 100px;
+        height: 100px;
+    }
+
+    .profile-popup h2 {
+        font-size: 22px;
+    }
+
+    .profile-popup-details p {
+        font-size: 14px;
+    }
+
+    .profile-popup-details strong {
+        min-width: 85px;
+    }
+
+}

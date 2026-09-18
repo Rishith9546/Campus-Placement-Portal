@@ -1,0 +1,42 @@
+.quick-actions {
+    margin-top: 35px;
+    margin-bottom: 40px;
+}
+
+.quick-actions h2 {
+    margin-bottom: 18px;
+}
+
+.quick-actions-container {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.quick-action {
+    padding: 20px;
+
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+
+    border-radius: 14px;
+
+    text-align: center;
+    cursor: pointer;
+
+    transition: 0.3s ease;
+}
+
+.quick-action:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.quick-action span {
+    font-size: 24px;
+}
+
+.quick-action p {
+    margin: 10px 0 0;
+    font-size: 14px;
+}

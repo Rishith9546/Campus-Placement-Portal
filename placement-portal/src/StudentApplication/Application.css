@@ -1,0 +1,166 @@
+.applications-page {
+    min-height: 100vh;
+    padding: 30px 40px;
+
+    color: white;
+}
+
+.applications-header {
+    width: 80%;
+    margin: 20px auto 30px;
+}
+
+.applications-header h1 {
+    margin: 0;
+    font-size: 32px;
+    color: white;
+}
+
+.applications-header p {
+    margin-top: 8px;
+    color: #aaa;
+    font-size: 15px;
+}
+
+.applications-container {
+    width: 80%;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.application-card {
+    background: #2a2828;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    transition: 0.3s;
+}
+
+.application-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+}
+
+.application-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #444;
+}
+
+.application-top h2 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    color: white;
+}
+
+.company {
+    margin: 0;
+    color: #aaa;
+    font-size: 14px;
+}
+
+.status {
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.applied {
+    background: #1e3a8a;
+    color: #93c5fd;
+}
+
+.shortlisted {
+    background: #14532d;
+    color: #86efac;
+}
+
+.rejected {
+    background: #7f1d1d;
+    color: #fca5a5;
+}
+
+.application-details {
+    padding: 15px 0;
+}
+
+.application-details p {
+    margin: 8px 0;
+    color: #bbb;
+    font-size: 14px;
+}
+
+.application-details strong {
+    color: white;
+}
+
+.view-job-btn {
+    width: 100%;
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.view-job-btn:hover {
+    background: #1d4ed8;
+}
+
+.no-applications {
+    width: 80%;
+    margin: 40px auto;
+    padding: 40px;
+    text-align: center;
+    background: #2a2828;
+    border-radius: 10px;
+}
+
+.no-applications h2 {
+    color: white;
+}
+
+.no-applications p {
+    color: #aaa;
+}
+
+.no-applications button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.no-applications button:hover {
+    background: #1d4ed8;
+}
+
+@media (max-width: 768px) {
+
+    .applications-page {
+        padding: 20px;
+    }
+
+    .applications-container {
+        width: 100%;
+        grid-template-columns: 1fr;
+    }
+
+    .applications-header {
+        width: 100%;
+    }
+
+    .application-top {
+        flex-direction: column;
+        gap: 12px;
+    }
+}

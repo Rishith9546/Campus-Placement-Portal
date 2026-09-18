@@ -1,0 +1,96 @@
+.recruiter-profile {
+    width: 100%;
+    box-sizing: border-box;
+
+    margin: 40px 0;
+    padding: 25px 30px;
+
+    background: rgba(15, 23, 42, 0.72);
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+
+    backdrop-filter: blur(10px);
+
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+}
+
+
+/* Heading */
+
+.profile-title {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.profile-title h2 {
+    margin: 0;
+    font-size: 26px;
+}
+
+.profile-title p {
+    margin-top: 6px;
+    opacity: 0.65;
+    font-size: 14px;
+}
+
+
+/* Details */
+
+.profile-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+
+/* Individual boxes */
+
+.detail-item {
+    padding: 18px 20px;
+
+    background: rgba(255, 255, 255, 0.06);
+
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    border-radius: 12px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+
+    transition: 0.2s;
+}
+
+.detail-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+
+/* Label */
+
+.detail-item span {
+    font-size: 13px;
+    opacity: 0.6;
+}
+
+
+/* Value */
+
+.detail-item strong {
+    font-size: 16px;
+}
+
+
+/* Recruiter badge */
+
+.role-badge {
+    width: fit-content;
+
+    padding: 5px 12px;
+
+    border-radius: 20px;
+
+    font-size: 12px !important;
+}

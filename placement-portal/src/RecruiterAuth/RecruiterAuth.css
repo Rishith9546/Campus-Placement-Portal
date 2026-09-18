@@ -1,0 +1,254 @@
+/* Main page */
+
+.recruiter-auth {
+    min-height: 100vh;
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: linear-gradient(
+        135deg,
+        #ecfdf5,
+        #f0fdf4,
+        #ffffff
+    );
+
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+
+/* Card */
+
+.recruiter-auth-card {
+    width: 420px;
+    max-width: 100%;
+
+    background: #ffffff;
+
+    padding: 40px;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.10);
+
+    box-sizing: border-box;
+}
+
+
+/* Heading */
+
+.recruiter-auth-card h1 {
+    margin: 0;
+
+    text-align: center;
+
+    color: #064e3b;
+
+    font-size: 30px;
+    font-weight: 700;
+}
+
+
+/* Subtitle */
+
+.recruiter-auth-card > p {
+    margin-top: 8px;
+    margin-bottom: 30px;
+
+    text-align: center;
+
+    color: #64748b;
+
+    font-size: 14px;
+}
+
+
+/* Sign In / Sign Up tabs */
+
+.auth-tabs {
+    display: flex;
+
+    width: 100%;
+
+    margin-bottom: 25px;
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+
+/* Tab buttons */
+
+.auth-tabs button {
+    flex: 1;
+
+    padding: 13px 10px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #64748b;
+
+    font-size: 16px;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+}
+
+
+/* Hover */
+
+.auth-tabs button:hover {
+    color: #059669;
+}
+
+
+/* Active tab */
+
+.auth-tabs button.active {
+    color: #059669;
+
+    font-weight: 700;
+
+    border-bottom: 3px solid #10b981;
+}
+
+
+/* Form */
+
+.recruiter-auth-card form {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 16px;
+}
+
+
+/* Inputs */
+
+.recruiter-auth-card input {
+    width: 100%;
+
+    padding: 14px 15px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    color: #1e293b;
+
+    font-size: 15px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+/* Input focus */
+
+.recruiter-auth-card input:focus {
+    border-color: #10b981;
+
+    box-shadow:
+        0 0 0 3px rgba(16, 185, 129, 0.12);
+}
+
+
+/* Placeholder */
+
+.recruiter-auth-card input::placeholder {
+    color: #94a3b8;
+}
+
+
+/* Submit button */
+
+.recruiter-auth-card form button {
+    width: 100%;
+
+    padding: 14px;
+
+    margin-top: 5px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #059669;
+
+    color: #ffffff;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+/* Submit hover */
+
+.recruiter-auth-card form button:hover {
+    background: #047857;
+
+    transform: translateY(-1px);
+}
+
+
+/* Submit active */
+
+.recruiter-auth-card form button:active {
+    transform: scale(0.98);
+}
+
+
+/* Message */
+
+.recruiter-auth-card p:last-child {
+    margin-top: 20px;
+
+    text-align: center;
+
+    color: #059669;
+
+    font-size: 14px;
+}
+
+
+/* Mobile */
+
+@media (max-width: 500px) {
+
+    .recruiter-auth {
+        padding: 20px;
+    }
+
+    .recruiter-auth-card {
+        padding: 28px 22px;
+
+        border-radius: 14px;
+    }
+
+    .recruiter-auth-card h1 {
+        font-size: 25px;
+    }
+
+}

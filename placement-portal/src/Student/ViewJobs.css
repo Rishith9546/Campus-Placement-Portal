@@ -1,0 +1,85 @@
+
+.search-bar {
+    width: 80%;
+    margin: 30px auto 20px;
+
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1px solid #2a2828;
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    background: #2a2828;
+}
+
+.search-bar input:focus {
+    border-color: #2563eb;
+}
+
+.jobs-container {
+    width: 80%;
+    margin: auto;
+}
+
+.job-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #2a2828;
+    padding: 18px 20px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.job-card h3 {
+    margin: 0 0 5px;
+    font-size: 18px;
+}
+
+.job-card p {
+    margin: 0 0 10px;
+    color: #666;
+}
+
+.job-card span {
+    display: inline-block;
+    background: #eef2ff;
+    color: #3730a3;
+    padding: 4px 8px;
+    margin-right: 6px;
+    border-radius: 5px;
+    font-size: 12px;
+}
+
+.job-card button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 9px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.job-card button:hover {
+    background: #1d4ed8;
+}
+
+
+ .Back{
+    border: none;
+    background: transparent;
+    color: #c7e8ff;
+    font-size: 15px;
+    cursor: pointer;
+    
+     margin-top: 20px;
+     margin-left: 40px;
+}
+
+ .Back:hover{
+    color: white;
+}

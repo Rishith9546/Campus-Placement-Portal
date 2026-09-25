@@ -48,4 +48,10 @@ public class JobService {
     public long getJobCount(Long id) {
        return jobRepo.countByRecruiterId(id);
     }
+
+    public List<Job> getJobByRecruiterId(Long id) {
+        return jobRepo.findByRecruiterId(id);
+    }
+
+
 }

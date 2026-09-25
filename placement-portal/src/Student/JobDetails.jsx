@@ -13,7 +13,8 @@ export function JobDetails() {
     const [applicationId, setApplicationId] = useState(null);
     const [status, setStatus] = useState(null);
 
-    console.log(id)
+    console.log(id);
+
     // GET STUDENT PROFILE
     useEffect(() => {
 
@@ -212,22 +213,24 @@ export function JobDetails() {
 
 
     return (
-        <div className="job-details">
-            <div className="container-button">
+        <div className="job-page">
 
-            <button onClick={() => navigate('/viewjobs')}>
-                ← Back to Jobs
-            </button>
-                <button onClick={()=>{
-                    navigate('/application')
-                }}>
-                    ←Back To Application
+            <div className="job-navigation">
 
+                <button onClick={() => navigate('/viewjobs')}>
+                    ← Back to Jobs
                 </button>
+
+                <button onClick={() => {
+                    navigate('/application');
+                }}>
+                    ← Back To Application
+                </button>
+
             </div>
 
 
-            <div className="job-header">
+            <div className="job-banner">
 
                 <div>
 
@@ -252,7 +255,7 @@ export function JobDetails() {
 
                 <button
                     onClick={applyFunction}
-                    className={status === "APPLIED" ? "Applied" : ""}
+                    className={status === "APPLIED" ? "job-applied" : ""}
                     disabled={
                         status === "APPLIED" ||
                         status === "SHORTLISTED" ||
@@ -274,7 +277,7 @@ export function JobDetails() {
             </div>
 
 
-            <div className="job-section">
+            <div className="job-content-section">
 
                 <h2>Job Description</h2>
 
@@ -285,7 +288,7 @@ export function JobDetails() {
             </div>
 
 
-            <div className="job-section">
+            <div className="job-content-section">
 
                 <h2>Skills Required</h2>
 
@@ -302,7 +305,7 @@ export function JobDetails() {
             </div>
 
 
-            <div className="job-section">
+            <div className="job-content-section">
 
                 <h2>Eligibility</h2>
 
@@ -313,7 +316,7 @@ export function JobDetails() {
             </div>
 
 
-            <div className="job-section">
+            <div className="job-content-section">
 
                 <h2>Responsibilities</h2>
 
@@ -330,7 +333,7 @@ export function JobDetails() {
             </div>
 
 
-            <div className="job-section">
+            <div className="job-content-section">
 
                 <h2>Job Information</h2>
 

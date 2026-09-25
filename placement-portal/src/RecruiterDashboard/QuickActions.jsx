@@ -1,7 +1,7 @@
 import "./QuickActions.css";
 import { useNavigate } from "react-router-dom";
 
-export function QuickActions({ onPostJob }) {
+export function QuickActions({ onPostJob,company }) {
 
     const navigate = useNavigate();
 
@@ -23,7 +23,7 @@ export function QuickActions({ onPostJob }) {
 
                 <div
                     className="quick-action"
-                    onClick={() => navigate("/recruiter/jobs")}
+                    onClick={() => navigate("/recruiter/manage-jobs")}
                 >
                     <span>💼</span>
                     <p>Manage Jobs</p>

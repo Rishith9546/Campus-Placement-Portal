@@ -29,6 +29,7 @@ export function RecruiterDashboard() {
 
                 <QuickActions
                     onPostJob={() => setShowPostJob(true)}
+                    company={company}
                 />
 
             </div>

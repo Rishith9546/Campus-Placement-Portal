@@ -101,6 +101,11 @@ public class ApplicationController {
         return service.searchShortlisted(keyword);
     }
 
+    @GetMapping("/countById/{id}")
+    public long getJobsCountById( @PathVariable int id) {
+        return service.getJobsCountById(id);
+    }
+
 
 
 }

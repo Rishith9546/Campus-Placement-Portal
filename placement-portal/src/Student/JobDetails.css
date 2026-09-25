@@ -1,20 +1,20 @@
-.job-details {
+.job-page {
     max-width: 1100px;
     margin: 40px auto;
     padding: 30px;
 }
 
-/* Back button */
 
+/* Navigation */
 
-.container-button {
+.job-navigation {
     display: flex;
     gap: 15px;
     margin-bottom: 25px;
     justify-content: space-between;
 }
 
-.container-button button {
+.job-navigation button {
     border: none;
     background: transparent;
     color: #c7e8ff;
@@ -22,13 +22,14 @@
     cursor: pointer;
 }
 
-.container-button button:hover {
+.job-navigation button:hover {
     color: white;
 }
 
 
-/* Job Header */
-.job-header {
+/* Job Banner */
+
+.job-banner {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -47,32 +48,36 @@
     transition: 0.3s ease;
 }
 
-.job-header:hover {
+.job-banner:hover {
     background: rgba(20, 65, 85, 0.8);
     transform: translateY(-2px);
 }
 
-/* Job title */
-.job-header h1 {
+
+/* Job Title */
+
+.job-banner h1 {
     margin: 0 0 10px;
     color: white;
     font-size: 30px;
 }
 
-.job-header h3 {
+.job-banner h3 {
     margin: 0 0 15px;
     color: #cbd5e1;
     font-weight: 500;
 }
 
-.job-header p {
+.job-banner p {
     display: inline-block;
     margin: 0 20px 0 0;
     color: #b6c7d3;
 }
 
-/* Apply button */
-.job-header button {
+
+/* Apply Button */
+
+.job-banner button {
     background: #3b82f6;
     color: white;
 
@@ -89,19 +94,25 @@
     transition: all 0.3s ease;
 }
 
-/* Apply button hover */
-.job-header button:hover {
+
+/* Apply Button Hover */
+
+.job-banner button:hover {
     background: #60a5fa;
     transform: translateY(-2px);
 }
 
-/* Apply button click */
-.job-header button:active {
+
+/* Apply Button Click */
+
+.job-banner button:active {
     transform: scale(0.94);
 }
 
-/* Applied button */
-.job-header .Applied {
+
+/* Applied Button */
+
+.job-banner .job-applied {
     background-color: #22c55e;
     color: white;
 
@@ -112,17 +123,21 @@
     padding: 10px 32px;
     font-weight: 600;
 
-    animation: appliedAnimation 0.4s ease;
+    animation: jobAppliedAnimation 0.4s ease;
 }
 
-/* Applied button hover */
-.job-header .Applied:hover {
+
+/* Applied Button Hover */
+
+.job-banner .job-applied:hover {
     background-color: #22c55e;
     transform: none;
 }
 
-/* Applied animation */
-@keyframes appliedAnimation {
+
+/* Applied Animation */
+
+@keyframes jobAppliedAnimation {
 
     0% {
         transform: scale(0.9);
@@ -140,8 +155,10 @@
     }
 }
 
-/* Sections */
-.job-section {
+
+/* Job Content Sections */
+
+.job-content-section {
     background: rgba(15, 48, 64, 0.6);
     backdrop-filter: blur(10px);
 
@@ -156,12 +173,14 @@
     transition: 0.3s ease;
 }
 
-.job-section:hover {
+.job-content-section:hover {
     background: rgba(20, 65, 85, 0.75);
 }
 
-/* Section heading */
-.job-section h2 {
+
+/* Section Heading */
+
+.job-content-section h2 {
     margin-top: 0;
     margin-bottom: 15px;
 
@@ -169,57 +188,65 @@
     font-size: 21px;
 }
 
+
 /* Paragraph */
-.job-section p {
+
+.job-content-section p {
     color: #cbd5e1;
     line-height: 1.7;
 }
 
+
 /* Lists */
-.job-section ul {
+
+.job-content-section ul {
     padding-left: 20px;
     margin-bottom: 0;
 }
 
-.job-section li {
+.job-content-section li {
     color: #cbd5e1;
     margin-bottom: 10px;
     line-height: 1.5;
 }
 
-/* Strong text */
-.job-section strong {
+
+/* Strong Text */
+
+.job-content-section strong {
     color: white;
 }
 
+
 /* Mobile */
+
 @media (max-width: 700px) {
 
-    .job-details {
+    .job-page {
         margin: 20px 0;
         padding: 15px;
     }
 
-    .job-header {
+    .job-banner {
         flex-direction: column;
         align-items: flex-start;
         gap: 20px;
     }
 
-    .job-header h1 {
+    .job-banner h1 {
         font-size: 24px;
     }
 
-    .job-header p {
+    .job-banner p {
         display: block;
         margin-bottom: 8px;
     }
 
-    .job-header button {
+    .job-banner button {
         width: 100%;
     }
 
-    .job-section {
+    .job-content-section {
         padding: 20px;
     }
 }

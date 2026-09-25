@@ -286,4 +286,7 @@ public class ApplicationService {
                 .toList();
     }
 
+    public long getJobsCountById(int id) {
+        return repo.countByJobId(id);
+    }
 }

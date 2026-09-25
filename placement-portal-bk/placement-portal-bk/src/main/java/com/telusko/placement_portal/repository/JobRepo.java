@@ -7,7 +7,10 @@ import java.util.List;
 
 public interface JobRepo extends JpaRepository<Job, Long> {
     List<Job> findTop3ByRecruiterIdOrderByCreatedAtDesc(Long recruiterId);
+
     List<Job> findByRecruiterId(Long recruiterId);
+
     long countByRecruiterId(Long recruiterId);
+
 
 }

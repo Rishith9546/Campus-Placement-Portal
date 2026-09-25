@@ -55,5 +55,9 @@ public class JobController {
     public long getJobsCount(@AuthenticationPrincipal UserPrincipal user) {
      return  jobService.getJobCount(user.getId());
     }
+    @GetMapping("allJobsById")
+    public List<Job> getJobByRecruiterId(@AuthenticationPrincipal UserPrincipal user) {
+        return jobService.getJobByRecruiterId(user.getId());
+    }
 
 }

@@ -3,6 +3,8 @@ package com.telusko.placement_portal.repository;
 import com.telusko.placement_portal.entity.Job;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface JobRepo extends JpaRepository<Job, Long> {
@@ -11,6 +13,13 @@ public interface JobRepo extends JpaRepository<Job, Long> {
     List<Job> findByRecruiterId(Long recruiterId);
 
     long countByRecruiterId(Long recruiterId);
-
+    List<Job> findByRecruiterIdAndDeadlineGreaterThanEqual(
+            Long recruiterId,
+            LocalDate deadline
+    );
+    List<Job> findByRecruiterIdAndDeadlineLessThan(
+            Long recruiterId,
+            LocalDate deadline
+    );
 
 }

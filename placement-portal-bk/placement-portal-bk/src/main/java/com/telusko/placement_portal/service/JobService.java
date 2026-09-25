@@ -7,6 +7,7 @@ import com.telusko.placement_portal.security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -54,4 +55,17 @@ public class JobService {
     }
 
 
+    public List<Job> getJobByActiveId(Long id) {
+        return jobRepo.findByRecruiterIdAndDeadlineGreaterThanEqual(
+                id,
+                LocalDate.now()
+        );
+    }
+
+    public List<Job> getJobByClosedId(Long id) {
+        return jobRepo.findByRecruiterIdAndDeadlineLessThan(
+                id,
+                LocalDate.now()
+        );
+    }
 }

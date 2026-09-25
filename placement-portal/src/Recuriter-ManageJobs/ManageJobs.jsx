@@ -11,15 +11,12 @@ const ManageJobs = () => {
     const [postJob, setPostJob] = useState(false);
     const [jobs, setJobs] = useState([]);
     const [applicantCounts, setApplicantCounts] = useState({});
-
-
+    const [status, setStatus] = useState("All Jobs");
 
     useEffect(() => {
 
         const getAllJobs = async () => {
-
             try {
-
                 const token = localStorage.getItem("token");
 
                 const response = await axios.get(
@@ -34,24 +31,77 @@ const ManageJobs = () => {
                 setJobs(response.data);
 
             } catch (error) {
-
                 console.error(
                     "Error fetching recruiter jobs:",
                     error
                 );
-
+                setJobs([]);
             }
         };
 
-        getAllJobs();
+        const getClosedJobs = async () => {
+            try {
+                const token = localStorage.getItem("token");
 
-    }, []);
+                const response = await axios.get(
+                    "http://localhost:8080/api/jobs/allClosedJobs",
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
 
+                setJobs(response.data);
+
+            } catch (error) {
+                console.error(
+                    "Error fetching closed jobs:",
+                    error
+                );
+                setJobs([]);
+            }
+        };
+
+        const getActiveJobs = async () => {
+            try {
+                const token = localStorage.getItem("token");
+
+                const response = await axios.get(
+                    "http://localhost:8080/api/jobs/allActiveJobs",
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+
+                setJobs(response.data);
+
+            } catch (error) {
+                console.error(
+                    "Error fetching active jobs:",
+                    error
+                );
+                setJobs([]);
+            }
+        };
+
+        if (status === "All Jobs") {
+            getAllJobs();
+        } else if (status === "Active") {
+            getActiveJobs();
+        } else {
+            getClosedJobs();
+        }
+
+    }, [status]);
 
 
     useEffect(() => {
 
         if (jobs.length === 0) {
+            setApplicantCounts({});
             return;
         }
 
@@ -60,7 +110,6 @@ const ManageJobs = () => {
             try {
 
                 const token = localStorage.getItem("token");
-
                 const counts = {};
 
                 for (const job of jobs) {
@@ -94,15 +143,8 @@ const ManageJobs = () => {
     }, [jobs]);
 
 
-    console.log(jobs);
-    console.log(applicantCounts);
-
-
     return (
         <div className="manage-jobs-page">
-
-
-
 
             <div className="dashboard-back">
 
@@ -173,17 +215,22 @@ const ManageJobs = () => {
                 </div>
 
 
-                <select>
+                <select
+                    value={status}
+                    onChange={(e) =>
+                        setStatus(e.target.value)
+                    }
+                >
 
-                    <option>
+                    <option value="All Jobs">
                         All Jobs
                     </option>
 
-                    <option>
+                    <option value="Active">
                         Active
                     </option>
 
-                    <option>
+                    <option value="Closed">
                         Closed
                     </option>
 
@@ -197,9 +244,6 @@ const ManageJobs = () => {
             <div className="job-table-wrapper">
 
                 <table className="job-list-table">
-
-
-                    {/* TABLE HEADER */}
 
                     <thead>
 
@@ -238,174 +282,190 @@ const ManageJobs = () => {
                     </thead>
 
 
-                    {/* TABLE BODY */}
-
                     <tbody>
 
-                    {jobs.map((job) => {
+                    {jobs.length === 0 ? (
 
+                        <tr>
 
-                        // CALCULATE JOB STATUS
-
-                        const jobStatus = job.deadline
-                            ? new Date() <=
-                            new Date(job.deadline)
-                                ? "Active"
-                                : "Closed"
-                            : "Closed";
-
-
-                        return (
-
-                            <tr
-                                key={job.id}
+                            <td
+                                colSpan="7"
+                                className="no-jobs"
                             >
 
+                                {status === "All Jobs" &&
+                                    "No jobs found."}
 
-                                {/* JOB */}
+                                {status === "Active" &&
+                                    "No active jobs found."}
 
-                                <td>
+                                {status === "Closed" &&
+                                    "No closed jobs found."}
 
-                                    <div className="job-details">
+                            </td>
+
+                        </tr>
+
+                    ) : (
+
+                        jobs.map((job) => {
+
+                            const today = new Date();
+
+                            const deadline = job.deadline
+                                ? new Date(
+                                    job.deadline + "T23:59:59"
+                                )
+                                : null;
+
+                            const jobStatus =
+                                deadline && today <= deadline
+                                    ? "Active"
+                                    : "Closed";
 
 
-                                        <div className="job-avatar">
+                            return (
 
-                                            {job.title
-                                                ? job.title.charAt(0)
-                                                : "J"}
+                                <tr
+                                    key={job.id}
+                                >
+
+                                    {/* JOB */}
+
+                                    <td>
+
+                                        <div className="job-details">
+
+                                            <div className="job-avatar">
+
+                                                {job.title
+                                                    ? job.title.charAt(0)
+                                                    : "J"}
+
+                                            </div>
+
+                                            <div>
+
+                                                <h3>
+                                                    {job.title}
+                                                </h3>
+
+                                                <p>
+                                                    {job.skills}
+                                                </p>
+
+                                            </div>
 
                                         </div>
 
+                                    </td>
 
-                                        <div>
 
-                                            <h3>
-                                                {job.title}
-                                            </h3>
+                                    {/* LOCATION */}
 
-                                            <p>
-                                                {job.skills}
-                                            </p>
+                                    <td>
+                                        {job.location}
+                                    </td>
+
+
+                                    {/* JOB TYPE */}
+
+                                    <td>
+                                        {job.jobType}
+                                    </td>
+
+
+                                    {/* DEADLINE */}
+
+                                    <td>
+                                        {job.deadline}
+                                    </td>
+
+
+                                    {/* APPLICANTS */}
+
+                                    <td>
+
+                                        <span className="applicant-count">
+
+                                            {applicantCounts[job.id] ?? 0}
+
+                                        </span>
+
+                                    </td>
+
+
+                                    {/* STATUS */}
+
+                                    <td>
+
+                                        <span
+                                            className={`job-status ${
+                                                jobStatus === "Active"
+                                                    ? "status-active"
+                                                    : "status-closed"
+                                            }`}
+                                        >
+
+                                            {jobStatus}
+
+                                        </span>
+
+                                    </td>
+
+
+                                    {/* ACTIONS */}
+
+                                    <td>
+
+                                        <div className="job-actions">
+
+                                            <button
+                                                className="action-view"
+                                                onClick={() =>
+                                                    navigate(
+                                                        `/jobs/${job.id}`
+                                                    )
+                                                }
+                                            >
+                                                View
+                                            </button>
+
+
+                                            <button
+                                                className="action-edit"
+                                                onClick={() =>
+                                                    navigate(
+                                                        `/recruiter/edit-job/${job.id}`
+                                                    )
+                                                }
+                                            >
+                                                Edit
+                                            </button>
+
+
+                                            <button
+                                                className="action-delete"
+                                                onClick={() =>
+                                                    alert(
+                                                        `Delete ${job.title}?`
+                                                    )
+                                                }
+                                            >
+                                                Delete
+                                            </button>
 
                                         </div>
 
-                                    </div>
+                                    </td>
 
-                                </td>
+                                </tr>
 
+                            );
 
-                                {/* LOCATION */}
+                        })
 
-                                <td>
-                                    {job.location}
-                                </td>
-
-
-                                {/* JOB TYPE */}
-
-                                <td>
-                                    {job.jobType}
-                                </td>
-
-
-                                {/* DEADLINE */}
-
-                                <td>
-                                    {job.deadline}
-                                </td>
-
-
-                                {/* APPLICANTS */}
-
-                                <td>
-
-                                    <span className="applicant-count">
-
-                                        {applicantCounts[job.id] ?? 0}
-
-                                    </span>
-
-                                </td>
-
-
-                                {/* STATUS */}
-
-                                <td>
-
-                                    <span
-                                        className={`job-status ${
-                                            jobStatus === "Active"
-                                                ? "status-active"
-                                                : "status-closed"
-                                        }`}
-                                    >
-
-                                        {jobStatus}
-
-                                    </span>
-
-                                </td>
-
-
-                                {/* ACTIONS */}
-
-                                <td>
-
-                                    <div className="job-actions">
-
-
-                                        {/* VIEW */}
-
-                                        <button
-                                            className="action-view"
-                                            onClick={() =>
-                                                navigate(
-                                                    `/jobs/${job.id}`
-                                                )
-                                            }
-                                        >
-                                            View
-                                        </button>
-
-
-                                        {/* EDIT */}
-
-                                        <button
-                                            className="action-edit"
-                                            onClick={() =>
-                                                navigate(
-                                                    `/recruiter/edit-job/${job.id}`
-                                                )
-                                            }
-                                        >
-                                            Edit
-                                        </button>
-
-
-                                        {/* DELETE */}
-
-                                        <button
-                                            className="action-delete"
-                                            onClick={() =>
-                                                alert(
-                                                    `Delete ${job.title}?`
-                                                )
-                                            }
-                                        >
-                                            Delete
-                                        </button>
-
-                                    </div>
-
-                                </td>
-
-
-                            </tr>
-
-                        );
-
-                    })}
+                    )}
 
                     </tbody>
 

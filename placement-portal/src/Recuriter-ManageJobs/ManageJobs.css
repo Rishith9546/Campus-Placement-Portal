@@ -361,3 +361,13 @@
     }
 }
 
+.no-jobs {
+    text-align: center;
+    vertical-align: middle;
+    height: 60px;
+    padding: 40px 20px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #9ca3af;
+    background: rgba(255, 255, 255, 0.03);
+}

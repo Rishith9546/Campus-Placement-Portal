@@ -59,5 +59,13 @@ public class JobController {
     public List<Job> getJobByRecruiterId(@AuthenticationPrincipal UserPrincipal user) {
         return jobService.getJobByRecruiterId(user.getId());
     }
+    @GetMapping("allActiveJobs")
+    public List<Job> getAllActiveJobs(@AuthenticationPrincipal UserPrincipal user) {
+        return jobService.getJobByActiveId(user.getId());
+    }
+    @GetMapping("allClosedJobs")
+    public List<Job> getAllClosedJobs(@AuthenticationPrincipal UserPrincipal user) {
+        return jobService.getJobByClosedId(user.getId());
+    }
 
 }

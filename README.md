@@ -226,39 +226,21 @@ Campus-Placement-Portal/
 └── README.md
 ```
 
-> Update the structure if your actual folder names are different.
 
----
 
 ## 🖥️ Screenshots
+screenshots/
+├── HomePage.png
+├── student-login.png
+├── Student-dashboard.png
+├── Student-jobs-page.png
+├── student-job-details.png
+├── recruiter-dashboard.png
+├── recuriter-shortlisted.png
+└── recuriter-applicants.png
 
-Add screenshots of the main application pages here.
 
-### Student Login
 
-*Add screenshot here*
-
-### Student Dashboard
-
-*Add screenshot here*
-
-### Jobs Page
-
-*Add screenshot here*
-
-### Job Details
-
-*Add screenshot here*
-
-### Recruiter Dashboard
-
-*Add screenshot here*
-
-### Applicant Management
-
-*Add screenshot here*
-
----
 
 ## ⚙️ How to Run Locally
 

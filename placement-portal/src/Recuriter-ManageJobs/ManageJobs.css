@@ -275,7 +275,7 @@
 .job-actions {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 10px;
 }
 
 .job-actions button {
@@ -314,17 +314,7 @@
 }
 
 
-/* Delete */
 
-.action-delete {
-    border: 1px solid rgba(248, 113, 113, 0.4);
-    background: rgba(239, 68, 68, 0.08);
-    color: #f87171;
-}
-
-.action-delete:hover {
-    background: rgba(239, 68, 68, 0.16);
-}
 
 
 /* =========================
@@ -370,4 +360,277 @@
     font-weight: 600;
     color: #9ca3af;
     background: rgba(255, 255, 255, 0.03);
+}
+/* =========================
+   EDIT MODAL
+========================= */
+
+.edit-modal-overlay {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 30px;
+
+    background: rgba(0, 0, 0, 0.65);
+
+    backdrop-filter: blur(6px);
+
+    z-index: 1000;
+}
+
+
+.edit-modal {
+    width: 100%;
+    max-width: 850px;
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    padding: 30px;
+
+    background: #172f3d;
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+
+    border-radius: 20px;
+
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+
+/* HEADER */
+
+.edit-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    margin-bottom: 25px;
+
+    padding-bottom: 20px;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.edit-modal-header h2 {
+    margin: 0 0 6px;
+
+    color: white;
+
+    font-size: 25px;
+}
+
+.edit-modal-header p {
+    margin: 0;
+
+    color: #aebdcc;
+
+    font-size: 14px;
+}
+
+
+.edit-close-button {
+    width: 35px;
+    height: 35px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    color: white;
+
+    font-size: 25px;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.edit-close-button:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+
+/* FORM */
+
+.edit-form {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+}
+
+.edit-form-group {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.edit-form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+
+.edit-form-group label {
+    color: #dbe4ea;
+
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+
+.edit-form-group input,
+.edit-form-group select,
+.edit-form-group textarea {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 12px 14px;
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+
+    border-radius: 9px;
+
+    outline: none;
+
+    background: rgba(255, 255, 255, 0.07);
+
+    color: white;
+
+    font-family: inherit;
+
+    font-size: 14px;
+}
+
+
+.edit-form-group input:focus,
+.edit-form-group select:focus,
+.edit-form-group textarea:focus {
+    border-color: rgba(255, 255, 255, 0.4);
+
+    background: rgba(255, 255, 255, 0.1);
+}
+
+
+.edit-form-group input:disabled {
+    cursor: not-allowed;
+
+    background: rgba(255, 255, 255, 0.03);
+
+    color: #8997a1;
+}
+
+
+.edit-form-group textarea {
+    min-height: 100px;
+
+    resize: vertical;
+}
+
+
+.edit-form-group select option {
+    background: #172f3d;
+
+    color: white;
+}
+
+
+/* BUTTONS */
+
+.edit-modal-actions {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 12px;
+
+    margin-top: 30px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+
+.edit-cancel-button,
+.edit-save-button {
+    padding: 11px 22px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+.edit-cancel-button {
+    background: rgba(255, 255, 255, 0.1);
+
+    color: white;
+}
+
+.edit-cancel-button:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+
+.edit-save-button {
+    background: #2563eb;
+
+    color: white;
+}
+
+.edit-save-button:hover {
+    background: #1d4ed8;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 700px) {
+
+    .edit-modal-overlay {
+        padding: 15px;
+    }
+
+    .edit-modal {
+        padding: 20px;
+
+        max-height: 95vh;
+    }
+
+    .edit-form {
+        grid-template-columns: 1fr;
+    }
+
+    .edit-form-group.full-width {
+        grid-column: auto;
+    }
+
+    .edit-modal-actions {
+        flex-direction: column;
+    }
+
+    .edit-cancel-button,
+    .edit-save-button {
+        width: 100%;
+    }
+
 }

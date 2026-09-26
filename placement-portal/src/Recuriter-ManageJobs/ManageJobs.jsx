@@ -12,13 +12,17 @@ const ManageJobs = () => {
     const [jobs, setJobs] = useState([]);
     const [applicantCounts, setApplicantCounts] = useState({});
     const [status, setStatus] = useState("All Jobs");
-    const [search,setSearch]=useState("");
-    console.log(jobs)
+    const [search, setSearch] = useState("");
+
+    // EDIT POPUP
+    const [editJob, setEditJob] = useState(null);
 
     useEffect(() => {
 
         const getAllJobs = async () => {
+
             try {
+
                 const token = localStorage.getItem("token");
 
                 const response = await axios.get(
@@ -33,16 +37,22 @@ const ManageJobs = () => {
                 setJobs(response.data);
 
             } catch (error) {
+
                 console.error(
                     "Error fetching recruiter jobs:",
                     error
                 );
+
                 setJobs([]);
+
             }
         };
 
+
         const getClosedJobs = async () => {
+
             try {
+
                 const token = localStorage.getItem("token");
 
                 const response = await axios.get(
@@ -57,16 +67,22 @@ const ManageJobs = () => {
                 setJobs(response.data);
 
             } catch (error) {
+
                 console.error(
                     "Error fetching closed jobs:",
                     error
                 );
+
                 setJobs([]);
+
             }
         };
 
+
         const getActiveJobs = async () => {
+
             try {
+
                 const token = localStorage.getItem("token");
 
                 const response = await axios.get(
@@ -81,24 +97,36 @@ const ManageJobs = () => {
                 setJobs(response.data);
 
             } catch (error) {
+
                 console.error(
                     "Error fetching active jobs:",
                     error
                 );
+
                 setJobs([]);
+
             }
         };
 
+
         if (status === "All Jobs") {
+
             getAllJobs();
+
         } else if (status === "Active") {
+
             getActiveJobs();
+
         } else {
+
             getClosedJobs();
+
         }
 
     }, [status]);
 
+
+    // SEARCH
     useEffect(() => {
 
         const searchJobs = async () => {
@@ -120,7 +148,11 @@ const ManageJobs = () => {
 
             } catch (error) {
 
-                console.error("Error searching jobs:", error);
+                console.error(
+                    "Error searching jobs:",
+                    error
+                );
+
                 setJobs([]);
 
             }
@@ -133,11 +165,15 @@ const ManageJobs = () => {
     }, [search]);
 
 
+    // APPLICANT COUNT
     useEffect(() => {
 
         if (jobs.length === 0) {
+
             setApplicantCounts({});
+
             return;
+
         }
 
         const getApplicantCounts = async () => {
@@ -145,6 +181,7 @@ const ManageJobs = () => {
             try {
 
                 const token = localStorage.getItem("token");
+
                 const counts = {};
 
                 for (const job of jobs) {
@@ -159,6 +196,7 @@ const ManageJobs = () => {
                     );
 
                     counts[job.id] = response.data;
+
                 }
 
                 setApplicantCounts(counts);
@@ -178,8 +216,65 @@ const ManageJobs = () => {
     }, [jobs]);
 
 
+    // EDIT JOB
+    const handleEditChange = (e) => {
+
+        const { name, value } = e.target;
+
+        setEditJob((previous) => ({
+            ...previous,
+            [name]: value
+        }));
+
+    };
+
+
+    // UPDATE JOB
+    const handleUpdateJob = async () => {
+
+        try {
+
+            const token = localStorage.getItem("token");
+
+            const response = await axios.put(
+                `http://localhost:8080/api/jobs/${editJob.id}`,
+                editJob,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            setJobs((previousJobs) =>
+                previousJobs.map((job) =>
+                    job.id === editJob.id
+                        ? response.data
+                        : job
+                )
+            );
+
+            setEditJob(null);
+
+        } catch (error) {
+
+            console.error(
+                "Error updating job:",
+                error
+            );
+
+            alert("Failed to update job.");
+
+        }
+
+    };
+
+
     return (
+
         <div className="manage-jobs-page">
+
+            {/* BACK */}
 
             <div className="dashboard-back">
 
@@ -222,11 +317,13 @@ const ManageJobs = () => {
 
 
                 {postJob && (
+
                     <PostJob
                         onClose={() =>
                             setPostJob(false)
                         }
                     />
+
                 )}
 
             </div>
@@ -246,9 +343,9 @@ const ManageJobs = () => {
                         type="text"
                         placeholder="Search jobs..."
                         value={search}
-                        onChange={(e)=>{
+                        onChange={(e) =>
                             setSearch(e.target.value)
-                        }}
+                        }
                     />
 
                 </div>
@@ -288,33 +385,19 @@ const ManageJobs = () => {
 
                     <tr>
 
-                        <th>
-                            Job
-                        </th>
+                        <th>Job</th>
 
-                        <th>
-                            Location
-                        </th>
+                        <th>Location</th>
 
-                        <th>
-                            Type
-                        </th>
+                        <th>Type</th>
 
-                        <th>
-                            Deadline
-                        </th>
+                        <th>Deadline</th>
 
-                        <th>
-                            Applicants
-                        </th>
+                        <th>Applicants</th>
 
-                        <th>
-                            Status
-                        </th>
+                        <th>Status</th>
 
-                        <th>
-                            Actions
-                        </th>
+                        <th>Actions</th>
 
                     </tr>
 
@@ -331,7 +414,6 @@ const ManageJobs = () => {
                                 colSpan="7"
                                 className="no-jobs"
                             >
-
                                 {status === "All Jobs" &&
                                     "No jobs found."}
 
@@ -340,7 +422,6 @@ const ManageJobs = () => {
 
                                 {status === "Closed" &&
                                     "No closed jobs found."}
-
                             </td>
 
                         </tr>
@@ -365,11 +446,7 @@ const ManageJobs = () => {
 
                             return (
 
-                                <tr
-                                    key={job.id}
-                                >
-
-                                    {/* JOB */}
+                                <tr key={job.id}>
 
                                     <td>
 
@@ -400,60 +477,46 @@ const ManageJobs = () => {
                                     </td>
 
 
-                                    {/* LOCATION */}
-
                                     <td>
                                         {job.location}
                                     </td>
 
-
-                                    {/* JOB TYPE */}
 
                                     <td>
                                         {job.jobType}
                                     </td>
 
 
-                                    {/* DEADLINE */}
-
                                     <td>
                                         {job.deadline}
                                     </td>
 
 
-                                    {/* APPLICANTS */}
-
                                     <td>
 
-                                        <span className="applicant-count">
+                                            <span className="applicant-count">
 
-                                            {applicantCounts[job.id] ?? 0}
+                                                {applicantCounts[job.id] ?? 0}
 
-                                        </span>
+                                            </span>
 
                                     </td>
 
 
-                                    {/* STATUS */}
-
                                     <td>
 
-                                        <span
-                                            className={`job-status ${
-                                                jobStatus === "Active"
-                                                    ? "status-active"
-                                                    : "status-closed"
-                                            }`}
-                                        >
-
-                                            {jobStatus}
-
-                                        </span>
+                                            <span
+                                                className={`job-status ${
+                                                    jobStatus === "Active"
+                                                        ? "status-active"
+                                                        : "status-closed"
+                                                }`}
+                                            >
+                                                {jobStatus}
+                                            </span>
 
                                     </td>
 
-
-                                    {/* ACTIONS */}
 
                                     <td>
 
@@ -474,24 +537,12 @@ const ManageJobs = () => {
                                             <button
                                                 className="action-edit"
                                                 onClick={() =>
-                                                    navigate(
-                                                        `/recruiter/edit-job/${job.id}`
-                                                    )
+                                                    setEditJob({
+                                                        ...job
+                                                    })
                                                 }
                                             >
                                                 Edit
-                                            </button>
-
-
-                                            <button
-                                                className="action-delete"
-                                                onClick={() =>
-                                                    alert(
-                                                        `Delete ${job.title}?`
-                                                    )
-                                                }
-                                            >
-                                                Delete
                                             </button>
 
                                         </div>
@@ -512,8 +563,267 @@ const ManageJobs = () => {
 
             </div>
 
+
+            {/* EDIT POPUP */}
+
+            {editJob && (
+
+                <div className="edit-modal-overlay">
+
+                    <div className="edit-modal">
+
+                        <div className="edit-modal-header">
+
+                            <div>
+
+                                <h2>
+                                    Edit Job
+                                </h2>
+
+                                <p>
+                                    Update your job details
+                                </p>
+
+                            </div>
+
+                            <button
+                                className="edit-close-button"
+                                onClick={() =>
+                                    setEditJob(null)
+                                }
+                            >
+                                ×
+                            </button>
+
+                        </div>
+
+
+                        <div className="edit-form">
+
+                            {/* COMPANY - DISABLED */}
+
+                            <div className="edit-form-group">
+
+                                <label>
+                                    Company
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="company"
+                                    value={editJob.company || ""}
+                                    disabled
+                                />
+
+                            </div>
+
+
+                            {/* TITLE */}
+
+                            <div className="edit-form-group">
+
+                                <label>
+                                    Job Title
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="title"
+                                    value={editJob.title || ""}
+                                    onChange={handleEditChange}
+                                />
+
+                            </div>
+
+
+                            {/* LOCATION */}
+
+                            <div className="edit-form-group">
+
+                                <label>
+                                    Location
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="location"
+                                    value={editJob.location || ""}
+                                    onChange={handleEditChange}
+                                />
+
+                            </div>
+
+
+                            {/* JOB TYPE */}
+
+                            <div className="edit-form-group">
+
+                                <label>
+                                    Job Type
+                                </label>
+
+                                <select
+                                    name="jobType"
+                                    value={editJob.jobType || ""}
+                                    onChange={handleEditChange}
+                                >
+
+                                    <option value="Full Time">
+                                        Full Time
+                                    </option>
+
+                                    <option value="Part Time">
+                                        Part Time
+                                    </option>
+
+                                    <option value="Internship">
+                                        Internship
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            {/* SALARY */}
+
+                            <div className="edit-form-group">
+
+                                <label>
+                                    Salary
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="salary"
+                                    value={editJob.salary || ""}
+                                    onChange={handleEditChange}
+                                />
+
+                            </div>
+
+
+                            {/* DEADLINE */}
+
+                            <div className="edit-form-group">
+
+                                <label>
+                                    Deadline
+                                </label>
+
+                                <input
+                                    type="date"
+                                    name="deadline"
+                                    value={editJob.deadline || ""}
+                                    onChange={handleEditChange}
+                                />
+
+                            </div>
+
+
+                            {/* SKILLS */}
+
+                            <div className="edit-form-group full-width">
+
+                                <label>
+                                    Skills
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="skills"
+                                    value={editJob.skills || ""}
+                                    onChange={handleEditChange}
+                                />
+
+                            </div>
+
+
+                            {/* ELIGIBILITY */}
+
+                            <div className="edit-form-group full-width">
+
+                                <label>
+                                    Eligibility
+                                </label>
+
+                                <textarea
+                                    name="eligibility"
+                                    value={editJob.eligibility || ""}
+                                    onChange={handleEditChange}
+                                />
+
+                            </div>
+
+
+                            {/* DESCRIPTION */}
+
+                            <div className="edit-form-group full-width">
+
+                                <label>
+                                    Description
+                                </label>
+
+                                <textarea
+                                    name="description"
+                                    value={editJob.description || ""}
+                                    onChange={handleEditChange}
+                                />
+
+                            </div>
+
+
+                            {/* RESPONSIBILITIES */}
+
+                            <div className="edit-form-group full-width">
+
+                                <label>
+                                    Responsibilities
+                                </label>
+
+                                <textarea
+                                    name="responsibilities"
+                                    value={editJob.responsibilities || ""}
+                                    onChange={handleEditChange}
+                                />
+
+                            </div>
+
+                        </div>
+
+
+                        {/* BUTTONS */}
+
+                        <div className="edit-modal-actions">
+
+                            <button
+                                className="edit-cancel-button"
+                                onClick={() =>
+                                    setEditJob(null)
+                                }
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                className="edit-save-button"
+                                onClick={handleUpdateJob}
+                            >
+                                Save Changes
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            )}
+
         </div>
+
     );
+
 };
 
 export default ManageJobs;

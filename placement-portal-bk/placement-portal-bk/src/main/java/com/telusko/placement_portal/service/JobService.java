@@ -72,4 +72,21 @@ public class JobService {
     public List<Job> searchJobs(String keyword,Long id) {
         return jobRepo.searchJobsById(keyword,id);
     }
+
+    public Job updateJob(Long id, Job updatedJob) {
+
+        Job existingJob = jobRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Job not found"));
+
+        existingJob.setTitle(updatedJob.getTitle());
+        existingJob.setLocation(updatedJob.getLocation());
+        existingJob.setJobType(updatedJob.getJobType());
+        existingJob.setSalary(updatedJob.getSalary());
+        existingJob.setDeadline(updatedJob.getDeadline());
+        existingJob.setSkills(updatedJob.getSkills());
+        existingJob.setEligibility(updatedJob.getEligibility());
+        existingJob.setDescription(updatedJob.getDescription());
+        existingJob.setResponsibilities(updatedJob.getResponsibilities());
+        return jobRepo.save(existingJob);
+    }
 }

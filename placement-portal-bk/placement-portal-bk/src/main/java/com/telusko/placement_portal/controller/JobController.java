@@ -71,5 +71,9 @@ public class JobController {
     public List<Job> searchJobs(@RequestParam String keyword,@AuthenticationPrincipal UserPrincipal user) {
         return jobService.searchJobs(keyword,user.getId());
     }
+    @PutMapping("/{id}")
+    public Job updateJob(@PathVariable Long id, @RequestBody  Job job) {
+        return jobService.updateJob(id,job);
+    }
 
 }

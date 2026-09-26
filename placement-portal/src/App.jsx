@@ -12,6 +12,7 @@ import {Application} from "./StudentApplication/Application.jsx";
 import {ViewApplicants} from "./RecuriterApplication/ViewApplicants.jsx";
 import Shortlisted from "./Shortlisted/Shortlisted.jsx";
 import ManageJobs from "./Recuriter-ManageJobs/ManageJobs.jsx";
+import {ViewJobsRecruiter} from "./Recuriter-ManageJobs/ViewJobsRecruiter.jsx";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="/recruiter/applicants" element={<ViewApplicants/>}/>
         <Route path="/recruiter/shortlisted" element={<Shortlisted/>}/>
         <Route path="/recruiter/manage-jobs" element={<ManageJobs/>}/>
+        <Route path="/recruiter/manage-jobs/jobs/:id" element={<ViewJobsRecruiter/>}/>
     </Routes>
   );
 }

@@ -68,4 +68,8 @@ public class JobService {
                 LocalDate.now()
         );
     }
+
+    public List<Job> searchJobs(String keyword,Long id) {
+        return jobRepo.searchJobsById(keyword,id);
+    }
 }

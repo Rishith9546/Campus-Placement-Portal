@@ -67,5 +67,9 @@ public class JobController {
     public List<Job> getAllClosedJobs(@AuthenticationPrincipal UserPrincipal user) {
         return jobService.getJobByClosedId(user.getId());
     }
+    @GetMapping("/search")
+    public List<Job> searchJobs(@RequestParam String keyword,@AuthenticationPrincipal UserPrincipal user) {
+        return jobService.searchJobs(keyword,user.getId());
+    }
 
 }

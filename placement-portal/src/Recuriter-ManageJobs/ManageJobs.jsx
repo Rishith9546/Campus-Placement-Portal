@@ -12,6 +12,8 @@ const ManageJobs = () => {
     const [jobs, setJobs] = useState([]);
     const [applicantCounts, setApplicantCounts] = useState({});
     const [status, setStatus] = useState("All Jobs");
+    const [search,setSearch]=useState("");
+    console.log(jobs)
 
     useEffect(() => {
 
@@ -96,6 +98,39 @@ const ManageJobs = () => {
         }
 
     }, [status]);
+
+    useEffect(() => {
+
+        const searchJobs = async () => {
+
+            try {
+
+                const token = localStorage.getItem("token");
+
+                const response = await axios.get(
+                    `http://localhost:8080/api/jobs/search?keyword=${search}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+
+                setJobs(response.data);
+
+            } catch (error) {
+
+                console.error("Error searching jobs:", error);
+                setJobs([]);
+
+            }
+        };
+
+        if (search.trim() !== "") {
+            searchJobs();
+        }
+
+    }, [search]);
 
 
     useEffect(() => {
@@ -210,6 +245,10 @@ const ManageJobs = () => {
                     <input
                         type="text"
                         placeholder="Search jobs..."
+                        value={search}
+                        onChange={(e)=>{
+                            setSearch(e.target.value)
+                        }}
                     />
 
                 </div>

@@ -13,6 +13,7 @@
     font-size: 15px;
     outline: none;
     background: #2a2828;
+    color:white;
 }
 
 .search-bar input:focus {

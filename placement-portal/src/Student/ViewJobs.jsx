@@ -3,69 +3,61 @@ import './ViewJobs.css';
 import {Await, useNavigate} from "react-router-dom";
 import axios from "axios";
 import {useEffect, useState} from "react";
+import {getJobs} from "./Functions/viewjobs.js";
+import {getUser} from "./Functions/viewjobs.js";
 
 function ViewJobs() {
 
     const navigate = useNavigate();
     const [jobs,setJobs]=useState([]);
     const [users,setUsers]=useState([]);
+    const [keyWord,setKeyWord]=useState("");
+    useEffect(() => {
+        const fetchJobs = async () => {
+            const data = await getJobs();
+            setJobs(data);
+        };
 
-    useEffect(()=>{
-        const getJobs=async ()=>{
+        fetchJobs();
 
-
-        try{
-
-            const token=localStorage.getItem("token");
-
-            const response=await  axios.get(
-                "http://localhost:8080/api/jobs/allJobs",{
-                    headers:{
-                        Authorization:`Bearer ${token}`
-                    }
-                }
-            );
-            setJobs(response.data);
-
-
-
+        const fetchuser=async ()=>{
+            const data=await getUser();
+            setUsers(data);
         }
-        catch (error){
-            console.log(error);
+        fetchuser();
+    }, []);
+    console.log(keyWord)
+    useEffect(() => {
+
+        if (keyWord.trim() === "") {
+            return;
         }
-        }
-        getJobs();
-    },[]);
 
+        const search = async () => {
+            try {
+                const token = localStorage.getItem("token");
 
-
-    useEffect(()=>{
-        const getUser=async ()=>{
-
-
-            try{
-
-                const token=localStorage.getItem("token");
-
-                const response=await  axios.get(
-                    "http://localhost:8080/api/student/profile",{
-                        headers:{
-                            Authorization:`Bearer ${token}`
+                const response = await axios.get(
+                    `http://localhost:8080/api/jobs/student/search?keyword=${keyWord}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
                         }
                     }
                 );
-                setUsers(response.data);
-                console.log(response.data)
 
+                setJobs(response.data);
 
-
-            }
-            catch (error){
+            } catch (error) {
                 console.log(error);
             }
-        }
-        getUser();
-    },[]);
+        };
+
+        search();
+
+    }, [keyWord]);
+
+
     return (
         <>
             <Headers />
@@ -81,6 +73,10 @@ function ViewJobs() {
                 <input
                     type="text"
                     placeholder="Search jobs by title, skills, or company..."
+                    value={keyWord}
+                    onChange={(e)=>{
+                        setKeyWord(e.target.value)
+                    }}
                 />
             </div>
 

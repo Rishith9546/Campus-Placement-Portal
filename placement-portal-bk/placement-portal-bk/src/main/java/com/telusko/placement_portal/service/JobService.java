@@ -89,4 +89,8 @@ public class JobService {
         existingJob.setResponsibilities(updatedJob.getResponsibilities());
         return jobRepo.save(existingJob);
     }
+
+    public List<Job> searchJobsForStudent(String keyword) {
+        return jobRepo.searchJobsForStudent(keyword);
+    }
 }

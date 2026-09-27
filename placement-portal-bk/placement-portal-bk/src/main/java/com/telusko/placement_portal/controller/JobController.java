@@ -75,5 +75,10 @@ public class JobController {
     public Job updateJob(@PathVariable Long id, @RequestBody  Job job) {
         return jobService.updateJob(id,job);
     }
+    @GetMapping("/student/search")
+    public List<Job> searchJobsForStudent(@RequestParam String keyword) {
+        return jobService.searchJobsForStudent(keyword);
+    }
+
 
 }

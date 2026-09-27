@@ -1,10 +1,13 @@
 package com.telusko.placement_portal.service;
 
+import com.telusko.placement_portal.entity.Job;
 import org.springframework.stereotype.Service;
 
 import com.telusko.placement_portal.entity.Student;
 import com.telusko.placement_portal.repository.StudentRepo;
 import com.telusko.placement_portal.security.UserPrincipal;
+
+import java.util.List;
 
 @Service
 public class StudentService {
@@ -111,4 +114,5 @@ public class StudentService {
 
         return studentRepository.save(student);
     }
+
 }

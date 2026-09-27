@@ -2,11 +2,12 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./ViewJobsRecuriter.css";
 import axios from "axios";
+import {useNavigate} from "react-router-dom";
 
 export function ViewJobsRecruiter() {
 
     const { id } = useParams();
-
+    const navigate=useNavigate();
     const [details, setDetails] = useState(null);
 
     useEffect(() => {
@@ -50,6 +51,13 @@ export function ViewJobsRecruiter() {
     return (
 
         <div className="job-view-page">
+
+            <div className="header-button"
+            onClick={()=>{
+                navigate("/recruiter/manage-jobs")
+            }}>
+                ← Back to ManageJobs
+            </div>
 
             <div className="job-view-container">
 
@@ -185,7 +193,11 @@ export function ViewJobsRecruiter() {
                         <span>Created At</span>
 
                         <strong>
-                            {details.createdAt}
+                            {new Date(details.createdAt).toLocaleDateString("en-IN",{
+                                day:"2-digit",
+                                month:"short",
+                                year:"numeric"
+                            })}
                         </strong>
 
                     </div>

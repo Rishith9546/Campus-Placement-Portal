@@ -34,7 +34,7 @@ function App() {
         <Route path="/recruiter/applicants" element={<ViewApplicants/>}/>
         <Route path="/recruiter/shortlisted" element={<Shortlisted/>}/>
         <Route path="/recruiter/manage-jobs" element={<ManageJobs/>}/>
-        <Route path="/recruiter/manage-jobs/jobs/:id" element={<ViewJobsRecruiter/>}/>
+        <Route path="jobsRecuriter/:id" element={<ViewJobsRecruiter/>}/>
     </Routes>
   );
 }

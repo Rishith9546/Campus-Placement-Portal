@@ -526,7 +526,7 @@ const ManageJobs = () => {
                                                 className="action-view"
                                                 onClick={() =>
                                                     navigate(
-                                                        `/jobs/${job.id}`
+                                                        `/jobsRecuriter/${job.id}`
                                                     )
                                                 }
                                             >

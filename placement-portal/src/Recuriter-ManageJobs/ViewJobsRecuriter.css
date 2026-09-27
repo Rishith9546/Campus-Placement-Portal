@@ -263,3 +263,22 @@
     }
 
 }
+
+.header-button {
+    margin-bottom: 40px;
+}
+
+.header-button button {
+    background-color: transparent;
+    border: none;
+    font-family: inherit;
+    color: #c7e8ff;
+    font-size: 15px;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s ease;
+}
+
+.header-button button:hover {
+    color: #3b82f6;
+}

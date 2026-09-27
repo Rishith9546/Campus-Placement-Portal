@@ -45,3 +45,25 @@ export  const getUser=async ()=>{
         return [];
     }
 }
+
+
+export const searchJobs = async (keyWord) => {
+    try {
+        const token = localStorage.getItem("token");
+
+        const response = await axios.get(
+            `http://localhost:8080/api/jobs/student/search?keyword=${keyWord}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+        return response.data;
+
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+};

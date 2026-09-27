@@ -5,6 +5,7 @@ import axios from "axios";
 import {useEffect, useState} from "react";
 import {getJobs} from "./Functions/viewjobs.js";
 import {getUser} from "./Functions/viewjobs.js";
+import {searchJobs} from "./Functions/viewjobs.js";
 
 function ViewJobs() {
 
@@ -33,27 +34,12 @@ function ViewJobs() {
             return;
         }
 
-        const search = async () => {
-            try {
-                const token = localStorage.getItem("token");
-
-                const response = await axios.get(
-                    `http://localhost:8080/api/jobs/student/search?keyword=${keyWord}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
-                );
-
-                setJobs(response.data);
-
-            } catch (error) {
-                console.log(error);
-            }
+        const fetchSearchJobs = async () => {
+            const data = await searchJobs(keyWord);
+            setJobs(data);
         };
 
-        search();
+        fetchSearchJobs();
 
     }, [keyWord]);
 

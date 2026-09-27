@@ -1,97 +1,498 @@
+/* =========================
+   MAIN PAGE
+========================= */
+
 .applications-page {
     min-height: 100vh;
     padding: 30px 40px;
+    color: white;
+}
+
+
+/* =========================
+   TOP ACTIONS
+========================= */
+
+.application-actions {
+    width: 80%;
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    position: relative;
+}
+
+
+/* =========================
+   BACK BUTTON
+========================= */
+
+.back-button {
+    border: none;
+    background: transparent;
+
+    color: #c7e8ff;
+    font-size: 15px;
+
+    cursor: pointer;
+    margin-left: 30px;
+    padding: 0;
+
+    transition: 0.2s ease;
+}
+
+.back-button:hover {
+    color: white;
+}
+
+
+/* =========================
+   FILTER BUTTON
+========================= */
+
+.filter-button {
+    width: 45px;
+    height: 45px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 1px solid #555;
+    border-radius: 8px;
+
+    background: #2a2828;
+    color: #c7e8ff;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.filter-button:hover {
+    background: #3a3838;
+    color: white;
+    border-color: #777;
+}
+
+.filter-button:active {
+    transform: scale(0.95);
+}
+
+.filter-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+
+/* =========================
+   FILTER BOX
+========================= */
+
+.filter-box {
+    position: absolute;
+
+    top: 55px;
+    right: 0;
+
+    width: 240px;
+
+    padding: 18px;
+
+    background: #2a2828;
+
+    border: 1px solid #555;
+    border-radius: 10px;
+
+    box-shadow:
+            0 8px 25px rgba(0, 0, 0, 0.45);
+
+    z-index: 100;
+}
+
+
+/* =========================
+   FILTER HEADER
+========================= */
+
+.filter-header {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 15px;
+
+    padding-bottom: 12px;
+
+    border-bottom: 1px solid #444;
+}
+
+.filter-header h3 {
+    margin: 0;
+
+    font-size: 16px;
 
     color: white;
 }
 
+
+/* =========================
+   FILTER CLOSE BUTTON
+========================= */
+
+.filter-close {
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: none;
+    border-radius: 5px;
+
+    background: transparent;
+
+    color: #aaa;
+
+    font-size: 22px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.filter-close:hover {
+    background: #3a3838;
+    color: white;
+}
+
+
+/* =========================
+   FILTER OPTIONS
+========================= */
+
+.filter-options {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+
+/* =========================
+   EACH FILTER OPTION
+========================= */
+
+.filter-option {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 10px 12px;
+
+    border: 1px solid #444;
+    border-radius: 7px;
+
+    background: transparent;
+
+    color: #bbb;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.filter-option:hover {
+    background: #353333;
+
+    border-color: #666;
+
+    color: white;
+}
+
+
+/* =========================
+   SELECTED FILTER
+========================= */
+
+.filter-option.selected {
+    background: #1e3a8a;
+
+    border-color: #2563eb;
+
+    color: white;
+}
+
+
+/* =========================
+   FILTER TEXT
+========================= */
+
+.filter-option span {
+    font-size: 14px;
+}
+
+
+/* =========================
+   FILTER REMOVE X
+========================= */
+
+.filter-remove {
+    width: 24px;
+    height: 24px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: none;
+
+    background: transparent;
+
+    color: #aaa;
+
+    font-size: 18px;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.filter-remove:hover {
+    color: white;
+
+    transform: scale(1.1);
+}
+
+
+/* =========================
+   SAVE BUTTON
+========================= */
+
+.filter-save {
+    width: 100%;
+
+    margin-top: 15px;
+
+    padding: 10px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background: #2563eb;
+
+    color: white;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.filter-save:hover {
+    background: #1d4ed8;
+}
+
+.filter-save:active {
+    transform: scale(0.98);
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
 .applications-header {
     width: 80%;
-    margin: 20px auto 30px;
+
+    margin: 0 auto 30px;
+
+    text-align: center;
 }
 
 .applications-header h1 {
-    margin: 0;
+    margin: 20px 0 0;
+
     font-size: 32px;
+
     color: white;
 }
 
 .applications-header p {
     margin-top: 8px;
+
+    margin-bottom: 50px;
+
     color: #aaa;
+
     font-size: 15px;
 }
 
+
+/* =========================
+   APPLICATION CONTAINER
+========================= */
+
 .applications-container {
     width: 80%;
-    margin: auto;
+
+    margin: 0 auto;
+
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+
+    grid-template-columns: repeat(
+        2,
+        minmax(0, 1fr)
+    );
+
     gap: 20px;
 }
 
+
+/* =========================
+   APPLICATION CARD
+========================= */
+
 .application-card {
     background: #2a2828;
+
     padding: 20px;
+
     border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-    transition: 0.3s;
+
+    box-shadow:
+            0 2px 8px rgba(0, 0, 0, 0.25);
+
+    transition:
+            transform 0.3s,
+            box-shadow 0.3s;
+
+    display: flex;
+
+    flex-direction: column;
 }
 
 .application-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+
+    box-shadow:
+            0 5px 15px rgba(0, 0, 0, 0.35);
 }
+
+
+/* =========================
+   CARD TOP
+========================= */
 
 .application-top {
     display: flex;
+
     justify-content: space-between;
+
     align-items: flex-start;
+
+    min-height: 65px;
+
     padding-bottom: 15px;
+
     border-bottom: 1px solid #444;
 }
 
 .application-top h2 {
     margin: 0 0 6px;
+
     font-size: 20px;
+
     color: white;
 }
 
 .company {
     margin: 0;
+
     color: #aaa;
+
     font-size: 14px;
 }
 
+
+/* =========================
+   STATUS
+========================= */
+
 .status {
     padding: 6px 12px;
+
     border-radius: 15px;
+
     font-size: 12px;
+
     font-weight: bold;
+
+    white-space: nowrap;
 }
+
+
+/* APPLIED */
 
 .applied {
     background: #1e3a8a;
     color: #93c5fd;
 }
 
+
+/* SHORTLISTED */
+
 .shortlisted {
     background: #14532d;
     color: #86efac;
 }
+
+
+/* REJECTED */
 
 .rejected {
     background: #7f1d1d;
     color: #fca5a5;
 }
 
+
+/* =========================
+   APPLICATION DETAILS
+========================= */
+
 .application-details {
     padding: 15px 0;
+
+    flex: 1;
 }
 
 .application-details p {
     margin: 8px 0;
+
     color: #bbb;
+
     font-size: 14px;
 }
 
@@ -99,31 +500,60 @@
     color: white;
 }
 
+
+/* =========================
+   VIEW JOB BUTTON
+========================= */
+
 .view-job-btn {
     width: 100%;
+
     background: #2563eb;
+
     color: white;
+
     border: none;
+
     padding: 10px;
+
     border-radius: 6px;
+
     cursor: pointer;
+
     font-size: 14px;
+
+    transition: 0.2s ease;
 }
 
 .view-job-btn:hover {
     background: #1d4ed8;
 }
 
+
+/* =========================
+   NO APPLICATIONS
+========================= */
+
 .no-applications {
     width: 80%;
+
     margin: 40px auto;
+
     padding: 40px;
+
     text-align: center;
+
     background: #2a2828;
+
     border-radius: 10px;
+
+    box-shadow:
+            0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .no-applications h2 {
+    margin-top: 0;
+
     color: white;
 }
 
@@ -133,16 +563,76 @@
 
 .no-applications button {
     background: #2563eb;
+
     color: white;
+
     border: none;
+
     padding: 10px 20px;
+
     border-radius: 6px;
+
     cursor: pointer;
+
+    font-size: 14px;
+
+    transition: 0.2s ease;
 }
 
 .no-applications button:hover {
     background: #1d4ed8;
 }
+
+
+/* =========================
+   LOADING
+========================= */
+
+.loading-page {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-height: 60vh;
+}
+
+.loading-page h2 {
+    color: white;
+}
+
+
+/* =========================
+   TABLET
+========================= */
+
+@media (max-width: 900px) {
+
+    .application-actions {
+        width: 90%;
+    }
+
+    .applications-header {
+        width: 90%;
+    }
+
+    .applications-container {
+        width: 90%;
+
+        grid-template-columns: 1fr;
+    }
+
+    .no-applications {
+        width: 90%;
+    }
+
+}
+
+
+/* =========================
+   MOBILE
+========================= */
 
 @media (max-width: 768px) {
 
@@ -150,17 +640,71 @@
         padding: 20px;
     }
 
-    .applications-container {
+    .application-actions {
         width: 100%;
-        grid-template-columns: 1fr;
     }
 
     .applications-header {
         width: 100%;
     }
 
+    .applications-container {
+        width: 100%;
+
+        grid-template-columns: 1fr;
+    }
+
+    .no-applications {
+        width: 100%;
+
+        padding: 30px 20px;
+    }
+
     .application-top {
-        flex-direction: column;
+        flex-direction: row;
+
         gap: 12px;
     }
+
+    .filter-box {
+        right: 0;
+    }
+
+}
+
+
+/* =========================
+   SMALL MOBILE
+========================= */
+
+@media (max-width: 500px) {
+
+    .application-top {
+        flex-direction: column;
+
+        gap: 12px;
+    }
+
+    .status {
+        align-self: flex-start;
+    }
+
+    .applications-header h1 {
+        font-size: 27px;
+    }
+
+    .application-card {
+        padding: 16px;
+    }
+
+    .filter-button {
+        width: 42px;
+
+        height: 42px;
+    }
+
+    .filter-box {
+        width: 220px;
+    }
+
 }

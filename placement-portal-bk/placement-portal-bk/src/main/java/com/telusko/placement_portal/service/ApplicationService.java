@@ -48,18 +48,16 @@ public class ApplicationService {
 
     // ================= GET APPLICATION =================
 
-    public application getApplication(
+    public Optional<application> getApplication(
             Long studentId,
-            Long jobId) {
-
+            Long jobId
+           ) {
         return repo.findByStudentIdAndJobId(
-                        studentId,
-                        jobId
-                )
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Application not found"
-                        ));
+                studentId,
+                jobId
+                
+        );
+
     }
 
     // ================= GET STATUS =================
@@ -216,29 +214,40 @@ public class ApplicationService {
         return applications;
     }
 
-    public List<application> searchShortlisted(String keyword) {
+    public List<application> searchShortlisted(
+            Long jobId,
+            String keyword) {
 
+        // Find the job using job ID
+        Job job = jobRepo.findById(jobId).orElse(null);
+
+        // If job does not exist
+        if (job == null) {
+            return List.of();
+        }
+
+        // Get only shortlisted applications for this job
         List<application> applications =
-                repo.findByStatus("SHORTLISTED");
+                repo.findByJobIdAndStatus(
+                        jobId,
+                        "SHORTLISTED"
+                );
 
-        String search = keyword.toLowerCase().trim();
+        // Handle null keyword
+        String search = keyword == null
+                ? ""
+                : keyword.toLowerCase().trim();
 
         return applications.stream()
                 .filter(app -> {
 
-                    Student student =
-                            studentRepo.findById(
-                                    app.getStudentId()
-                            ).orElse(null);
+                    // Get student
+                    Student student = studentRepo.findById(
+                            app.getStudentId()
+                    ).orElse(null);
 
-                    Job job =
-                            jobRepo.findById(
-                                    app.getJobId()
-                            ).orElse(null);
-
-                    // If student or job doesn't exist,
-                    // don't show this application
-                    if (student == null || job == null) {
+                    // If student doesn't exist
+                    if (student == null) {
                         return false;
                     }
 
@@ -246,36 +255,33 @@ public class ApplicationService {
                     app.setStudent(student);
                     app.setJob(job);
 
-                    String name =
-                            student.getName() == null
-                                    ? ""
-                                    : student.getName().toLowerCase();
+                    // Student details
+                    String name = student.getName() == null
+                            ? ""
+                            : student.getName().toLowerCase();
 
-                    String email =
-                            student.getEmail() == null
-                                    ? ""
-                                    : student.getEmail().toLowerCase();
+                    String email = student.getEmail() == null
+                            ? ""
+                            : student.getEmail().toLowerCase();
 
-                    String skills =
-                            student.getSkills() == null
-                                    ? ""
-                                    : student.getSkills().toLowerCase();
+                    String skills = student.getSkills() == null
+                            ? ""
+                            : student.getSkills().toLowerCase();
 
-                    String branch =
-                            student.getBranch() == null
-                                    ? ""
-                                    : student.getBranch().toLowerCase();
+                    String branch = student.getBranch() == null
+                            ? ""
+                            : student.getBranch().toLowerCase();
 
-                    String jobTitle =
-                            job.getTitle() == null
-                                    ? ""
-                                    : job.getTitle().toLowerCase();
+                    // Job details
+                    String jobTitle = job.getTitle() == null
+                            ? ""
+                            : job.getTitle().toLowerCase();
 
-                    String company =
-                            job.getCompany() == null
-                                    ? ""
-                                    : job.getCompany().toLowerCase();
+                    String company = job.getCompany() == null
+                            ? ""
+                            : job.getCompany().toLowerCase();
 
+                    // Search
                     return name.contains(search)
                             || email.contains(search)
                             || skills.contains(search)
@@ -285,7 +291,6 @@ public class ApplicationService {
                 })
                 .toList();
     }
-
     public long getJobsCountById(int id) {
         return repo.countByJobId(id);
     }

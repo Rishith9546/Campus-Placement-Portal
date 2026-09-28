@@ -14,10 +14,11 @@ function Shortlisted() {
     const [shortlisted, setShortlisted] = useState(0);
     const [shortData, setShortData] = useState([]);
     const [selectedApplicant, setSelectedApplicant] = useState(null);
+
     const [search, setSearch] = useState("");
+    const [jobId, setJobId] = useState("");
 
     const navigate = useNavigate();
-
 
     // View Resume
     const viewResume = async (filename) => {
@@ -47,16 +48,12 @@ function Shortlisted() {
             );
 
             const pdfUrl = URL.createObjectURL(response.data);
-
             window.open(pdfUrl, "_blank");
 
         } catch (error) {
-
             console.error("Error opening resume:", error);
-
         }
     };
-
 
     // Get shortlisted count
     useEffect(() => {
@@ -64,15 +61,10 @@ function Shortlisted() {
         const getCount = async () => {
 
             try {
-
                 const data = await countShortlisted();
-
                 setShortlisted(data);
-
             } catch (error) {
-
                 console.log(error);
-
             }
 
         };
@@ -80,7 +72,6 @@ function Shortlisted() {
         getCount();
 
     }, []);
-
 
     // Get shortlisted candidates
     useEffect(() => {
@@ -90,13 +81,11 @@ function Shortlisted() {
             try {
 
                 const data = await getShortlisted();
-
                 setShortData(data || []);
 
             } catch (error) {
 
                 console.log(error);
-
                 setShortData([]);
 
             }
@@ -107,26 +96,21 @@ function Shortlisted() {
 
     }, []);
 
-
     // Search candidates
     const handleSearch = async (value) => {
 
         setSearch(value);
 
-        // When search is empty,
-        // show all shortlisted candidates
         if (value.trim() === "") {
 
             try {
 
                 const data = await getShortlisted();
-
                 setShortData(data || []);
 
             } catch (error) {
 
                 console.log(error);
-
                 setShortData([]);
 
             }
@@ -134,493 +118,523 @@ function Shortlisted() {
             return;
         }
 
+        if (!jobId) {
+            console.log("Please select a job first");
+            return;
+        }
+
         try {
 
-            const data = await searchShortlisted(value.trim());
+            const data = await searchShortlisted(
+                jobId,
+                value.trim()
+            );
 
-            // Replace old profiles with search results
             setShortData(data || []);
 
         } catch (error) {
 
             console.log(error);
-
-            // Don't show old profiles
             setShortData([]);
 
         }
     };
 
+    // Get unique jobs
+    const uniqueJobs = [];
 
-    // Only display profiles where both
-    // student and job actually exist
+    shortData.forEach((data) => {
+
+        if (!data.job) {
+            return;
+        }
+
+        const exists = uniqueJobs.some(
+            (job) => job.id === data.job.id
+        );
+
+        if (!exists) {
+            uniqueJobs.push(data.job);
+        }
+
+    });
+
+    // Job selection
+    const handleJobChange = async (e) => {
+
+        const selectedJobId = e.target.value;
+
+        setJobId(selectedJobId);
+
+        if (selectedJobId === "") {
+
+            try {
+
+                const data = await getShortlisted();
+                setShortData(data || []);
+
+            } catch (error) {
+
+                console.log(error);
+                setShortData([]);
+
+            }
+
+            return;
+        }
+
+        if (search.trim() !== "") {
+
+            try {
+
+                const data = await searchShortlisted(
+                    selectedJobId,
+                    search.trim()
+                );
+
+                setShortData(data || []);
+
+            } catch (error) {
+
+                console.log(error);
+                setShortData([]);
+
+            }
+        }
+    };
+
+    // Only display valid profiles
     const validProfiles = shortData.filter(
         (data) =>
             data.student &&
             data.job
     );
 
-
     return (
-        <div className="shortlisted-page">
 
+        <div className="shortlisted-page">
 
             {/* Header */}
             <div className="shortlisted-header">
 
-                <div>
+                <button
+                    className="back-btn"
+                    onClick={() => navigate("/recruiterDashboard")}
+                >
+                    ← Back to Dashboard
+                </button>
 
-                    <button
-                        className="back-btn"
-                        onClick={() => {
-                            navigate("/recruiterDashboard");
-                        }}
-                    >
-                        ← Back to Dashboard
-                    </button>
+                <div className="header-content">
 
-                    <h1>Shortlisted Candidates</h1>
+                    <div>
+                        <div className="page-label">
+                            RECRUITER
+                        </div>
 
-                    <p>
-                        Manage shortlisted students and schedule interviews
-                    </p>
+                        <h1>
+                            Shortlisted Candidates
+                        </h1>
 
-                </div>
+                        <p>
+                            Review and manage students shortlisted for your jobs.
+                        </p>
+                    </div>
 
-            </div>
+                    <div className="header-count">
 
+                        <span>
+                            Shortlisted
+                        </span>
 
-            {/* Stats */}
-            <div className="shortlisted-stats">
-
-                <div className="stat-card">
-
-                    <span>👥</span>
-
-                    <h2>
-                        {shortlisted}
-                    </h2>
-
-                    <p>
-                        Shortlisted
-                    </p>
-
-                </div>
-
-
-                <div className="stat-card">
-
-                    <span>📅</span>
-
-                    <h2>
-                        8
-                    </h2>
-
-                    <p>
-                        Scheduled
-                    </p>
-
-                </div>
-
-
-                <div className="stat-card">
-
-                    <span>🔗</span>
-
-                    <h2>
-                        4
-                    </h2>
-
-                    <p>
-                        Link Sent
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            {/* Search and Filters */}
-            <div className="filters">
-
-                <input
-                    type="text"
-                    placeholder="🔍 Search candidate..."
-                    value={search}
-                    onChange={(e) => {
-                        handleSearch(e.target.value);
-                    }}
-                />
-
-
-                <select>
-
-                    <option>
-                        All Jobs
-                    </option>
-
-                    {shortData.map((data) => {
-
-                        if (!data.job) {
-                            return null;
-                        }
-
-                        return (
-                            <option
-                                key={data.id}
-                                value={data.job.id}
-                            >
-                                {data.job.title}
-                            </option>
-                        );
-
-                    })}
-
-                </select>
-
-
-                <select>
-
-                    <option>
-                        All Branches
-                    </option>
-
-                    <option>
-                        CSE
-                    </option>
-
-                    <option>
-                        ECE
-                    </option>
-
-                    <option>
-                        EE
-                    </option>
-
-                </select>
-
-
-                <select>
-
-                    <option>
-                        All Status
-                    </option>
-
-                    <option>
-                        Shortlisted
-                    </option>
-
-                    <option>
-                        Scheduled
-                    </option>
-
-                    <option>
-                        Link Sent
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            {/* Candidate List */}
-            <div className="candidate-list">
-
-
-                {/* No profiles */}
-                {validProfiles.length === 0 ? (
-
-                    <div className="no-profiles">
-
-                        <h2>
-                            No profiles found
-                        </h2>
-
-                        {search.trim() !== "" && (
-                            <p>
-                                No shortlisted candidate matches "{search}"
-                            </p>
-                        )}
+                        <strong>
+                            {shortlisted}
+                        </strong>
 
                     </div>
 
-                ) : (
+                </div>
 
+            </div>
 
-                    validProfiles.map((data) => {
 
-                        const skills = data.job.skills
-                            ? data.job.skills
-                                .split(",")
-                                .join(" • ")
-                            : "";
+            {/* Main Content */}
+            <div className="shortlisted-container">
 
+                {/* Filters */}
+                <div className="filter-card">
 
-                        return (
+                    <div className="filter-title">
 
-                            <div
-                                className="candidate-card"
-                                key={data.id}
-                            >
+                        <div>
+                            <h3>Candidate Search</h3>
+                            <p>
+                                Find shortlisted candidates quickly
+                            </p>
+                        </div>
 
+                    </div>
 
-                                {/* Candidate Top */}
-                                <div className="candidate-top">
+                    <div className="filters">
 
-                                    <div className="candidate-info">
+                        <div className="search-box">
 
-                                        <div className="candidate-avatar">
-                                            VR
-                                        </div>
+                            <span>⌕</span>
 
-                                        <div>
+                            <input
+                                type="text"
+                                placeholder="Search by candidate name..."
+                                value={search}
+                                onChange={(e) =>
+                                    handleSearch(e.target.value)
+                                }
+                            />
 
-                                            <h2>
-                                                {data.student.name}
-                                            </h2>
+                        </div>
 
-                                            <span className="status">
-                                                ● SHORTLISTED
-                                            </span>
+                        <select
+                            value={jobId}
+                            onChange={handleJobChange}
+                        >
 
-                                        </div>
+                            <option value="">
+                                All Jobs
+                            </option>
 
-                                    </div>
+                            {uniqueJobs.map((job) => (
 
-                                </div>
+                                <option
+                                    key={job.id}
+                                    value={job.id}
+                                >
+                                    {job.title}
+                                </option>
 
+                            ))}
 
-                                {/* Candidate Details */}
-                                <div className="candidate-details">
+                        </select>
 
+                        <select>
 
-                                    <div>
+                            <option>
+                                All Branches
+                            </option>
 
-                                        <span>
-                                            Email
-                                        </span>
+                            <option>
+                                CSE
+                            </option>
 
-                                        <p>
-                                            {data.student.email}
-                                        </p>
+                            <option>
+                                ECE
+                            </option>
 
-                                    </div>
+                            <option>
+                                EE
+                            </option>
 
+                        </select>
 
-                                    <div>
+                        <select>
 
-                                        <span>
-                                            Phone
-                                        </span>
+                            <option>
+                                All Status
+                            </option>
 
-                                        <p>
-                                            {data.student.phone}
-                                        </p>
+                            <option>
+                                Shortlisted
+                            </option>
 
-                                    </div>
+                        </select>
 
+                    </div>
 
-                                    <div>
+                </div>
 
-                                        <span>
-                                            Branch
-                                        </span>
 
-                                        <p>
-                                            {data.student.branch}
-                                        </p>
+                {/* Candidate Heading */}
+                <div className="candidate-heading">
 
-                                    </div>
+                    <div>
 
+                        <h2>
+                            Shortlisted Students
+                        </h2>
 
-                                    <div>
+                        <p>
+                            {validProfiles.length} candidate
+                            {validProfiles.length !== 1 ? "s" : ""} found
+                        </p>
 
-                                        <span>
-                                            CGPA
-                                        </span>
+                    </div>
 
-                                        <p>
-                                            {data.student.cgpa}
-                                        </p>
+                </div>
 
-                                    </div>
 
+                {/* Candidate List */}
+                <div className="candidate-list">
 
-                                </div>
+                    {validProfiles.length === 0 ? (
 
+                        <div className="no-profiles">
 
-                                {/* Job Information */}
-                                <div className="job-info">
-
-
-                                    <p>
-
-                                        <strong>
-                                            Job:
-                                        </strong>{" "}
-
-                                        {data.job.title}
-
-                                    </p>
-
-
-                                    <p>
-
-                                        <strong>
-                                            Applied:
-                                        </strong>{" "}
-
-                                        {data.appliedAt
-                                            ? new Date(
-                                                data.appliedAt
-                                            ).toLocaleDateString(
-                                                "en-GB",
-                                                {
-                                                    day: "2-digit",
-                                                    month: "long",
-                                                    year: "numeric"
-                                                }
-                                            )
-                                            : ""}
-
-                                    </p>
-
-
-                                    <p>
-
-                                        <strong>
-                                            Skills:
-                                        </strong>{" "}
-
-                                        {skills}
-
-                                    </p>
-
-
-                                </div>
-
-
-                                {/* Interview Section */}
-                                <div className="interview-section">
-
-                                    <h3>
-                                        🎯 Interview
-                                    </h3>
-
-
-                                    <div className="interview-form">
-
-
-                                        <div>
-
-                                            <label>
-                                                Interview Date
-                                            </label>
-
-                                            <input
-                                                type="date"
-                                            />
-
-                                        </div>
-
-
-                                        <div>
-
-                                            <label>
-                                                Interview Time
-                                            </label>
-
-                                            <input
-                                                type="time"
-                                            />
-
-                                        </div>
-
-
-                                    </div>
-
-
-                                    <div className="link-input">
-
-                                        <label>
-                                            Interview Link
-                                        </label>
-
-                                        <input
-                                            type="text"
-                                            placeholder="https://meet.google.com/..."
-                                        />
-
-                                    </div>
-
-
-                                </div>
-
-
-                                {/* Actions */}
-                                <div className="candidate-actions">
-
-
-                                    {/* View Resume */}
-                                    <button
-                                        className="resume-btn"
-                                        onClick={() =>
-                                            viewResume(
-                                                data.student.resume
-                                            )
-                                        }
-                                    >
-                                        📄 View Resume
-                                    </button>
-
-
-                                    {/* View Profile */}
-                                    <button
-                                        className="profile-btn"
-                                        onClick={() => {
-                                            setSelectedApplicant(data);
-                                        }}
-                                    >
-                                        👁 View Profile
-                                    </button>
-
-
-                                    {/* Schedule Interview */}
-                                    <button className="schedule-btn">
-                                        📅 Schedule Interview
-                                    </button>
-
-
-                                    {/* Send Interview Link */}
-                                    <button className="send-btn">
-                                        🔗 Send Interview Link
-                                    </button>
-
-
-                                </div>
-
-
+                            <div className="empty-icon">
+                                👤
                             </div>
 
-                        );
+                            <h2>
+                                No shortlisted candidates
+                            </h2>
 
-                    })
+                            {search.trim() !== "" ? (
 
-                )}
+                                <p>
+                                    No shortlisted candidate matches
+                                    "{search}"
+                                </p>
+
+                            ) : (
+
+                                <p>
+                                    There are no shortlisted candidates
+                                    available.
+                                </p>
+
+                            )}
+
+                        </div>
+
+                    ) : (
+
+                        validProfiles.map((data) => {
+
+                            const skills = data.job.skills
+                                ? data.job.skills
+                                    .split(",")
+                                    .join(" • ")
+                                : "";
+
+                            const name = data.student.name || "Student";
+
+                            const initials = name
+                                .split(" ")
+                                .map((word) => word.charAt(0))
+                                .join("")
+                                .slice(0, 2)
+                                .toUpperCase();
+
+                            return (
+
+                                <div
+                                    className="candidate-card"
+                                    key={data.id}
+                                >
+
+                                    {/* Candidate Header */}
+                                    <div className="candidate-top">
+
+                                        <div className="candidate-info">
+
+                                            <div className="candidate-avatar">
+                                                {initials}
+                                            </div>
+
+                                            <div className="candidate-name">
+
+                                                <h2>
+                                                    {data.student.name}
+                                                </h2>
+
+                                                <span className="status">
+                                                    <span className="status-dot">
+                                                        ●
+                                                    </span>
+
+                                                    Shortlisted
+                                                </span>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div className="candidate-id">
+                                            Application #{data.id}
+                                        </div>
+
+                                    </div>
+
+
+                                    {/* Candidate Information */}
+                                    <div className="candidate-details">
+
+                                        <div className="detail-item">
+
+                                            <span>
+                                                EMAIL
+                                            </span>
+
+                                            <p>
+                                                {data.student.email}
+                                            </p>
+
+                                        </div>
+
+                                        <div className="detail-item">
+
+                                            <span>
+                                                PHONE
+                                            </span>
+
+                                            <p>
+                                                {data.student.phone || "Not provided"}
+                                            </p>
+
+                                        </div>
+
+                                        <div className="detail-item">
+
+                                            <span>
+                                                BRANCH
+                                            </span>
+
+                                            <p>
+                                                {data.student.branch}
+                                            </p>
+
+                                        </div>
+
+                                        <div className="detail-item">
+
+                                            <span>
+                                                CGPA
+                                            </span>
+
+                                            <p className="cgpa">
+                                                {data.student.cgpa}
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    {/* Job Information */}
+                                    <div className="job-section">
+
+                                        <div className="job-title">
+
+                                            <span className="job-icon">
+                                                💼
+                                            </span>
+
+                                            <div>
+
+                                                <span>
+                                                    APPLIED FOR
+                                                </span>
+
+                                                <h3>
+                                                    {data.job.title}
+                                                </h3>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div className="job-meta">
+
+                                            <div>
+
+                                                <span>
+                                                    Applied On
+                                                </span>
+
+                                                <p>
+                                                    {data.appliedAt
+                                                        ? new Date(
+                                                            data.appliedAt
+                                                        ).toLocaleDateString(
+                                                            "en-GB",
+                                                            {
+                                                                day: "2-digit",
+                                                                month: "short",
+                                                                year: "numeric"
+                                                            }
+                                                        )
+                                                        : "N/A"}
+                                                </p>
+
+                                            </div>
+
+                                            <div>
+
+                                                <span>
+                                                    Skills
+                                                </span>
+
+                                                <p>
+                                                    {skills || "Not specified"}
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    {/* Actions */}
+                                    <div className="candidate-actions">
+
+                                        <button
+                                            className="resume-btn"
+                                            onClick={() =>
+                                                viewResume(
+                                                    data.student.resume
+                                                )
+                                            }
+                                        >
+                                            <span>📄</span>
+                                            View Resume
+                                        </button>
+
+                                        <button
+                                            className="profile-btn"
+                                            onClick={() =>
+                                                setSelectedApplicant(data)
+                                            }
+                                        >
+                                            <span>👁</span>
+                                            View Profile
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                            );
+
+                        })
+
+                    )}
+
+                </div>
 
             </div>
 
 
             {/* Profile Popup */}
             {selectedApplicant && (
+
                 <ViewProfile
                     selectedApplicant={selectedApplicant}
-                    setSelectedApplicant={setSelectedApplicant}
+                    setSelectedApplicant={
+                        setSelectedApplicant
+                    }
                 />
+
             )}
 
-
         </div>
+
     );
 }
 

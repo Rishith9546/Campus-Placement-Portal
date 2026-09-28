@@ -8,6 +8,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/applications")
@@ -49,9 +50,10 @@ public class ApplicationController {
     // ================= GET APPLICATION BY STUDENT + JOB =================
 
     @GetMapping("/student/{studentId}/job/{jobId}")
-    public application getApplication(
+    public Optional<application> getApplication(
             @PathVariable Long studentId,
-            @PathVariable Long jobId) {
+            @PathVariable Long jobId
+            ) {
 
         return service.getApplication(studentId, jobId);
     }
@@ -96,9 +98,13 @@ public class ApplicationController {
 
     @GetMapping("/recruiter/shortlisted/search")
     public List<application> searchShortlisted(
+            @RequestParam Long jobId,
             @RequestParam String keyword) {
 
-        return service.searchShortlisted(keyword);
+        System.out.println("JOB ID = " + jobId);
+        System.out.println("KEYWORD = " + keyword);
+
+        return service.searchShortlisted(jobId, keyword);
     }
 
     @GetMapping("/countById/{id}")

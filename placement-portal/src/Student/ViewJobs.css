@@ -70,7 +70,7 @@
 }
 
 
- .back-button{
+ .Back{
     border: none;
     background: transparent;
     color: #c7e8ff;
@@ -81,6 +81,6 @@
      margin-left: 40px;
 }
 
- .back-button:hover{
+ .Back:hover{
     color: white;
 }

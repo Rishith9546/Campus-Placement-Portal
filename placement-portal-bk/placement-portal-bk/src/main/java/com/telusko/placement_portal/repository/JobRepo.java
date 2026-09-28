@@ -48,4 +48,5 @@ public interface JobRepo extends JpaRepository<Job, Long> {
        OR LOWER(j.jobType) LIKE LOWER(CONCAT('%', :keyword, '%'))
 """)
     List<Job> searchJobsForStudent(@Param("keyword") String keyword);
+
 }

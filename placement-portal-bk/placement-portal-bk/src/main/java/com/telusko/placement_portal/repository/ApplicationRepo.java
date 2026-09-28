@@ -68,6 +68,9 @@ public interface ApplicationRepo extends JpaRepository<application, Long> {
             @Param("recruiterId") Long recruiterId
     );
 
+
     long countByJobId(int jobId);
-    List<application> findByStatus(String status);
+    List<application> findByJobIdAndStatus(Long jobId, String status);
+
+
 }

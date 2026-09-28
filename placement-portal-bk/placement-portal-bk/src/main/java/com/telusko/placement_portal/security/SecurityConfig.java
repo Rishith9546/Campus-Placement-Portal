@@ -117,6 +117,11 @@ public class SecurityConfig {
                                 "/api/recruiter/**"
                         ).hasRole("RECRUITER")
 
+                        // Interview APIs
+                        .requestMatchers(
+                                "/api/interviews/**"
+                        ).hasRole("RECRUITER")
+
                         // Admin APIs
                         .requestMatchers(
                                 "/api/admin/**"
@@ -126,7 +131,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                .authenticationProvider(authenticationProvider())
+                .authenticationProvider(
+                        authenticationProvider()
+                )
 
                 .addFilterBefore(
                         jwtAuthenticationFilter,

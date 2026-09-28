@@ -30,12 +30,12 @@ export const getShortlisted= async ()=>{
 }
 
 
-export const searchShortlisted = async (keyword) => {
+export const searchShortlisted = async (jobId,keyword) => {
 
     const token = localStorage.getItem("token");
 
     const response = await axios.get(
-        `http://localhost:8080/api/applications/recruiter/shortlisted/search?keyword=${encodeURIComponent(keyword)}`,
+        `http://localhost:8080/api/applications/recruiter/shortlisted/search?jobId=${jobId}&keyword=${encodeURIComponent(keyword)}`,
         {
             headers: {
                 Authorization: `Bearer ${token}`

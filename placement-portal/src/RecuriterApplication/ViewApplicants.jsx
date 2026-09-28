@@ -3,8 +3,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import app from "../App.jsx";
-import {Application} from "../StudentApplication/Application.jsx";
+import { SlidersHorizontal } from "lucide-react";
 
 export function ViewApplicants() {
 
@@ -12,6 +11,11 @@ export function ViewApplicants() {
 
     const [applications, setApplications] = useState([]);
     const [selectedApplicant, setSelectedApplicant] = useState(null);
+
+    const [showFilter, setShowFilter] = useState(false);
+    const [selectedStatus, setSelectedStatus] = useState("ALL");
+    const [appliedFilter, setAppliedFilter] = useState("ALL");
+
 
     useEffect(() => {
 
@@ -127,50 +131,170 @@ export function ViewApplicants() {
 
     };
 
-    const reject= async(application)=>{
-        try{
-            const token =localStorage.getItem("token");
+
+    const reject = async (application) => {
+
+        try {
+
+            const token = localStorage.getItem("token");
+
             await axios.put(
                 `http://localhost:8080/api/applications/rejected/${application.id}`,
                 {},
                 {
-                    headers:{
-                        Authorization:`Bearer ${token}`
+                    headers: {
+                        Authorization: `Bearer ${token}`
                     }
                 }
-            )
-            setApplications((prevApplication)=>{
-               return prevApplication.map((app)=>{
-                    return app.id === application.id
-                    ?{
-                        ...app,
-                        status:"REJECTED"
+            );
+
+            setApplications((prevApplications) =>
+                prevApplications.map((app) =>
+                    app.id === application.id
+                        ? {
+                            ...app,
+                            status: "REJECTED"
                         }
-                        :app
-                })
-            })
+                        : app
+                )
+            );
+
             toast.success("Applicant rejected");
-        }
-        catch (error){
+
+        } catch (error) {
+
             console.error("Error reject applicant:", error);
 
             toast.error("Unable to reject applicant");
+
         }
-    }
+
+    };
+
+
+    const filteredApplications = applications.filter((application) => {
+
+        if (appliedFilter === "ALL") {
+            return true;
+        }
+
+        return application.status === appliedFilter;
+
+    });
+
+
+    const applyFilter = () => {
+
+        setAppliedFilter(selectedStatus);
+
+        setShowFilter(false);
+
+    };
 
 
     return (
 
         <div className="view-applicants-page">
 
-            <button
-                onClick={() => {
-                    navigate('/recruiterDashboard');
-                }}
-                className="back-button"
-            >
-                ← Back To Profile
-            </button>
+            <div className="button-part">
+
+                <button
+                    onClick={() => {
+                        navigate('/recruiterDashboard');
+                    }}
+                    className="back-button"
+                >
+                    ← Back To Profile
+                </button>
+
+
+                <button
+                    className="filter-button"
+                    onClick={() => {
+                        setSelectedStatus(appliedFilter);
+                        setShowFilter(true);
+                    }}
+                >
+                    <SlidersHorizontal size={20} />
+                </button>
+
+            </div>
+
+
+            {showFilter && (
+
+                <div
+                    className="filter-popup-overlay"
+                    onClick={() => setShowFilter(false)}
+                >
+
+                    <div
+                        className="filter-popup"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+
+                        <button
+                            className="filter-popup-close"
+                            onClick={() => setShowFilter(false)}
+                        >
+                            ×
+                        </button>
+
+
+                        <h2>Filter Applicants</h2>
+
+
+                        <div className="filter-option">
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="status"
+                                    value="ALL"
+                                    checked={selectedStatus === "ALL"}
+                                    onChange={() => setSelectedStatus("ALL")}
+                                />
+                                All
+                            </label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="status"
+                                    value="SHORTLISTED"
+                                    checked={selectedStatus === "SHORTLISTED"}
+                                    onChange={() => setSelectedStatus("SHORTLISTED")}
+                                />
+                                Shortlisted
+                            </label>
+
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="status"
+                                    value="REJECTED"
+                                    checked={selectedStatus === "REJECTED"}
+                                    onChange={() => setSelectedStatus("REJECTED")}
+                                />
+                                Rejected
+                            </label>
+
+                        </div>
+
+
+                        <button
+                            className="apply-filter-button"
+                            onClick={applyFilter}
+                        >
+                            Apply Filter
+                        </button>
+
+                    </div>
+
+                </div>
+
+            )}
 
 
             <div className="view-applicants-header">
@@ -186,7 +310,7 @@ export function ViewApplicants() {
 
             <div className="view-applicants-container">
 
-                {applications.map((application) => (
+                {filteredApplications.map((application) => (
 
                     <div
                         className="view-applicant-card"
@@ -206,6 +330,7 @@ export function ViewApplicants() {
                                 </p>
 
                             </div>
+
 
                             <span>
                                 {application.status}
@@ -287,22 +412,32 @@ export function ViewApplicants() {
 
                             <button
                                 onClick={() => shortlist(application)}
-                                disabled={application.status === "SHORTLISTED"
-                                 ||
-                                    application.status==="REJECTED"
-                            }
+                                disabled={
+                                    application.status === "SHORTLISTED" ||
+                                    application.status === "REJECTED"
+                                }
                             >
-                                {application.status === "SHORTLISTED"
-
-                                    ? "Shortlisted"
-                                    : "Shortlist"}
+                                {
+                                    application.status === "SHORTLISTED"
+                                        ? "Shortlisted"
+                                        : "Shortlist"
+                                }
                             </button>
 
 
-                            <button onClick={()=>{reject(application)}}
-                                    disabled={application.status==="REJECTED"}
+                            <button
+                                onClick={() => {
+                                    reject(application);
+                                }}
+                                disabled={
+                                    application.status === "REJECTED"
+                                }
                             >
-                                {application.status!=="REJECTED"?"Reject":"Rejected"}
+                                {
+                                    application.status !== "REJECTED"
+                                        ? "Reject"
+                                        : "Rejected"
+                                }
                             </button>
 
                         </div>
@@ -312,6 +447,19 @@ export function ViewApplicants() {
                 ))}
 
             </div>
+
+
+            {filteredApplications.length === 0 && (
+
+                <div className="view-applicants-header">
+
+                    <p>
+                        No applicants found for this filter.
+                    </p>
+
+                </div>
+
+            )}
 
 
             {selectedApplicant && (
@@ -359,9 +507,7 @@ export function ViewApplicants() {
                         )}
 
 
-                        <h2>
-                            Student Profile
-                        </h2>
+                        <h2>Student Profile</h2>
 
 
                         <div className="profile-popup-details">

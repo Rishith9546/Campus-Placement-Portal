@@ -13,8 +13,6 @@ export function JobDetails() {
     const [applicationId, setApplicationId] = useState(null);
     const [status, setStatus] = useState(null);
 
-    console.log(id);
-
     // GET STUDENT PROFILE
     useEffect(() => {
 
@@ -157,17 +155,24 @@ export function JobDetails() {
     // APPLY FOR JOB
     const applyFunction = async () => {
 
+        if (!users || !details) {
+            return;
+        }
+
         try {
 
             const token = localStorage.getItem("token");
 
             const application = {
                 studentId: users.id,
-                jobId: id,
+                jobId: Number(id),
+                recruiterId: details.recruiterId,
                 appliedAt: new Date().toISOString(),
                 status: "APPLIED",
                 rejectionReason: null
             };
+
+            console.log(application);
 
             const response = await axios.post(
                 "http://localhost:8080/api/applications/applied",
@@ -221,9 +226,7 @@ export function JobDetails() {
                     ← Back to Jobs
                 </button>
 
-                <button onClick={() => {
-                    navigate('/application');
-                }}>
+                <button onClick={() => navigate('/application')}>
                     ← Back To Application
                 </button>
 
@@ -257,6 +260,8 @@ export function JobDetails() {
                     onClick={applyFunction}
                     className={status === "APPLIED" ? "job-applied" : ""}
                     disabled={
+                        !users ||
+                        !details ||
                         status === "APPLIED" ||
                         status === "SHORTLISTED" ||
                         status === "REJECTED"

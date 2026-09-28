@@ -17,10 +17,18 @@ public class application {
     private LocalDateTime appliedAt;
 
     private String status;
+    private Long recruiterId;
 
     private String rejectionReason;
 
     // Getters and Setters
+    public Long getRecruiterId() {
+        return recruiterId;
+    }
+
+    public void setRecruiterId(Long recruiterId) {
+        this.recruiterId = recruiterId;
+    }
 
     public Long getId() {
         return id;
@@ -90,4 +98,5 @@ public class application {
     public void setStudent( Student student) {
         this.student = student;
     }
+
 }

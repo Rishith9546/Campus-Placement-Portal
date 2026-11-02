@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.telusko.placement_portal.dto.EmailRequest;
 import com.telusko.placement_portal.service.EmailService;
 
+import jakarta.validation.Valid;
+
 @RestController 
 @RequestMapping("/api/email")
 @CrossOrigin (origins = "http://localhost:5173")
@@ -23,7 +25,7 @@ public class EmailController {
     }
     
 @PostMapping("/send")
-public ResponseEntity<String> sendEmail(@RequestBody EmailRequest request) {
+public ResponseEntity<String> sendEmail( @Valid @RequestBody EmailRequest request) {
 
     emailService.sendEmail(
         request.getTo(),

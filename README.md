@@ -452,3 +452,9 @@ IIIT Kalyani
 
 GitHub: **Rishith9546**
 
+
+
+1. Eligibility Checker ⭐⭐⭐
+2. Placement Readiness Score ⭐⭐⭐
+3. Candidate Comparison ⭐⭐
+4. Offer Management ⭐⭐

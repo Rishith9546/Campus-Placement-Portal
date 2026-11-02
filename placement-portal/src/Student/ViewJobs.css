@@ -1,24 +1,32 @@
 
+/* ==============================
+   SEARCH BAR
+================================= */
+
 .search-bar {
     width: 80%;
     margin: 30px auto 20px;
-
 }
 
 .search-bar input {
     width: 100%;
+    box-sizing: border-box;
     padding: 14px 18px;
     border: 1px solid #2a2828;
     border-radius: 10px;
     font-size: 15px;
     outline: none;
     background: #2a2828;
-    color:white;
+    color: #ffffff;
 }
 
 .search-bar input:focus {
     border-color: #2563eb;
 }
+
+/* ==============================
+   JOBS CONTAINER
+================================= */
 
 .jobs-container {
     width: 80%;
@@ -30,10 +38,17 @@
     justify-content: space-between;
     align-items: center;
     background: #2a2828;
+    color: #ffffff;
     padding: 18px 20px;
     margin-bottom: 15px;
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: box-shadow 0.2s ease;
+}
+
+.job-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
 }
 
 .job-card h3 {
@@ -43,7 +58,7 @@
 
 .job-card p {
     margin: 0 0 10px;
-    color: #666;
+    color: #bdbdbd;
 }
 
 .job-card span {
@@ -52,35 +67,493 @@
     color: #3730a3;
     padding: 4px 8px;
     margin-right: 6px;
+    margin-bottom: 5px;
     border-radius: 5px;
     font-size: 12px;
 }
 
 .job-card button {
     background: #2563eb;
-    color: white;
+    color: #ffffff;
     border: none;
     padding: 9px 18px;
     border-radius: 6px;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .job-card button:hover {
     background: #1d4ed8;
 }
 
+/* ==============================
+   BACK BUTTON
+================================= */
 
- .Back{
+.Back {
     border: none;
     background: transparent;
     color: #c7e8ff;
     font-size: 15px;
     cursor: pointer;
-    
-     margin-top: 20px;
-     margin-left: 40px;
+    margin-top: 20px;
+    margin-left: 40px;
 }
 
- .Back:hover{
-    color: white;
+.Back:hover {
+    color: #ffffff;
+}
+
+/* ==============================
+   MOCK INTERVIEW BUTTON POSITION
+================================= */
+
+.mock-button {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-left: -50px;
+    z-index: 1000;
+    position: fixed;
+    margin-top: -10px;
+    pointer-events: none;
+}
+
+.mock-button .start-interview-btn {
+    pointer-events: auto;
+}
+
+/* ==============================
+   MOCK INTERVIEW BUTTON
+================================= */
+
+.start-interview-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 13px 22px;
+
+    background: #ffffff;
+    color: #0f3040;
+    border: 1.5px solid #0f3040;
+    border-radius: 9px;
+    opacity: 1;
+
+    font-family: "Open Sans", sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition:
+            background 0.25s ease,
+            box-shadow 0.25s ease,
+            transform 0.25s ease;
+}
+
+.start-interview-btn:hover {
+    background: #f0f5f7;
+    box-shadow: 0 4px 12px rgba(15, 48, 64, 0.10);
+}
+
+.start-interview-btn:active {
+    transform: scale(0.98);
+}
+
+.interview-arrow {
+    font-size: 20px;
+    line-height: 1;
+    transition: transform 0.25s ease;
+}
+
+.start-interview-btn:hover .interview-arrow {
+    transform: translateX(4px);
+}
+
+.start-interview-btn:focus-visible {
+    outline: 3px solid rgba(15, 48, 64, 0.25);
+    outline-offset: 3px;
+}
+
+/* ==============================
+   POPUP OVERLAY
+================================= */
+
+.mock-interview-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+    box-sizing: border-box;
+
+    background: rgba(0, 0, 0, 0.70);
+    backdrop-filter: blur(5px);
+}
+
+/* ==============================
+   POPUP MODAL
+================================= */
+
+.mock-interview-modal {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+
+    padding: 30px;
+
+    background: linear-gradient(135deg, #0F3040, #3d415c);
+    color: #ffffff;
+
+    border: 2px solid #a8c7d8;
+    border-radius: 16px;
+
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.40);
+
+    animation: interviewPopupIn 0.22s ease-out;
+}
+
+@keyframes interviewPopupIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==============================
+   POPUP HEADING
+================================= */
+
+.modal-heading {
+    margin-bottom: 25px;
+    color: #ffffff;
+}
+
+.modal-label {
+    display: block;
+    margin-bottom: 10px;
+
+    color: #b9d8e8;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+}
+
+.modal-heading h2 {
+    margin: 0 35px 8px 0;
+
+    color: #ffffff;
+    font-size: 23px;
+    font-weight: 700;
+}
+
+.modal-heading p {
+    margin: 0;
+
+    color: #e0e7ef;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* ==============================
+   CLOSE POPUP BUTTON
+================================= */
+
+.close-popup {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 34px;
+    height: 34px;
+
+    border: 1px solid #a8c7d8;
+    border-radius: 8px;
+
+    background: rgba(255, 255, 255, 0.10);
+    color: #ffffff;
+    font-size: 27px;
+    cursor: pointer;
+
+    transition: background 0.2s ease;
+}
+
+.close-popup:hover {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+}
+
+/* ==============================
+   POPUP FORM
+================================= */
+
+.interview-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.form-group label {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ==============================
+   TOPIC AND QUESTION DROPDOWNS
+================================= */
+
+.form-group select {
+    width: 100%;
+    min-height: 44px;
+    box-sizing: border-box;
+    padding: 11px 12px;
+
+    border: 1px solid #b8c5d1;
+    border-radius: 8px;
+    outline: none;
+
+    background: #ffffff;
+    color: #111827;
+
+    font-family: "Open Sans", sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+
+    transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
+}
+
+.form-group select:focus {
+    border-color: #8bd3f7;
+    box-shadow: 0 0 0 3px rgba(139, 211, 247, 0.20);
+}
+
+/* Dropdown options */
+
+.form-group select option {
+    background: #ffffff;
+    color: #111827;
+}
+
+/* ==============================
+   CUSTOM TOPIC INPUT
+================================= */
+
+.custom-topic-input {
+    width: 100%;
+    min-height: 44px;
+    box-sizing: border-box;
+    margin-top: 10px;
+    padding: 11px 12px;
+
+    border: 1px solid #b8c5d1;
+    border-radius: 8px;
+    outline: none;
+
+    background: #ffffff;
+    color: #111827;
+
+    font-family: "Open Sans", sans-serif;
+    font-size: 14px;
+
+    transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
+}
+
+.custom-topic-input:focus {
+    border-color: #8bd3f7;
+    box-shadow: 0 0 0 3px rgba(139, 211, 247, 0.20);
+}
+
+.custom-topic-input::placeholder {
+    color: #6b7280;
+}
+
+/* ==============================
+   CUSTOM TOPIC ERROR
+================================= */
+
+.topic-error {
+    margin: 0;
+    color: #fecaca;
+    font-size: 12px;
+}
+
+/* ==============================
+   DIFFICULTY OPTIONS
+================================= */
+
+.difficulty-options {
+    display: flex;
+    gap: 10px;
+}
+
+.difficulty {
+    flex: 1;
+    min-height: 42px;
+    padding: 10px 8px;
+
+    border: 1px solid #b8c5d1;
+    border-radius: 8px;
+
+    background: rgba(255, 255, 255, 0.96);
+    color: #111827;
+
+    font-family: "Open Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+            background 0.2s ease,
+            color 0.2s ease,
+            border-color 0.2s ease;
+}
+
+.difficulty:hover {
+    background: #e0f2fe;
+    border-color: #8bd3f7;
+}
+
+.difficulty.active {
+    border: 1px solid #a8ddf5;
+    background: #a8ddf5;
+    color: #0f3040;
+    font-weight: 700;
+}
+
+/* ==============================
+   START INTERVIEW INSIDE POPUP
+================================= */
+
+.begin-interview-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    width: 100%;
+    min-height: 46px;
+    margin-top: 4px;
+    padding: 12px 16px;
+    box-sizing: border-box;
+
+    border: 1.5px solid #a8ddf5;
+    border-radius: 9px;
+
+    background: #a8ddf5;
+    color: #0f3040;
+
+    font-family: "Open Sans", sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+            background 0.2s ease,
+            box-shadow 0.2s ease,
+            transform 0.2s ease;
+}
+
+.begin-interview-btn:hover {
+    background: #d7f0ff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+.begin-interview-btn:active {
+    transform: scale(0.99);
+}
+
+.begin-interview-btn span {
+    font-size: 20px;
+}
+
+/* ==============================
+   RESPONSIVE DESIGN
+================================= */
+
+@media (max-width: 768px) {
+    .search-bar,
+    .jobs-container {
+        width: 90%;
+    }
+
+    .mock-button {
+        width: auto;
+        right: 12px;
+        margin-left: 0;
+    }
+
+    .Back {
+        margin-left: 20px;
+    }
+
+    .job-card {
+        gap: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .mock-interview-overlay {
+        padding: 12px;
+    }
+
+    .mock-interview-modal {
+        max-height: 94vh;
+        padding: 24px 20px;
+        border-radius: 13px;
+    }
+
+    .modal-heading h2 {
+        font-size: 20px;
+    }
+
+    .difficulty-options {
+        gap: 7px;
+    }
+
+    .difficulty {
+        padding: 10px 5px;
+        font-size: 12px;
+    }
+
+    .job-card {
+        align-items: flex-start;
+        padding: 15px;
+    }
+
+    .job-card h3 {
+        font-size: 16px;
+    }
+
+    .job-card button {
+        padding: 8px 12px;
+    }
 }

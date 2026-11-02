@@ -121,7 +121,7 @@ public class StudentController {
             // =================================================
 
             Path uploadDirectory =
-                    Paths.get("uploads/profile/")
+                    Paths.get("..","..","uploads/profile/")
                             .toAbsolutePath()
                             .normalize();
 
@@ -266,7 +266,7 @@ public class StudentController {
             // =================================================
 
             Path uploadDirectory =
-                    Paths.get("uploads/profile/")
+                    Paths.get("..","..","uploads/profile/")
                             .toAbsolutePath()
                             .normalize();
 

@@ -12,11 +12,14 @@ import { ViewProfile } from "./ViewProfile.jsx";
 function Shortlisted() {
 
     const [shortlisted, setShortlisted] = useState(0);
-    const [shortData, setShortData] = useState([]);
+    const [allShortData, setAllShortData] = useState([]); // Master list of all shortlisted items
+    const [shortData, setShortData] = useState([]); // Filtered list for display/search
     const [selectedApplicant, setSelectedApplicant] = useState(null);
 
     const [search, setSearch] = useState("");
     const [jobId, setJobId] = useState("");
+    const [branch, setBranch] = useState("All"); // Added branch state
+    const [status, setStatus] = useState("All"); // Added status state
 
     const navigate = useNavigate();
 
@@ -55,160 +58,120 @@ function Shortlisted() {
         }
     };
 
-    // Get shortlisted count
+    // Get shortlisted count & initial data
     useEffect(() => {
 
         const getCount = async () => {
-
             try {
                 const data = await countShortlisted();
                 setShortlisted(data);
             } catch (error) {
                 console.log(error);
             }
+        };
 
+        const getData = async () => {
+            try {
+                const data = await getShortlisted();
+                setAllShortData(data || []);
+                setShortData(data || []);
+            } catch (error) {
+                console.log(error);
+                setAllShortData([]);
+                setShortData([]);
+            }
         };
 
         getCount();
-
-    }, []);
-
-    // Get shortlisted candidates
-    useEffect(() => {
-
-        const getData = async () => {
-
-            try {
-
-                const data = await getShortlisted();
-                setShortData(data || []);
-
-            } catch (error) {
-
-                console.log(error);
-                setShortData([]);
-
-            }
-
-        };
-
         getData();
 
     }, []);
 
-    // Search candidates
+    // Search candidates (handles API search when jobId is present, otherwise filters locally or prompts)
     const handleSearch = async (value) => {
 
         setSearch(value);
 
         if (value.trim() === "") {
-
-            try {
-
-                const data = await getShortlisted();
-                setShortData(data || []);
-
-            } catch (error) {
-
-                console.log(error);
-                setShortData([]);
-
-            }
-
+            // Reset to full master list or current job filter
+            setShortData(allShortData);
             return;
         }
 
         if (!jobId) {
-            console.log("Please select a job first");
+            // If no job selected, perform client-side search across all loaded candidates
             return;
         }
 
         try {
-
             const data = await searchShortlisted(
                 jobId,
                 value.trim()
             );
-
             setShortData(data || []);
-
         } catch (error) {
-
             console.log(error);
             setShortData([]);
-
         }
     };
 
-    // Get unique jobs
+    // Get unique jobs for dropdown
     const uniqueJobs = [];
-
-    shortData.forEach((data) => {
-
-        if (!data.job) {
-            return;
-        }
-
-        const exists = uniqueJobs.some(
-            (job) => job.id === data.job.id
-        );
-
+    allShortData.forEach((data) => {
+        if (!data.job) return;
+        const exists = uniqueJobs.some((job) => job.id === data.job.id);
         if (!exists) {
             uniqueJobs.push(data.job);
         }
-
     });
 
-    // Job selection
+    // Job selection handler
     const handleJobChange = async (e) => {
-
         const selectedJobId = e.target.value;
-
         setJobId(selectedJobId);
 
         if (selectedJobId === "") {
-
-            try {
-
-                const data = await getShortlisted();
-                setShortData(data || []);
-
-            } catch (error) {
-
-                console.log(error);
-                setShortData([]);
-
-            }
-
+            setShortData(allShortData);
             return;
         }
 
         if (search.trim() !== "") {
-
             try {
-
-                const data = await searchShortlisted(
-                    selectedJobId,
-                    search.trim()
-                );
-
+                const data = await searchShortlisted(selectedJobId, search.trim());
                 setShortData(data || []);
-
             } catch (error) {
-
                 console.log(error);
                 setShortData([]);
-
             }
+        } else {
+            // Filter master list by selected job locally
+            const filtered = allShortData.filter(item => item.job && item.job.id.toString() === selectedJobId);
+            setShortData(filtered);
         }
     };
 
-    // Only display valid profiles
-    const validProfiles = shortData.filter(
-        (data) =>
-            data.student &&
-            data.job
-    );
+    // Comprehensive filtering (Branch, Status, Search fallback if no jobId api search was triggered)
+    const filteredProfiles = shortData.filter((data) => {
+        if (!data.student || !data.job) return false;
+
+        // Branch Filter
+        if (branch !== "All" && data.student.branch !== branch) {
+            return false;
+        }
+
+        // Status Filter (Assuming status is 'Shortlisted' or similar property, adjust if needed)
+        if (status !== "All") {
+            // Add your status condition check here if status exists in data, e.g., data.status === status
+        }
+
+        // Client-side search fallback (if searching without a backend API job filter constraint)
+        if (search.trim() !== "" && !jobId) {
+            const matchesName = data.student.name.toLowerCase().includes(search.toLowerCase());
+            if (!matchesName) return false;
+        }
+
+        return true;
+    });
 
     return (
 
@@ -264,85 +227,59 @@ function Shortlisted() {
                 <div className="filter-card">
 
                     <div className="filter-title">
-
                         <div>
                             <h3>Candidate Search</h3>
                             <p>
                                 Find shortlisted candidates quickly
                             </p>
                         </div>
-
                     </div>
 
                     <div className="filters">
 
                         <div className="search-box">
-
                             <span>⌕</span>
-
                             <input
                                 type="text"
                                 placeholder="Search by candidate name..."
                                 value={search}
-                                onChange={(e) =>
-                                    handleSearch(e.target.value)
-                                }
+                                onChange={(e) => handleSearch(e.target.value)}
                             />
-
                         </div>
 
+                        {/* Job Filter */}
                         <select
                             value={jobId}
                             onChange={handleJobChange}
                         >
-
                             <option value="">
                                 All Jobs
                             </option>
-
                             {uniqueJobs.map((job) => (
-
-                                <option
-                                    key={job.id}
-                                    value={job.id}
-                                >
+                                <option key={job.id} value={job.id}>
                                     {job.title}
                                 </option>
-
                             ))}
-
                         </select>
 
-                        <select>
-
-                            <option>
-                                All Branches
-                            </option>
-
-                            <option>
-                                CSE
-                            </option>
-
-                            <option>
-                                ECE
-                            </option>
-
-                            <option>
-                                EE
-                            </option>
-
+                        {/* Branch Filter */}
+                        <select
+                            value={branch}
+                            onChange={(e) => setBranch(e.target.value)}
+                        >
+                            <option value="All">All Branches</option>
+                            <option value="CSE">CSE</option>
+                            <option value="ECE">ECE</option>
+                            <option value="EE">EE</option>
                         </select>
 
-                        <select>
-
-                            <option>
-                                All Status
-                            </option>
-
-                            <option>
-                                Shortlisted
-                            </option>
-
+                        {/* Status Filter */}
+                        <select
+                            value={status}
+                            onChange={(e) => setStatus(e.target.value)}
+                        >
+                            <option value="All">All Status</option>
+                            <option value="Shortlisted">Shortlisted</option>
                         </select>
 
                     </div>
@@ -352,27 +289,22 @@ function Shortlisted() {
 
                 {/* Candidate Heading */}
                 <div className="candidate-heading">
-
                     <div>
-
                         <h2>
                             Shortlisted Students
                         </h2>
-
                         <p>
-                            {validProfiles.length} candidate
-                            {validProfiles.length !== 1 ? "s" : ""} found
+                            {filteredProfiles.length} candidate
+                            {filteredProfiles.length !== 1 ? "s" : ""} found
                         </p>
-
                     </div>
-
                 </div>
 
 
                 {/* Candidate List */}
                 <div className="candidate-list">
 
-                    {validProfiles.length === 0 ? (
+                    {filteredProfiles.length === 0 ? (
 
                         <div className="no-profiles">
 
@@ -385,31 +317,23 @@ function Shortlisted() {
                             </h2>
 
                             {search.trim() !== "" ? (
-
                                 <p>
-                                    No shortlisted candidate matches
-                                    "{search}"
+                                    No shortlisted candidate matches "{search}"
                                 </p>
-
                             ) : (
-
                                 <p>
-                                    There are no shortlisted candidates
-                                    available.
+                                    There are no shortlisted candidates available for the selected filters.
                                 </p>
-
                             )}
 
                         </div>
 
                     ) : (
 
-                        validProfiles.map((data) => {
+                        filteredProfiles.map((data) => {
 
                             const skills = data.job.skills
-                                ? data.job.skills
-                                    .split(",")
-                                    .join(" • ")
+                                ? data.job.skills.split(",").join(" • ")
                                 : "";
 
                             const name = data.student.name || "Student";
@@ -438,19 +362,11 @@ function Shortlisted() {
                                             </div>
 
                                             <div className="candidate-name">
-
-                                                <h2>
-                                                    {data.student.name}
-                                                </h2>
-
+                                                <h2>{data.student.name}</h2>
                                                 <span className="status">
-                                                    <span className="status-dot">
-                                                        ●
-                                                    </span>
-
+                                                    <span className="status-dot">●</span>
                                                     Shortlisted
                                                 </span>
-
                                             </div>
 
                                         </div>
@@ -466,51 +382,23 @@ function Shortlisted() {
                                     <div className="candidate-details">
 
                                         <div className="detail-item">
-
-                                            <span>
-                                                EMAIL
-                                            </span>
-
-                                            <p>
-                                                {data.student.email}
-                                            </p>
-
+                                            <span>EMAIL</span>
+                                            <p>{data.student.email}</p>
                                         </div>
 
                                         <div className="detail-item">
-
-                                            <span>
-                                                PHONE
-                                            </span>
-
-                                            <p>
-                                                {data.student.phone || "Not provided"}
-                                            </p>
-
+                                            <span>PHONE</span>
+                                            <p>{data.student.phone || "Not provided"}</p>
                                         </div>
 
                                         <div className="detail-item">
-
-                                            <span>
-                                                BRANCH
-                                            </span>
-
-                                            <p>
-                                                {data.student.branch}
-                                            </p>
-
+                                            <span>BRANCH</span>
+                                            <p>{data.student.branch}</p>
                                         </div>
 
                                         <div className="detail-item">
-
-                                            <span>
-                                                CGPA
-                                            </span>
-
-                                            <p className="cgpa">
-                                                {data.student.cgpa}
-                                            </p>
-
+                                            <span>CGPA</span>
+                                            <p className="cgpa">{data.student.cgpa}</p>
                                         </div>
 
                                     </div>
@@ -520,60 +408,31 @@ function Shortlisted() {
                                     <div className="job-section">
 
                                         <div className="job-title">
-
-                                            <span className="job-icon">
-                                                💼
-                                            </span>
-
+                                            <span className="job-icon">💼</span>
                                             <div>
-
-                                                <span>
-                                                    APPLIED FOR
-                                                </span>
-
-                                                <h3>
-                                                    {data.job.title}
-                                                </h3>
-
+                                                <span>APPLIED FOR</span>
+                                                <h3>{data.job.title}</h3>
                                             </div>
-
                                         </div>
 
                                         <div className="job-meta">
 
                                             <div>
-
-                                                <span>
-                                                    Applied On
-                                                </span>
-
+                                                <span>Applied On</span>
                                                 <p>
                                                     {data.appliedAt
-                                                        ? new Date(
-                                                            data.appliedAt
-                                                        ).toLocaleDateString(
-                                                            "en-GB",
-                                                            {
-                                                                day: "2-digit",
-                                                                month: "short",
-                                                                year: "numeric"
-                                                            }
-                                                        )
+                                                        ? new Date(data.appliedAt).toLocaleDateString("en-GB", {
+                                                            day: "2-digit",
+                                                            month: "short",
+                                                            year: "numeric"
+                                                        })
                                                         : "N/A"}
                                                 </p>
-
                                             </div>
 
                                             <div>
-
-                                                <span>
-                                                    Skills
-                                                </span>
-
-                                                <p>
-                                                    {skills || "Not specified"}
-                                                </p>
-
+                                                <span>Skills</span>
+                                                <p>{skills || "Not specified"}</p>
                                             </div>
 
                                         </div>
@@ -586,11 +445,7 @@ function Shortlisted() {
 
                                         <button
                                             className="resume-btn"
-                                            onClick={() =>
-                                                viewResume(
-                                                    data.student.resume
-                                                )
-                                            }
+                                            onClick={() => viewResume(data.student.resume)}
                                         >
                                             <span>📄</span>
                                             View Resume
@@ -598,9 +453,7 @@ function Shortlisted() {
 
                                         <button
                                             className="profile-btn"
-                                            onClick={() =>
-                                                setSelectedApplicant(data)
-                                            }
+                                            onClick={() => setSelectedApplicant(data)}
                                         >
                                             <span>👁</span>
                                             View Profile
@@ -623,14 +476,10 @@ function Shortlisted() {
 
             {/* Profile Popup */}
             {selectedApplicant && (
-
                 <ViewProfile
                     selectedApplicant={selectedApplicant}
-                    setSelectedApplicant={
-                        setSelectedApplicant
-                    }
+                    setSelectedApplicant={setSelectedApplicant}
                 />
-
             )}
 
         </div>

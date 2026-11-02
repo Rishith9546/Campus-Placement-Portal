@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -5,7 +6,6 @@ import "./StudentDashBoard.css";
 import { Headers } from "./Headers.jsx";
 
 function StudentDashboard() {
-
     const navigate = useNavigate();
 
     const [student, setStudent] = useState({
@@ -21,11 +21,14 @@ function StudentDashboard() {
         resume: null
     });
 
-    const [profilePhoto, setProfilePhoto] =
-        useState("/student-photo.jpg");
+    const [profilePhoto, setProfilePhoto] = useState("/student-photo.jpg");
+    const [showEdit, setShowEdit] = useState(false);
+    const [showResumeAnalyzer, setShowResumeAnalyzer] = useState(false);
 
-    const [showEdit, setShowEdit] =
-        useState(false);
+    const [jobDescription, setJobDescription] = useState("");
+    const [response, setResponse] = useState(null);
+    const [analyzing, setAnalyzing] = useState(false);
+    const [analyzerError, setAnalyzerError] = useState("");
 
     const [formData, setFormData] = useState({
         rollNo: "",
@@ -35,15 +38,11 @@ function StudentDashboard() {
         skills: ""
     });
 
-    const [loading, setLoading] =
-        useState(true);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-
         const getStudentProfile = async () => {
-
-            const token =
-                localStorage.getItem("token");
+            const token = localStorage.getItem("token");
 
             if (!token) {
                 setLoading(false);
@@ -51,17 +50,14 @@ function StudentDashboard() {
             }
 
             try {
-
-                const response =
-                    await axios.get(
-                        "http://localhost:8080/api/student/profile",
-                        {
-                            headers: {
-                                Authorization:
-                                    `Bearer ${token}`
-                            }
+                const response = await axios.get(
+                    "http://localhost:8080/api/student/profile",
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
                         }
-                    );
+                    }
+                );
 
                 setStudent({
                     id: response.data.id ?? null,
@@ -72,109 +68,75 @@ function StudentDashboard() {
                     branch: response.data.branch ?? "",
                     cgpa: response.data.cgpa ?? "",
                     skills: response.data.skills ?? "",
-                    profilePhoto:
-                        response.data.profilePhoto ?? null,
-                    resume:
-                        response.data.resume ?? null
+                    profilePhoto: response.data.profilePhoto ?? null,
+                    resume: response.data.resume ?? null
                 });
 
                 setFormData({
-                    rollNo:
-                        response.data.rollNo || "",
-                    phone:
-                        response.data.phone || "",
-                    branch:
-                        response.data.branch || "",
-                    cgpa:
-                        response.data.cgpa || "",
-                    skills:
-                        response.data.skills || ""
+                    rollNo: response.data.rollNo || "",
+                    phone: response.data.phone || "",
+                    branch: response.data.branch || "",
+                    cgpa: response.data.cgpa || "",
+                    skills: response.data.skills || ""
                 });
 
                 if (response.data.profilePhoto) {
-
                     setProfilePhoto(
                         `http://localhost:8080/api/student/photo/${encodeURIComponent(
                             response.data.profilePhoto
                         )}`
                     );
-
                 } else {
-
-                    setProfilePhoto(
-                        "/student-photo.jpg"
-                    );
+                    setProfilePhoto("/student-photo.jpg");
                 }
-
             } catch (error) {
-
                 console.error(
                     "Error getting student profile:",
-                    error
+                    error.response?.data || error.message
                 );
-
             } finally {
-
                 setLoading(false);
             }
         };
 
         getStudentProfile();
-
     }, []);
 
     const handleProfilePhoto = async (event) => {
+        const file = event.target.files[0];
 
-        const file =
-            event.target.files[0];
-
-        if (!file) {
-            return;
-        }
+        if (!file) return;
 
         if (!file.type.startsWith("image/")) {
+            alert("Please select a valid image.");
+            event.target.value = "";
             return;
         }
 
-        const imageURL =
-            URL.createObjectURL(file);
-
+        const imageURL = URL.createObjectURL(file);
         setProfilePhoto(imageURL);
 
-        const uploadData =
-            new FormData();
-
-        uploadData.append(
-            "photo",
-            file
-        );
+        const uploadData = new FormData();
+        uploadData.append("photo", file);
 
         try {
+            const token = localStorage.getItem("token");
 
-            const token =
-                localStorage.getItem("token");
+            if (!token) return;
 
-            if (!token) {
-                return;
-            }
-
-            const response =
-                await axios.post(
-                    "http://localhost:8080/api/student/photo",
-                    uploadData,
-                    {
-                        headers: {
-                            Authorization:
-                                `Bearer ${token}`
-                        }
+            const response = await axios.post(
+                "http://localhost:8080/api/student/photo",
+                uploadData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
                     }
-                );
+                }
+            );
 
-            const filename =
-                response.data?.profilePhoto;
+            const filename = response.data?.profilePhoto;
 
             if (filename) {
-
                 setProfilePhoto(
                     `http://localhost:8080/api/student/photo/${encodeURIComponent(
                         filename
@@ -186,66 +148,52 @@ function StudentDashboard() {
                     profilePhoto: filename
                 }));
             }
-
         } catch (error) {
-
             console.error(
                 "Photo upload error:",
-                error
+                error.response?.data || error.message
             );
 
-            setProfilePhoto(
-                "/student-photo.jpg"
-            );
+            setProfilePhoto("/student-photo.jpg");
         }
     };
 
     const handleResume = async (event) => {
+        const file = event.target.files[0];
 
-        const file =
-            event.target.files[0];
+        if (!file) return;
 
-        if (!file) {
+        if (
+            file.type !== "application/pdf" &&
+            !file.name.toLowerCase().endsWith(".pdf")
+        ) {
+            alert("Please select a PDF resume.");
+            event.target.value = "";
             return;
         }
 
-        if (file.type !== "application/pdf") {
-            return;
-        }
-
-        const uploadData =
-            new FormData();
-
-        uploadData.append(
-            "resume",
-            file
-        );
+        const uploadData = new FormData();
+        uploadData.append("resume", file);
 
         try {
+            const token = localStorage.getItem("token");
 
-            const token =
-                localStorage.getItem("token");
+            if (!token) return;
 
-            if (!token) {
-                return;
-            }
-
-            const response =
-                await axios.post(
-                    "http://localhost:8080/api/student/resume",
-                    uploadData,
-                    {
-                        headers: {
-                            Authorization:
-                                `Bearer ${token}`
-                        }
+            const response = await axios.post(
+                "http://localhost:8080/api/student/resume",
+                uploadData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
                     }
-                );
+                }
+            );
 
-            const filename =
-                response.data?.resume;
+            const filename = response.data?.resume;
 
             if (!filename) {
+                alert("Resume uploaded, but the filename was not returned.");
                 return;
             }
 
@@ -254,83 +202,126 @@ function StudentDashboard() {
                 resume: filename
             }));
 
+            setResponse(null);
+            setAnalyzerError("");
         } catch (error) {
-
             console.error(
                 "Resume upload error:",
-                error
+                error.response?.data || error.message
             );
+
+            alert("Resume upload failed. Please try again.");
+        } finally {
+            event.target.value = "";
         }
     };
 
     const viewResume = async () => {
+        const filename = student.resume;
 
-        const filename =
-            student.resume;
+        if (!filename) return;
 
-        if (!filename) {
-            return;
-        }
+        const token = localStorage.getItem("token");
 
-        const token =
-            localStorage.getItem("token");
-
-        if (!token) {
-            return;
-        }
+        if (!token) return;
 
         try {
-
-            const response =
-                await axios.get(
-                    `http://localhost:8080/api/student/resume/${encodeURIComponent(
-                        filename
-                    )}`,
-                    {
-                        headers: {
-                            Authorization:
-                                `Bearer ${token}`
-                        },
-                        responseType: "blob"
-                    }
-                );
-
-            const pdfUrl =
-                URL.createObjectURL(
-                    response.data
-                );
-
-            window.open(
-                pdfUrl,
-                "_blank"
+            const response = await axios.get(
+                `http://localhost:8080/api/student/resume/${encodeURIComponent(
+                    filename
+                )}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    },
+                    responseType: "blob"
+                }
             );
 
-        } catch (error) {
+            const pdfUrl = URL.createObjectURL(response.data);
+            window.open(pdfUrl, "_blank", "noopener,noreferrer");
 
+            // Revoke the temporary URL after a delay.
+            setTimeout(() => URL.revokeObjectURL(pdfUrl), 60000);
+        } catch (error) {
             console.error(
                 "Error opening resume:",
-                error
+                error.response?.data || error.message
             );
         }
     };
 
+    const resumeAnalyser = async () => {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            setAnalyzerError("Please log in again.");
+            return;
+        }
+
+        if (!student.resume) {
+            setAnalyzerError("Please upload your resume first.");
+            return;
+        }
+
+        if (!jobDescription.trim()) {
+            setAnalyzerError("Please enter a job description.");
+            return;
+        }
+
+        setAnalyzing(true);
+        setAnalyzerError("");
+        setResponse(null);
+
+        try {
+            const analyzerData = new FormData();
+
+            analyzerData.append("resume", student.resume);
+            analyzerData.append("jobDescription", jobDescription.trim());
+
+            const result = await axios.post(
+                "http://localhost:8080/api/resume-analyzer/analyze",
+                analyzerData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            setResponse(result.data);
+        } catch (error) {
+            console.error(
+                "Resume analysis error:",
+                error.response?.data || error.message
+            );
+
+            const message = error.response?.data?.message;
+
+            setAnalyzerError(
+                typeof message === "string"
+                    ? message
+                    : typeof error.response?.data === "string"
+                    ? error.response.data
+                    : error.response?.status === 404
+                    ? "Resume PDF not found on the server. Check the backend resume upload path."
+                    : error.response?.status === 401 ||
+                      error.response?.status === 403
+                    ? "You are not authorized. Please log in again."
+                    : "Unable to analyze your resume. Check the backend and Ollama logs."
+            );
+        } finally {
+            setAnalyzing(false);
+        }
+    };
+
     const openEdit = () => {
-
         setFormData({
-            rollNo:
-                student.rollNo || "",
-
-            phone:
-                student.phone || "",
-
-            branch:
-                student.branch || "",
-
-            cgpa:
-                student.cgpa || "",
-
-            skills:
-                student.skills || ""
+            rollNo: student.rollNo || "",
+            phone: student.phone || "",
+            branch: student.branch || "",
+            cgpa: student.cgpa || "",
+            skills: student.skills || ""
         });
 
         setShowEdit(true);
@@ -341,11 +332,7 @@ function StudentDashboard() {
     };
 
     const handleChange = (event) => {
-
-        const {
-            name,
-            value
-        } = event.target;
+        const { name, value } = event.target;
 
         setFormData(prev => ({
             ...prev,
@@ -354,84 +341,48 @@ function StudentDashboard() {
     };
 
     const saveDetails = async () => {
+        const token = localStorage.getItem("token");
 
-        const token =
-            localStorage.getItem("token");
-
-        if (!token) {
-            return;
-        }
+        if (!token) return;
 
         try {
-
-            const response =
-                await axios.post(
-                    "http://localhost:8080/api/student/profile",
-
-                    {
-                        rollNo:
-                        formData.rollNo,
-
-                        phone:
-                        formData.phone,
-
-                        branch:
-                        formData.branch,
-
-                        cgpa:
-                        formData.cgpa,
-
-                        skills:
-                        formData.skills
-                    },
-
-                    {
-                        headers: {
-                            "Content-Type":
-                                "application/json",
-
-                            Authorization:
-                                `Bearer ${token}`
-                        }
+            const result = await axios.post(
+                "http://localhost:8080/api/student/profile",
+                {
+                    rollNo: formData.rollNo,
+                    phone: formData.phone,
+                    branch: formData.branch,
+                    cgpa: formData.cgpa,
+                    skills: formData.skills
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
                     }
-                );
+                }
+            );
 
             setStudent(prev => ({
                 ...prev,
-                ...response.data,
-
+                ...result.data,
                 profilePhoto:
-                    response.data.profilePhoto ??
-                    prev.profilePhoto,
-
-                resume:
-                    response.data.resume ??
-                    prev.resume
+                    result.data.profilePhoto ?? prev.profilePhoto,
+                resume: result.data.resume ?? prev.resume
             }));
 
             setFormData({
-                rollNo:
-                    response.data.rollNo || "",
-
-                phone:
-                    response.data.phone || "",
-
-                branch:
-                    response.data.branch || "",
-
-                cgpa:
-                    response.data.cgpa || "",
-
-                skills:
-                    response.data.skills || ""
+                rollNo: result.data.rollNo || "",
+                phone: result.data.phone || "",
+                branch: result.data.branch || "",
+                cgpa: result.data.cgpa || "",
+                skills: result.data.skills || ""
             });
 
             const savedPhoto =
-                response.data.profilePhoto ||
-                student.profilePhoto;
+                result.data.profilePhoto || student.profilePhoto;
 
             if (savedPhoto) {
-
                 setProfilePhoto(
                     `http://localhost:8080/api/student/photo/${encodeURIComponent(
                         savedPhoto
@@ -440,25 +391,29 @@ function StudentDashboard() {
             }
 
             setShowEdit(false);
-
         } catch (error) {
-
             console.error(
                 "Error saving profile:",
-                error
+                error.response?.data || error.message
             );
         }
     };
 
+    const closeResumeAnalyzer = () => {
+        if (analyzing) return;
+
+        setShowResumeAnalyzer(false);
+        setJobDescription("");
+        setResponse(null);
+        setAnalyzerError("");
+    };
+
     const logout = () => {
-
         localStorage.removeItem("token");
-
         window.location.href = "/";
     };
 
     if (loading) {
-
         return (
             <div className="loading">
                 Loading student profile...
@@ -471,143 +426,68 @@ function StudentDashboard() {
             <Headers />
 
             <div className="profile-card">
-
                 <div className="profile-header">
-
                     <div className="photo-container">
-
                         <img
-                            src={
-                                profilePhoto ||
-                                "/student-photo.jpg"
-                            }
-                            alt={
-                                student.name ||
-                                "Student"
-                            }
+                            src={profilePhoto || "/student-photo.jpg"}
+                            alt={student.name || "Student"}
                             className="student-photo"
                             onError={(event) => {
-                                event.currentTarget.src =
-                                    "/student-photo.jpg";
+                                event.currentTarget.src = "/student-photo.jpg";
                             }}
                         />
 
                         <label className="change-photo">
-
                             ✏️ Change Photo
-
                             <input
                                 type="file"
                                 accept="image/*"
-                                onChange={
-                                    handleProfilePhoto
-                                }
+                                onChange={handleProfilePhoto}
                                 hidden
                             />
-
                         </label>
-
                     </div>
 
                     <div>
-
-                        <h2>
-                            Welcome, {student.name} 👋
-                        </h2>
-
+                        <h2>Welcome, {student.name} 👋</h2>
                     </div>
-
                 </div>
 
                 <div className="profile-details">
-
-                    <p>
-                        <strong>Name:</strong>{" "}
-                        {student.name ||
-                            "Not available"}
-                    </p>
-
-                    <p>
-                        <strong>Roll No:</strong>{" "}
-                        {student.rollNo ||
-                            "Not added"}
-                    </p>
-
-                    <p>
-                        <strong>Email:</strong>{" "}
-                        {student.email ||
-                            "Not available"}
-                    </p>
-
-                    <p>
-                        <strong>Phone:</strong>{" "}
-                        {student.phone ||
-                            "Not added"}
-                    </p>
-
-                    <p>
-                        <strong>Branch:</strong>{" "}
-                        {student.branch ||
-                            "Not added"}
-                    </p>
-
-                    <p>
-                        <strong>CGPA:</strong>{" "}
-                        {student.cgpa ||
-                            "Not added"}
-                    </p>
-
-                    <p>
-                        <strong>Skills:</strong>{" "}
-                        {student.skills ||
-                            "Not added"}
-                    </p>
-
+                    <p><strong>Name:</strong> {student.name || "Not available"}</p>
+                    <p><strong>Roll No:</strong> {student.rollNo || "Not added"}</p>
+                    <p><strong>Email:</strong> {student.email || "Not available"}</p>
+                    <p><strong>Phone:</strong> {student.phone || "Not added"}</p>
+                    <p><strong>Branch:</strong> {student.branch || "Not added"}</p>
+                    <p><strong>CGPA:</strong> {student.cgpa || "Not added"}</p>
+                    <p><strong>Skills:</strong> {student.skills || "Not added"}</p>
                 </div>
 
                 <div className="resume-section">
-
-                    <h3>
-                        Resume
-                    </h3>
+                    <h3>Resume</h3>
 
                     {student.resume ? (
-
                         <p className="resume-name">
                             📄 {student.resume} ✅
                         </p>
-
                     ) : (
-
                         <p className="no-resume">
                             Resume not uploaded ❌
                         </p>
-
                     )}
 
                     <div className="resume-buttons">
-
                         <label className="upload-btn">
-
-                            📤{" "}
-                            {student.resume
-                                ? "Replace Resume"
-                                : "Upload Resume"
-                            }
-
+                            📤 {student.resume ? "Replace Resume" : "Upload Resume"}
                             <input
                                 type="file"
                                 accept=".pdf,application/pdf"
-                                onChange={
-                                    handleResume
-                                }
+                                onChange={handleResume}
                                 hidden
                             />
-
                         </label>
 
                         {student.resume && (
-
                             <button
                                 type="button"
                                 className="view-resume-btn"
@@ -615,258 +495,246 @@ function StudentDashboard() {
                             >
                                 👁 View Resume
                             </button>
-
                         )}
-
                     </div>
-
                 </div>
 
                 <div className="profile-buttons">
-
-                    <button
-                        className="edit-btn"
-                        onClick={openEdit}
-                    >
+                    <button className="edit-btn" onClick={openEdit}>
                         ✏️ Edit Details
                     </button>
 
+                    <button
+                        className="resume-analyser-btn"
+                        onClick={() => {
+                            setResponse(null);
+                            setAnalyzerError("");
+                            setShowResumeAnalyzer(true);
+                        }}
+                    >
+                        ⬆️ Resume Analyser
+                    </button>
                 </div>
-
             </div>
 
             <div className="placement-section">
-
-                <h2>
-                    Placement
-                </h2>
+                <h2>Placement</h2>
 
                 <div className="placement-buttons">
-
                     <button
                         className="placement-btn jobs-btn"
-                        onClick={() =>
-                            navigate("/viewjobs")
-                        }
+                        onClick={() => navigate("/viewjobs")}
                     >
-
-                        <span>
-                            💼
-                        </span>
-
-                        <strong>
-                            VIEW JOBS
-                        </strong>
-
-                        <small>
-                            Find available jobs
-                        </small>
-
+                        <span>💼</span>
+                        <strong>VIEW JOBS</strong>
+                        <small>Find available jobs</small>
                     </button>
 
                     <button
                         className="placement-btn application-btn"
-                        onClick={() =>
-                            navigate("/application")
-                        }
+                        onClick={() => navigate("/application")}
                     >
-
-                        <span>
-                            📋
-                        </span>
-
-                        <strong>
-                            APPLICATIONS
-                        </strong>
-
-                        <small>
-                            Track your applications
-                        </small>
-
+                        <span>📋</span>
+                        <strong>APPLICATIONS</strong>
+                        <small>Track your applications</small>
                     </button>
-
                 </div>
-
             </div>
 
             {showEdit && (
-
                 <div className="popup-overlay">
-
                     <div className="edit-popup">
-
                         <div className="popup-header">
-
-                            <h2>
-                                Edit Details
-                            </h2>
-
+                            <h2>Edit Details</h2>
                             <button
                                 className="close-btn"
                                 onClick={closeEdit}
                             >
                                 ✕
                             </button>
-
                         </div>
 
                         <div className="edit-form">
-
                             <div className="form-group">
-
-                                <label>
-                                    Name
-                                </label>
-
+                                <label>Name</label>
                                 <input
                                     type="text"
-                                    value={
-                                        student.name || ""
-                                    }
+                                    value={student.name || ""}
                                     disabled
                                 />
-
                             </div>
 
                             <div className="form-group">
-
-                                <label>
-                                    Roll No
-                                </label>
-
+                                <label>Roll No</label>
                                 <input
                                     type="text"
                                     name="rollNo"
-                                    value={
-                                        formData.rollNo
-                                    }
-                                    onChange={
-                                        handleChange
-                                    }
+                                    value={formData.rollNo}
+                                    onChange={handleChange}
                                 />
-
                             </div>
 
                             <div className="form-group">
-
-                                <label>
-                                    Email
-                                </label>
-
+                                <label>Email</label>
                                 <input
                                     type="email"
-                                    value={
-                                        student.email || ""
-                                    }
+                                    value={student.email || ""}
                                     disabled
                                 />
-
                             </div>
 
                             <div className="form-group">
-
-                                <label>
-                                    Phone
-                                </label>
-
+                                <label>Phone</label>
                                 <input
                                     type="text"
                                     name="phone"
-                                    value={
-                                        formData.phone
-                                    }
-                                    onChange={
-                                        handleChange
-                                    }
+                                    value={formData.phone}
+                                    onChange={handleChange}
                                 />
-
                             </div>
 
                             <div className="form-group">
-
-                                <label>
-                                    Branch
-                                </label>
-
+                                <label>Branch</label>
                                 <input
                                     type="text"
                                     name="branch"
-                                    value={
-                                        formData.branch
-                                    }
-                                    onChange={
-                                        handleChange
-                                    }
+                                    value={formData.branch}
+                                    onChange={handleChange}
                                 />
-
                             </div>
 
                             <div className="form-group">
-
-                                <label>
-                                    CGPA
-                                </label>
-
+                                <label>CGPA</label>
                                 <input
                                     type="number"
                                     step="0.01"
                                     name="cgpa"
-                                    value={
-                                        formData.cgpa
-                                    }
-                                    onChange={
-                                        handleChange
-                                    }
+                                    value={formData.cgpa}
+                                    onChange={handleChange}
                                 />
-
                             </div>
 
                             <div className="form-group full-width">
-
-                                <label>
-                                    Skills
-                                </label>
-
+                                <label>Skills</label>
                                 <input
                                     type="text"
                                     name="skills"
-                                    value={
-                                        formData.skills
-                                    }
-                                    onChange={
-                                        handleChange
-                                    }
+                                    value={formData.skills}
+                                    onChange={handleChange}
                                     placeholder="Java, Python, React, SQL"
                                 />
-
                             </div>
-
                         </div>
 
                         <div className="popup-footer">
-
-                            <button
-                                className="cancel-btn"
-                                onClick={closeEdit}
-                            >
+                            <button className="cancel-btn" onClick={closeEdit}>
                                 Cancel
                             </button>
 
-                            <button
-                                className="save-btn"
-                                onClick={saveDetails}
-                            >
+                            <button className="save-btn" onClick={saveDetails}>
                                 Save Changes
                             </button>
-
                         </div>
-
                     </div>
-
                 </div>
-
             )}
 
+            {showResumeAnalyzer && (
+                <div className="popup-overlay">
+                    <div className="edit-popup resume-analyzer-popup">
+                        <div className="popup-header">
+                            <h2>🤖 AI Resume Analyzer</h2>
+
+                            <button
+                                type="button"
+                                className="close-btn"
+                                onClick={closeResumeAnalyzer}
+                                disabled={analyzing}
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <div className="edit-form">
+                            <div className="form-group full-width">
+                                <label>Your Resume</label>
+
+                                {student.resume ? (
+                                    <p>📄 {student.resume} ✅</p>
+                                ) : (
+                                    <p>
+                                        No resume uploaded. Please upload
+                                        your resume from the dashboard first.
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="form-group full-width">
+                                <label htmlFor="jobDescription">
+                                    Job Description
+                                </label>
+
+                                <textarea
+                                    id="jobDescription"
+                                    value={jobDescription}
+                                    onChange={(event) =>
+                                        setJobDescription(event.target.value)
+                                    }
+                                    placeholder="Paste the job description here..."
+                                    rows={6}
+                                    required
+                                    disabled={analyzing}
+                                />
+                            </div>
+                        </div>
+
+                        {analyzerError && (
+                            <p className="analyzer-error" role="alert">
+                                {analyzerError}
+                            </p>
+                        )}
+
+                        {analyzing && (
+                            <p className="analyzer-loading">
+                                🤖 Analyzing your resume... Please wait.
+                            </p>
+                        )}
+
+                        {response?.analysis && (
+                            <div className="resume-analysis-result">
+                                <h3>📊 Resume Analysis Result</h3>
+                                <pre>{response.analysis}</pre>
+                            </div>
+                        )}
+
+                        <div className="popup-footer">
+                            <button
+                                type="button"
+                                className="cancel-btn"
+                                onClick={closeResumeAnalyzer}
+                                disabled={analyzing}
+                            >
+                                Close
+                            </button>
+
+                            <button
+                                type="button"
+                                className="resume-analyser-btn"
+                                disabled={
+                                    analyzing ||
+                                    !student.resume ||
+                                    !jobDescription.trim()
+                                }
+                                onClick={resumeAnalyser}
+                            >
+                                {analyzing
+                                    ? "Analyzing..."
+                                    : "✨ Analyze Resume"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

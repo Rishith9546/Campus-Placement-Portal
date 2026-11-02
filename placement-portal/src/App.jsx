@@ -13,6 +13,7 @@ import {ViewApplicants} from "./RecuriterApplication/ViewApplicants.jsx";
 import Shortlisted from "./Shortlisted/Shortlisted.jsx";
 import ManageJobs from "./Recuriter-ManageJobs/ManageJobs.jsx";
 import {ViewJobsRecruiter} from "./Recuriter-ManageJobs/ViewJobsRecruiter.jsx";
+import MockInterview from "./Student/MockInterview.jsx";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
         <Route path="/recruiter/shortlisted" element={<Shortlisted/>}/>
         <Route path="/recruiter/manage-jobs" element={<ManageJobs/>}/>
         <Route path="jobsRecuriter/:id" element={<ViewJobsRecruiter/>}/>
+        <Route path="mock-interview" element={<MockInterview/>}/>
     </Routes>
   );
 }

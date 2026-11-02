@@ -1,3 +1,4 @@
+
 package com.telusko.placement_portal.security;
 
 import com.telusko.placement_portal.service.CustomUserDetailsService;
@@ -60,8 +61,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(
-            HttpSecurity http)
-            throws Exception {
+            HttpSecurity http) throws Exception {
 
         http
                 .csrf(csrf -> csrf.disable())
@@ -76,13 +76,15 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // CORS preflight
+                        // CORS preflight requests
                         .requestMatchers(
-                                HttpMethod.OPTIONS,
-                                "/**"
+                                HttpMethod.OPTIONS, "/**"
                         ).permitAll()
 
-                        // Authentication
+                        // Error handler
+                        .requestMatchers("/error").permitAll()
+
+                        // Public authentication endpoints
                         .requestMatchers(
                                 "/",
                                 "/api/auth/signup",
@@ -90,13 +92,13 @@ public class SecurityConfig {
                                 "/api/auth/login"
                         ).permitAll()
 
-                        // Student profile photo
+                        // Public student profile photos
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/student/photo/**"
                         ).permitAll()
 
-                        // Student resume
+                        // Student resume viewing
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/student/resume/**"
@@ -107,10 +109,15 @@ public class SecurityConfig {
                                 "/api/student/**"
                         ).hasRole("STUDENT")
 
-                        // Applications
+                        // Mock Interview APIs - students only
+                        .requestMatchers(
+                                "/api/mock-interview/**"
+                        ).hasRole("STUDENT")
+
+                        // Applications - authentication required
                         .requestMatchers(
                                 "/api/applications/**"
-                        ).permitAll()
+                        ).authenticated()
 
                         // Recruiter APIs
                         .requestMatchers(
@@ -127,13 +134,16 @@ public class SecurityConfig {
                                 "/api/admin/**"
                         ).hasRole("ADMIN")
 
-                        // Other APIs
+                        // Resume Analyzer
+                        .requestMatchers(
+                                "/api/resume-analyzer/**"
+                        ).hasAnyRole("STUDENT", "RECRUITER")
+
+                        // All remaining endpoints require authentication
                         .anyRequest().authenticated()
                 )
 
-                .authenticationProvider(
-                        authenticationProvider()
-                )
+                .authenticationProvider(authenticationProvider())
 
                 .addFilterBefore(
                         jwtAuthenticationFilter,
@@ -141,7 +151,6 @@ public class SecurityConfig {
                 )
 
                 .formLogin(form -> form.disable())
-
                 .httpBasic(basic -> basic.disable());
 
         return http.build();

@@ -1,0 +1,441 @@
+
+/* ===== Main Page ===== */
+.mock-page {
+    min-height: 100vh;
+    padding: 35px 20px 60px;
+    background: linear-gradient(135deg, #0f3040, #3d415c);
+    color: #172b3a;
+    font-family: "Open Sans", "Plus Jakarta Sans", Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+.mock-page * {
+    box-sizing: border-box;
+}
+
+.mock-interview-container,
+.mock-results {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* ===== Back Button ===== */
+.mock-back-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s ease;
+}
+
+.mock-back-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* ===== Page Heading ===== */
+.mock-header {
+    color: white;
+    margin: 35px 0 30px;
+}
+
+.mock-eyebrow {
+    display: inline-block;
+    color: #8fe2d0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.mock-header h1,
+.results-heading h1 {
+    font-size: clamp(28px, 4vw, 40px);
+    margin: 10px 0;
+    line-height: 1.25;
+}
+
+.mock-header p,
+.results-heading p {
+    color: #d2dce5;
+    margin-top: 8px;
+}
+
+/* ===== Question Progress ===== */
+.question-progress {
+    background: white;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.progress-track {
+    height: 8px;
+    background: #e8edf1;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #20ad90;
+    border-radius: 20px;
+    transition: width 0.3s ease;
+}
+
+/* ===== Question Card ===== */
+.question-card {
+    background: white;
+    padding: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+}
+
+.question-number {
+    color: #168c79;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+.question-card h2 {
+    font-size: 23px;
+    line-height: 1.6;
+    margin: 15px 0 28px;
+    overflow-wrap: anywhere;
+}
+
+.question-card label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.question-card textarea {
+    display: block;
+    width: 100%;
+    min-height: 180px;
+    padding: 15px;
+    border: 1px solid #cbd5df;
+    border-radius: 10px;
+    resize: vertical;
+    font: inherit;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #172b3a;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.question-card textarea:focus {
+    border-color: #168c79;
+    box-shadow: 0 0 0 3px rgba(22, 140, 121, 0.12);
+}
+
+.question-card textarea::placeholder {
+    color: #94a3b8;
+}
+
+.answer-hint {
+    color: #718096;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+/* ===== Navigation Buttons ===== */
+.question-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-top: 22px;
+}
+
+.mock-primary-btn,
+.mock-secondary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 46px;
+    border: none;
+    border-radius: 9px;
+    padding: 13px 22px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.mock-primary-btn {
+    background: #20ad90;
+    color: white;
+}
+
+.mock-primary-btn:hover:not(:disabled) {
+    background: #168c79;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.mock-secondary-btn {
+    background: white;
+    color: #183b4c;
+}
+
+.mock-secondary-btn:hover:not(:disabled) {
+    background: #edf4f6;
+}
+
+.mock-primary-btn:disabled,
+.mock-secondary-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ===== Error Message ===== */
+.mock-error {
+    margin-top: 16px;
+    padding: 13px 16px;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    background: #fff0f0;
+    color: #a52b2b;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* ===== Loading Screen ===== */
+.mock-loading,
+.mock-error-card {
+    max-width: 550px;
+    margin: 100px auto;
+    padding: 35px;
+    text-align: center;
+    border-radius: 16px;
+    background: white;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.mock-loading h2,
+.mock-error-card h2 {
+    margin-top: 10px;
+}
+
+.mock-loading p,
+.mock-error-card p {
+    color: #64748b;
+    line-height: 1.7;
+}
+
+.mock-error-card button {
+    margin-top: 15px;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 8px;
+    background: #168c79;
+    color: white;
+    cursor: pointer;
+}
+
+.mock-spinner {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 20px;
+    border: 4px solid #dce9e6;
+    border-top-color: #168c79;
+    border-radius: 50%;
+    animation: mock-spin 0.8s linear infinite;
+}
+
+@keyframes mock-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== Results Heading ===== */
+.results-heading {
+    color: white;
+    margin: 35px 0 25px;
+}
+
+/* ===== Overall Score ===== */
+.score-card {
+    padding: 28px;
+    text-align: center;
+    background: white;
+    border-radius: 16px;
+    margin-bottom: 22px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.score-card > p {
+    color: #64748b;
+    margin: 8px 0;
+}
+
+.score-value {
+    font-size: 52px;
+    font-weight: 800;
+    color: #168c79;
+    margin: 10px 0;
+}
+
+.score-value span {
+    color: #64748b;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+/* ===== Strengths, Weaknesses and Suggestions ===== */
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.feedback-card,
+.answer-review {
+    background: white;
+    border-radius: 14px;
+    padding: 23px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.feedback-card h3 {
+    margin-top: 0;
+    font-size: 18px;
+}
+
+.feedback-card ul {
+    padding-left: 22px;
+    line-height: 1.8;
+}
+
+.feedback-card li,
+.answer-feedback p {
+    overflow-wrap: anywhere;
+}
+
+.feedback-card p {
+    line-height: 1.7;
+    color: #526274;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+/* ===== Question-wise Feedback ===== */
+.answer-review {
+    margin: 22px 0;
+}
+
+.answer-review h2 {
+    margin-top: 0;
+    font-size: 22px;
+}
+
+.answer-feedback {
+    padding: 20px 0;
+    border-bottom: 1px solid #e5eaf0;
+}
+
+.answer-feedback:last-child {
+    border-bottom: none;
+}
+
+.feedback-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+}
+
+.feedback-top h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.feedback-score {
+    white-space: nowrap;
+    color: #168c79;
+    font-weight: 700;
+}
+
+.feedback-question {
+    font-weight: 700;
+    line-height: 1.7;
+}
+
+.answer-feedback > p:last-child {
+    color: #526274;
+    line-height: 1.8;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 600px) {
+    .mock-page {
+        padding: 22px 14px 40px;
+    }
+
+    .mock-header {
+        margin: 28px 0 22px;
+    }
+
+    .question-card {
+        padding: 20px;
+    }
+
+    .question-card h2 {
+        font-size: 19px;
+    }
+
+    .question-navigation {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .question-navigation button {
+        width: 100%;
+    }
+
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .full-width {
+        grid-column: auto;
+    }
+
+    .feedback-top {
+        align-items: flex-start;
+    }
+
+    .score-value {
+        font-size: 44px;
+    }
+
+    .mock-loading,
+    .mock-error-card {
+        margin: 60px auto;
+        padding: 25px 18px;
+    }
+}

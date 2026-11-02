@@ -109,12 +109,12 @@ public class SecurityConfig {
                                 "/api/student/**"
                         ).hasRole("STUDENT")
 
-                        // Mock Interview APIs - students only
+                        // Mock Interview APIs
                         .requestMatchers(
                                 "/api/mock-interview/**"
                         ).hasRole("STUDENT")
 
-                        // Applications - authentication required
+                        // Applications
                         .requestMatchers(
                                 "/api/applications/**"
                         ).authenticated()
@@ -129,6 +129,11 @@ public class SecurityConfig {
                                 "/api/interviews/**"
                         ).hasRole("RECRUITER")
 
+                        // Email APIs - Recruiters only
+                        .requestMatchers(
+                                "/api/email/**"
+                        ).hasRole("RECRUITER")
+
                         // Admin APIs
                         .requestMatchers(
                                 "/api/admin/**"
@@ -139,7 +144,7 @@ public class SecurityConfig {
                                 "/api/resume-analyzer/**"
                         ).hasAnyRole("STUDENT", "RECRUITER")
 
-                        // All remaining endpoints require authentication
+                        // All remaining endpoints
                         .anyRequest().authenticated()
                 )
 

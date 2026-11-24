@@ -476,6 +476,8 @@
     background: #7f1d1d;
     color: #fca5a5;
 }
+.under-review, .interview-scheduled, .interviewed { background: rgba(217,183,117,.14); color: #f1d99d; }
+.selected { background: rgba(20,83,45,.72); color: #86efac; }
 
 
 /* =========================

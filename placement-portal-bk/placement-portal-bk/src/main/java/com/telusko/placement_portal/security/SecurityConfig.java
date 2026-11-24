@@ -99,11 +99,14 @@ public class SecurityConfig {
                                 "/api/student/photo/**"
                         ).permitAll()
 
+                        // Role-filtered placement announcements
+                        .requestMatchers("/api/announcements", "/api/announcements/**").hasAnyRole("STUDENT", "RECRUITER")
+
                         // Student resume viewing
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/student/resume/**"
-                        ).hasAnyRole("STUDENT", "RECRUITER")
+                        ).hasAnyRole("STUDENT", "RECRUITER", "ADMIN")
 
                         // Student APIs
                         .requestMatchers(
@@ -117,8 +120,14 @@ public class SecurityConfig {
 
                         // Applications
                         .requestMatchers(
+                                "/api/applications/shortlist/**",
+                                "/api/applications/rejected/**",
+                                "/api/applications/recruiter/**",
+                                "/api/applications/recuriter/shortlisted"
+                        ).hasRole("RECRUITER")
+                        .requestMatchers(
                                 "/api/applications/**"
-                        ).authenticated()
+                        ).hasAnyRole("STUDENT", "RECRUITER")
 
                         // Recruiter APIs
                         .requestMatchers(
@@ -134,6 +143,17 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/email/**"
                         ).hasRole("RECRUITER")
+
+                        // Recruiter job-management APIs. Public/shared job discovery remains available below.
+                        .requestMatchers(HttpMethod.POST, "/api/jobs/addJob").hasRole("RECRUITER")
+                        .requestMatchers(HttpMethod.PUT, "/api/jobs/**").hasRole("RECRUITER")
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/jobs/count",
+                                "/api/jobs/recent",
+                                "/api/jobs/allJobsById",
+                                "/api/jobs/allActiveJobs",
+                                "/api/jobs/allClosedJobs",
+                                "/api/jobs/search").hasRole("RECRUITER")
 
                         // Admin APIs
                         .requestMatchers(

@@ -33,6 +33,22 @@ public class Job {
 
     private Long recruiterId;
 
+    // Existing jobs retain prior visibility through the database default; new jobs are explicitly saved as PENDING.
+    @Column(nullable = false, length = 16, columnDefinition = "varchar(16) default 'APPROVED'")
+    private String approvalStatus = "PENDING";
+
+    @Column(length = 1000)
+    private String rejectionReason;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean closed;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean moderationFlagged;
+
+    @Column(length = 1000)
+    private String moderationReason;
+
 
     // Getters and Setters
 
@@ -138,6 +154,23 @@ public class Job {
 
     public void setRecruiterId(Long recruiterId) {
         this.recruiterId = recruiterId;
+    }
+
+    public String getApprovalStatus() { return approvalStatus; }
+    public void setApprovalStatus(String approvalStatus) { this.approvalStatus = approvalStatus; }
+    public String getRejectionReason() { return rejectionReason; }
+    public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
+    public boolean isClosed() { return closed; }
+    public void setClosed(boolean closed) { this.closed = closed; }
+    public boolean isModerationFlagged() { return moderationFlagged; }
+    public void setModerationFlagged(boolean moderationFlagged) { this.moderationFlagged = moderationFlagged; }
+    public String getModerationReason() { return moderationReason; }
+    public void setModerationReason(String moderationReason) { this.moderationReason = moderationReason; }
+
+    @Transient
+    public boolean acceptsApplications(java.time.LocalDate today) {
+        return "APPROVED".equalsIgnoreCase(approvalStatus) && !closed && !moderationFlagged
+                && (deadline == null || !deadline.isBefore(today));
     }
 
 

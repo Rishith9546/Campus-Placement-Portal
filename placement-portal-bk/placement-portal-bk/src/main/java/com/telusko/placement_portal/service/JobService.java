@@ -23,14 +23,21 @@ public class JobService {
 
 
     public Job PostJob(Job job, UserPrincipal user) {
+        // A recruiter submission always creates a new record; client-supplied IDs cannot overwrite jobs.
+        job.setId(null);
         Long recruiterId=user.getId();
         job.setRecruiterId(recruiterId);
         job.setCreatedAt(LocalDateTime.now());
+        job.setApprovalStatus("PENDING");
+        job.setRejectionReason(null);
+        job.setClosed(false);
+        job.setModerationFlagged(false);
+        job.setModerationReason(null);
         return jobRepo.save(job);
     }
 
     public List<Job> getFinalJobs() {
-        return jobRepo.findAll();
+        return jobRepo.findStudentVisibleJobs(LocalDate.now());
     }
 
     public List<Job> getRecentJobs(Long recruiterId) {
@@ -38,12 +45,22 @@ public class JobService {
     }
 
     public List<Job> getAllJobs() {
-        return jobRepo.findAll();
+        return jobRepo.findStudentVisibleJobs(LocalDate.now());
     }
 
     public Job geyJobById(Long id) {
         return jobRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
+    }
+
+    public Job getRecruiterJobById(Long id, Long recruiterId) {
+        return jobRepo.findByIdAndRecruiterId(id, recruiterId)
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Job not found."));
+    }
+
+    public Job getStudentVisibleJob(Long id) {
+        return jobRepo.findStudentVisibleJob(id, LocalDate.now())
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Job not found."));
     }
 
     public long getJobCount(Long id) {
@@ -73,10 +90,10 @@ public class JobService {
         return jobRepo.searchJobsById(keyword,id);
     }
 
-    public Job updateJob(Long id, Job updatedJob) {
+    public Job updateJob(Long id, Job updatedJob, Long recruiterId) {
 
-        Job existingJob = jobRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+        Job existingJob = jobRepo.findByIdAndRecruiterId(id, recruiterId)
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Job not found."));
 
         existingJob.setTitle(updatedJob.getTitle());
         existingJob.setLocation(updatedJob.getLocation());
@@ -87,10 +104,13 @@ public class JobService {
         existingJob.setEligibility(updatedJob.getEligibility());
         existingJob.setDescription(updatedJob.getDescription());
         existingJob.setResponsibilities(updatedJob.getResponsibilities());
+        // A materially edited posting returns for Admin review.
+        existingJob.setApprovalStatus("PENDING");
+        existingJob.setRejectionReason(null);
         return jobRepo.save(existingJob);
     }
 
     public List<Job> searchJobsForStudent(String keyword) {
-        return jobRepo.searchJobsForStudent(keyword);
+        return jobRepo.searchStudentVisibleJobs(keyword == null ? "" : keyword.trim(), LocalDate.now());
     }
 }

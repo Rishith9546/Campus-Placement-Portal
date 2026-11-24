@@ -67,19 +67,8 @@ export function Application() {
 
     const getStatusClass = (status) => {
 
-        if (status === "APPLIED") {
-            return "status applied";
-        }
-
-        if (status === "SHORTLISTED") {
-            return "status shortlisted";
-        }
-
-        if (status === "REJECTED") {
-            return "status rejected";
-        }
-
-        return "status";
+        const normalized = (status || "APPLIED").toLowerCase().replaceAll("_", "-");
+        return `status ${normalized}`;
 
     };
 
@@ -90,7 +79,7 @@ export function Application() {
 
     const filteredApplications = applications.filter((application) => {
         const statusMatches = selectedFilter === "All" || selectedFilter === ""
-            || application.status === selectedFilter.toUpperCase();
+            || (application.status || "APPLIED").toUpperCase() === selectedFilter.toUpperCase().replaceAll(" ", "_");
         const query = search.trim().toLowerCase();
         const title = application.job?.title || application.jobTitle || "Job";
         const company = application.job?.company || application.company || "";

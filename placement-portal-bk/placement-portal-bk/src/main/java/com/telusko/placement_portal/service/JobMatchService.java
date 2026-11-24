@@ -47,7 +47,7 @@ public class JobMatchService {
         List<application> savedApps=applications.findByStudentId(principal.getId());
         Map<Long,String> appStatus=new HashMap<>();for(application app:savedApps)if(app.getJobId()!=null)appStatus.put(app.getJobId(),blank(app.getStatus())?"APPLIED":app.getStatus());
         LocalDate today=LocalDate.now();
-        List<JobMatchDto> matches=jobs.findAll().stream().filter(j->j.getDeadline()==null||!j.getDeadline().isBefore(today))
+        List<JobMatchDto> matches=jobs.findStudentVisibleJobs(today).stream()
                 .filter(j->search==null||search.isBlank()||searchMatch(j,search.trim()))
                 .map(j->evaluate(j,student,appStatus.get(j.getId())))
                 .filter(m->accepts(filter,m))
@@ -63,23 +63,29 @@ public class JobMatchService {
     }
     public JobMatchDto details(UserPrincipal principal,long jobId) {
         Student student=students.findById(principal.getId()).orElse(null);
-        Job job=jobs.findById(jobId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Job not found."));
+        Job job=jobs.findStudentVisibleJob(jobId, LocalDate.now()).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Job not found."));
         String status=applications.findByStudentIdAndJobId(principal.getId(),jobId).map(a->blank(a.getStatus())?"APPLIED":a.getStatus()).orElse(null);
         return evaluate(job,student,status);
+    }
+
+    /** Shared deterministic scorer used by recruiter candidate ranking. */
+    public JobMatchDto evaluateCandidate(Job job, Student student, String applicationStatus) {
+        return evaluate(job, student, applicationStatus);
     }
     private boolean searchMatch(Job j,String q){String s=q.toLowerCase(Locale.ROOT);return contains(j.getTitle(),s)||contains(j.getCompany(),s)||contains(j.getLocation(),s)||contains(j.getJobType(),s)||contains(j.getSkills(),s);}
     private boolean contains(String value,String q){return value!=null&&value.toLowerCase(Locale.ROOT).contains(q);}
     private boolean accepts(String filter,JobMatchDto m){return switch(filter==null?"ALL":filter.toUpperCase(Locale.ROOT)){case "ELIGIBLE"->"ELIGIBLE".equals(m.eligibilityStatus());case "HIGH_MATCH"->m.matchScore()>=70;case "MISSING_SKILLS"->!m.missingSkills().isEmpty();case "APPLIED"->m.applied();default->true;};}
 
     private JobMatchDto evaluate(Job job,Student student,String applicationStatus){
-        List<String> required=splitSkills(job.getSkills());Set<String> studentSkills=student==null?Set.of():splitSkills(student.getSkills()).stream().map(this::normalizeSkill).collect(Collectors.toSet());
-        List<String> matched=required.stream().filter(s->studentSkills.contains(normalizeSkill(s))).toList();
-        List<String> missing=required.stream().filter(s->!studentSkills.contains(normalizeSkill(s))).toList();
-        Integer skillScore=required.isEmpty()?null:percent(matched.size(),required.size());
+        List<String> required=splitSkills(job.getSkills());boolean skillsAvailable=student!=null&&!blank(student.getSkills());Set<String> studentSkills=!skillsAvailable?Set.of():splitSkills(student.getSkills()).stream().map(this::normalizeSkill).collect(Collectors.toSet());
+        List<String> matched=!skillsAvailable?List.of():required.stream().filter(s->studentSkills.contains(normalizeSkill(s))).toList();
+        List<String> missing=!skillsAvailable?List.of():required.stream().filter(s->!studentSkills.contains(normalizeSkill(s))).toList();
+        Integer skillScore=required.isEmpty()||!skillsAvailable?null:percent(matched.size(),required.size());
         String criteria=job.getEligibility()==null?"":job.getEligibility().trim();String lower=criteria.toLowerCase(Locale.ROOT);
         List<String> reasons=new ArrayList<>();List<Integer> componentScores=new ArrayList<>();List<Integer> weights=new ArrayList<>();
         if(skillScore!=null){componentScores.add(skillScore);weights.add(SKILL_WEIGHT);}
-        boolean hardFail=false,needsReview=criteria.isBlank();
+        boolean hardFail=false,needsReview=criteria.isBlank()||(!required.isEmpty()&&(student==null||blank(student.getSkills())));
+        if(!required.isEmpty()&&(student==null||blank(student.getSkills()))) reasons.add("Student skills are unavailable, so the skills match needs manual review.");
         if(criteria.isBlank())reasons.add("The recruiter did not provide written eligibility criteria; confirm requirements with the placement cell.");
         else reasons.add("Eligibility criteria are taken from the recruiter’s job posting.");
 
@@ -111,7 +117,7 @@ public class JobMatchService {
         List<String> branchNames=eligibleBranches.stream().map(group->group.get(0)).toList();
         Integer allowedBacklogs=maxBacklogs!=null?maxBacklogs:zeroBacklogs?0:null;
         Integer minGradYear=yearRange!=null?Integer.valueOf(yearRange[0]):requiredYear;Integer maxGradYear=yearRange!=null?Integer.valueOf(yearRange[1]):requiredYear;
-        return new JobMatchDto(job.getId(),job.getTitle(),job.getCompany(),job.getLocation(),job.getJobType(),job.getSalary(),job.getDeadline(),job.getDescription(),job.getEligibility(),eligibility,List.copyOf(reasons),score,scoreAvailable,skillScore,branchScore,cgpaScore,required,matched,missing,List.of(),minimumCgpa,branchNames,allowedBacklogs,minGradYear,maxGradYear,missing.stream().limit(5).toList(),applicationStatus,applicationStatus!=null,job.getDeadline()==null||!job.getDeadline().isBefore(LocalDate.now()));
+        return new JobMatchDto(job.getId(),job.getTitle(),job.getCompany(),job.getLocation(),job.getJobType(),job.getSalary(),job.getDeadline(),job.getDescription(),job.getEligibility(),eligibility,List.copyOf(reasons),score,scoreAvailable,skillScore,branchScore,cgpaScore,required,matched,missing,List.of(),minimumCgpa,branchNames,allowedBacklogs,minGradYear,maxGradYear,missing.stream().limit(5).toList(),applicationStatus,applicationStatus!=null,job.acceptsApplications(LocalDate.now()));
     }
     private List<List<String>> matchedBranches(String criteria){return BRANCH_ALIASES.stream().filter(group->group.stream().anyMatch(alias->containsToken(criteria,alias))).toList();}
     private boolean containsToken(String source,String token){String norm=source.toLowerCase(Locale.ROOT);if(token.length()<=3)return Pattern.compile("(?<![a-z0-9])"+Pattern.quote(token)+"(?![a-z0-9])").matcher(norm).find();return norm.contains(token);}
@@ -131,7 +137,7 @@ public class JobMatchService {
         rest=rest.replaceAll("\\b(?:all|any|branch|branches|streams|eligible|eligibility|for|only|minimum|min|required|requirement|requirements|cgpa|gpa|of|at|least|above|greater|than|or|and|with|without|active|backlog|backlogs|arrear|arrears|zero|no|the|a|an|candidate|candidates|should|must|be|is|are|have|has|from|batch|year|graduation|graduating|pass|out|202[0-9])\\b"," ").replaceAll("[^a-z0-9]+"," ").trim();
         return !rest.isBlank();
     }
-    private List<String> splitSkills(String raw){if(blank(raw))return List.of();return Arrays.stream(raw.split("[,;|\\n]+" )).map(String::trim).filter(s->!s.isBlank()).distinct().toList();}
+    private List<String> splitSkills(String raw){if(blank(raw))return List.of();LinkedHashMap<String,String> unique=new LinkedHashMap<>();for(String value:raw.split("[,;|\\n]+")){String skill=value.trim();if(!skill.isBlank())unique.putIfAbsent(normalizeSkill(skill),skill);}return List.copyOf(unique.values());}
     private String normalizeSkill(String value){String s=normalizeText(value);Map<String,String> aliases=Map.ofEntries(Map.entry("react js","react"),Map.entry("reactjs","react"),Map.entry("springboot","spring boot"),Map.entry("node js","node"),Map.entry("nodejs","node"),Map.entry("vue js","vue"),Map.entry("vuejs","vue"),Map.entry("dotnet",".net"));return aliases.getOrDefault(s,s);}
     private String normalizeText(String value){return value==null?"":value.toLowerCase(Locale.ROOT).replaceAll("\\.js\\b"," js").replaceAll("[^a-z0-9+#.]+"," ").replaceAll("\\s+"," ").trim();}
     private int percent(int n,int d){return d==0?0:(int)Math.round(n*100.0/d);}

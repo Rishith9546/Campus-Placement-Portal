@@ -34,6 +34,14 @@ public class User {
     @Column
     private String companyName;
 
+    @Setter
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean enabled = true;
+
+    @Setter
+    @Column(nullable = false, length = 16, columnDefinition = "varchar(16) default 'PENDING'")
+    private String verificationStatus = "PENDING";
+
     // Required by JPA
     public User() {
     }

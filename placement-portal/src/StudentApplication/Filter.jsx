@@ -1,7 +1,7 @@
 import "./Application.css";
 
 export function Filter({ selectedFilter, setSelectedFilter, setShowFilter }) {
-    const filters = ["All", "Applied", "Shortlisted", "Rejected"];
+    const filters = ["All", "Applied", "Under Review", "Shortlisted", "Interview Scheduled", "Interviewed", "Selected", "Rejected"];
 
     return (
         <div className="filter-box" id="application-filter-panel" role="dialog" aria-label="Filter applications">

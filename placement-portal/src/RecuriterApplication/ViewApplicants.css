@@ -6,6 +6,37 @@
     font-family: "Open Sans", sans-serif;
 }
 
+.match-ranking-tools { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 22px; padding:14px 16px; border:1px solid rgba(143,211,255,.25); border-radius:10px; background:rgba(10,35,55,.55); }
+.match-ranking-tools label { color:#c7e8ff; font-weight:700; }
+.match-ranking-tools select { min-width:260px; max-width:100%; padding:9px 12px; color:#f5fbff; background:#142c3d; border:1px solid rgba(199,232,255,.25); border-radius:7px; }
+.match-ranking-tools option { color:#142c3d; }
+.match-ranking-tools span { color:#c7d5dc; font-size:13px; }
+.candidate-match-card { display:grid; grid-template-columns:1fr auto; gap:10px 14px; margin-top:16px; padding:14px; border:1px solid rgba(143,211,255,.25); border-radius:9px; background:rgba(4,22,36,.5); }
+.candidate-match-card > div { grid-column:1 / -1; }
+.candidate-match-card small { color:#9fc3d7; }
+.candidate-match-card p { margin:4px 0 0; color:#e3edf2; }
+.candidate-match-score { display:flex; align-items:center; gap:10px; border:0; padding:0; color:#fff; background:none; cursor:pointer; text-align:left; }
+.candidate-match-score strong { color:#7ee0b0; font-size:24px; }
+.candidate-match-score span { color:#c7e8ff; }
+.candidate-eligibility { align-self:center; padding:5px 8px; border-radius:14px; background:rgba(255,255,255,.12); font-size:11px; font-weight:700; }
+.candidate-eligibility.eligible { color:#8ef0b9; }
+.candidate-eligibility.not_eligible { color:#ffaaaa; }
+.candidate-eligibility.needs_review { color:#ffd885; }
+.candidate-match-modal { position:relative; width:min(650px,94vw); max-height:85vh; overflow:auto; padding:28px; border:1px solid rgba(143,211,255,.28); border-radius:14px; background:#102638; color:#f5fbff; box-shadow:0 20px 60px rgba(0,0,0,.5); }
+.candidate-match-modal h2 { margin-top:0; }
+.candidate-match-modal p,.candidate-match-modal li { color:#d5e0e5; line-height:1.55; }
+.applicant-view-toggle { display:flex; width:max-content; max-width:100%; gap:4px; margin:18px 0; padding:4px; border:1px solid rgba(255,255,255,.12); border-radius:11px; background:rgba(8,24,37,.55); }
+.applicant-view-toggle button { min-height:36px; padding:0 13px; border:0; border-radius:8px; color:#aebdca; background:transparent; cursor:pointer; font:inherit; font-size:13px; font-weight:700; }
+.applicant-view-toggle button.active { color:#10352f; background:#8bdac3; }
+@media(max-width:520px) { .applicant-view-toggle { display:grid; width:100%; grid-template-columns:1fr 1fr; } }
+.compare-candidate-check { display:inline-flex; align-items:center; gap:7px; margin:0 0 12px; color:#b8d0d9; font-size:12px; cursor:pointer; }
+.compare-candidate-check input { width:16px; height:16px; accent-color:#8bdac3; }
+.comparison-selection-bar { display:flex; align-items:center; justify-content:space-between; gap:14px; margin:0 0 18px; padding:13px 16px; border:1px solid rgba(139,218,195,.28); border-radius:12px; background:rgba(9,38,42,.6); }
+.comparison-selection-bar>div:first-child { display:grid; gap:4px; }.comparison-selection-bar strong { color:#effaf6; font-size:14px; }.comparison-selection-bar span { color:#9fc2bf; font-size:12px; }
+.comparison-selection-actions { display:flex; flex-wrap:wrap; gap:8px; }.comparison-selection-actions button { min-height:38px; padding:0 12px; border:1px solid rgba(255,255,255,.14); border-radius:9px; color:#d5e4e8; background:rgba(255,255,255,.05); font:inherit; cursor:pointer; }
+.comparison-selection-actions .compare-open-button { border-color:#8bdac3; color:#10352f; background:#8bdac3; font-weight:750; }.comparison-selection-actions button:disabled { opacity:.45; cursor:not-allowed; }
+@media(max-width:560px) { .comparison-selection-bar { align-items:stretch; flex-direction:column; }.comparison-selection-actions { display:grid; grid-template-columns:1fr 1.4fr; }.comparison-selection-actions button { padding:0 8px; } }
+
 /* =========================================
    TOP BUTTON PART
 ========================================= */
@@ -245,6 +276,17 @@
 .view-applicant-actions button:nth-child(4):hover {
     background: #b91c1c;
 }
+
+.view-applicant-actions .schedule-interview-action,
+.view-applicant-actions .complete-interview-action {
+    border: 1px solid rgba(116, 213, 190, .34);
+    background: rgba(38, 134, 110, .7);
+    color: #eafff7;
+}
+
+.view-applicant-actions .complete-interview-action { background: rgba(83, 112, 169, .76); }
+.view-applicant-actions .select-candidate-action { border:1px solid rgba(119,215,173,.4); background:linear-gradient(135deg,#24876e,#1d705d); color:#effff8; font-weight:750; }
+.view-applicant-actions button:disabled { opacity: .48; cursor: not-allowed; filter: saturate(.65); }
 
 
 /* =========================================

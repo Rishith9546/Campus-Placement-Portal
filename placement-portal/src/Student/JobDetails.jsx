@@ -215,6 +215,8 @@ export function JobDetails() {
             month: "long"
         })}, ${date.getFullYear()}`
         : "";
+    const currentApplicationStage = (status || "").toUpperCase();
+    const alreadyApplied = ["APPLIED", "UNDER_REVIEW", "SHORTLISTED", "INTERVIEW_SCHEDULED", "INTERVIEWED", "SELECTED", "REJECTED"].includes(currentApplicationStage);
 
 
     return (
@@ -258,17 +260,17 @@ export function JobDetails() {
 
                 <button
                     onClick={applyFunction}
-                    className={status === "APPLIED" ? "job-applied" : ""}
+                    className={alreadyApplied ? "job-applied" : ""}
                     disabled={
                         !users ||
                         !details ||
-                        status === "APPLIED" ||
-                        status === "SHORTLISTED" ||
-                        status === "REJECTED"
+                        alreadyApplied
                     }
                 >
 
-                    {status === "APPLIED"
+                    {alreadyApplied && !["APPLIED", "SHORTLISTED", "REJECTED"].includes(currentApplicationStage)
+                        ? `✓ ${currentApplicationStage.replaceAll("_", " ")}`
+                        : status === "APPLIED"
                         ? "✓ Applied"
                         : status === "SHORTLISTED"
                             ? "✓ Shortlisted"

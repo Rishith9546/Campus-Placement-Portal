@@ -3,14 +3,26 @@ package com.telusko.placement_portal.service;
 import com.telusko.placement_portal.entity.Job;
 import com.telusko.placement_portal.entity.Student;
 import com.telusko.placement_portal.entity.application;
+import com.telusko.placement_portal.entity.ApplicationStageHistory;
+import com.telusko.placement_portal.entity.PipelineStage;
+import com.telusko.placement_portal.dto.PipelineApplicantDto;
+import com.telusko.placement_portal.dto.PipelineStageChangeRequest;
+import com.telusko.placement_portal.dto.ApplicationStageHistoryDto;
+import com.telusko.placement_portal.repository.ApplicationStageHistoryRepo;
 import com.telusko.placement_portal.repository.ApplicationRepo;
 import com.telusko.placement_portal.repository.JobRepo;
 import com.telusko.placement_portal.repository.StudentRepo;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Service
 public class ApplicationService {
@@ -18,15 +30,18 @@ public class ApplicationService {
     private final ApplicationRepo repo;
     private final JobRepo jobRepo;
     private final StudentRepo studentRepo;
+    private final ApplicationStageHistoryRepo historyRepo;
 
     public ApplicationService(
             ApplicationRepo repo,
             JobRepo jobRepo,
-            StudentRepo studentRepo) {
+            StudentRepo studentRepo,
+            ApplicationStageHistoryRepo historyRepo) {
 
         this.repo = repo;
         this.jobRepo = jobRepo;
         this.studentRepo = studentRepo;
+        this.historyRepo = historyRepo;
     }
 
     // ================= APPLY =================
@@ -35,6 +50,9 @@ public class ApplicationService {
 
         Job job = jobRepo.findById(app.getJobId())
                 .orElseThrow(() -> new RuntimeException("Job not found"));
+        if (!job.acceptsApplications(java.time.LocalDate.now())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "This job is not accepting applications.");
+        }
         app.setRecruiterId(job.getRecruiterId());
 
         Optional<application> existing =
@@ -46,6 +64,9 @@ public class ApplicationService {
         if (existing.isPresent()) {
             return existing.get();
         }
+
+        // A student submission can never set a recruiter-controlled pipeline stage.
+        app.setStatus(PipelineStage.APPLIED.name());
 
         return repo.save(app);
     }
@@ -184,19 +205,92 @@ public class ApplicationService {
         return applications;
     }
 
-    public application shortlistApplication(Long id) {
+    @Transactional
+    public application shortlistApplication(Long id, Long recruiterId) {
+        return changeStage(id, recruiterId, new PipelineStageChangeRequest("SHORTLISTED", false, null), true);
+    }
 
-        application app = repo.findById(id).orElseThrow();
+    @Transactional
+    public application rejectApplication(Long id, Long recruiterId) {
+        return changeStage(id, recruiterId, new PipelineStageChangeRequest("REJECTED", false, null), true);
+    }
 
-        app.setStatus("SHORTLISTED");
+    public List<PipelineApplicantDto> pipelineApplicants(Long recruiterId, Long jobId) {
+        List<Job> ownedJobs = jobRepo.findByRecruiterId(recruiterId).stream()
+                .filter(j -> jobId == null || jobId.equals(j.getId())).toList();
+        if (jobId != null && ownedJobs.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not found.");
+        if (ownedJobs.isEmpty()) return List.of();
+        var jobIds = ownedJobs.stream().map(Job::getId).toList();
+        var jobsById = ownedJobs.stream().collect(java.util.stream.Collectors.toMap(Job::getId, j -> j));
+        List<application> records = repo.findByJobIdInOrderByAppliedAtAscIdAsc(jobIds);
+        var studentsById = studentRepo.findAllById(records.stream().map(application::getStudentId).filter(java.util.Objects::nonNull).distinct().toList())
+                .stream().collect(java.util.stream.Collectors.toMap(Student::getId, s -> s));
+        return records.stream().map(app -> {
+            Student student = studentsById.get(app.getStudentId()); Job job = jobsById.get(app.getJobId());
+            if (student == null || job == null || Boolean.FALSE.equals(student.getProfileVisible())) return null;
+            return new PipelineApplicantDto(app.getId(), student.getId(), student.getName(), student.getEmail(), student.getPhone(),
+                    student.getBranch(), student.getCgpa(), student.getSkills(), student.getResume(), job.getId(), job.getTitle(),
+                    job.getCompany(), app.getAppliedAt(), PipelineStage.parse(app.getStatus()).name());
+        }).filter(java.util.Objects::nonNull).toList();
+    }
 
+    @Transactional
+    public application changeStage(Long applicationId, Long recruiterId, PipelineStageChangeRequest request) {
+        return changeStage(applicationId, recruiterId, request, false);
+    }
+
+    private application changeStage(Long applicationId, Long recruiterId, PipelineStageChangeRequest request, boolean legacyShortcut) {
+        PipelineStage target;
+        try { target = PipelineStage.valueOf(request.stage().trim().toUpperCase(java.util.Locale.ROOT)); }
+        catch (RuntimeException ex) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown recruitment stage."); }
+        application app = repo.findById(applicationId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found."));
+        Job job = app.getJobId() == null ? null : jobRepo.findByIdAndRecruiterId(app.getJobId(), recruiterId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found."));
+        if (job == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found.");
+        PipelineStage current = PipelineStage.parse(app.getStatus());
+        if (current == target) return app;
+        if (current.terminal()) {
+            if (!request.reopen()) throw new ResponseStatusException(HttpStatus.CONFLICT, "This application is closed. Explicit reopening is required.");
+            if (target.terminal()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reopen the candidate into an active stage.");
+        } else if (request.reopen()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reopening is only valid for selected or rejected applications.");
+        } else if (!legacyShortcut && !validTransition(current, target)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "That stage transition is not allowed.");
+        }
+        ApplicationStageHistory history = new ApplicationStageHistory();
+        history.setApplicationId(app.getId()); history.setPreviousStage(current.name()); history.setNewStage(target.name());
+        history.setChangedByRecruiterId(recruiterId); history.setNote(request.note()); historyRepo.save(history);
+        app.setStatus(target.name());
         return repo.save(app);
     }
 
-    public application rejectApplication(Long id) {
-        application application = repo.findById(id).orElseThrow();
-        application.setStatus("REJECTED");
-        return repo.save(application);
+    private boolean validTransition(PipelineStage from, PipelineStage to) {
+        if (to == PipelineStage.REJECTED) return true;
+        if (to == PipelineStage.SELECTED) return from == PipelineStage.INTERVIEWED;
+        if (from == PipelineStage.SELECTED || from == PipelineStage.REJECTED) return false;
+        // Backward moves are allowed; forward moves follow the defined pipeline one stage at a time.
+        return to.ordinal() < from.ordinal() || to.ordinal() == from.ordinal() + 1;
+    }
+
+    public List<ApplicationStageHistoryDto> stageHistory(Long applicationId, Long recruiterId) {
+        application app = repo.findById(applicationId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found."));
+        if (app.getJobId() == null || jobRepo.findByIdAndRecruiterId(app.getJobId(), recruiterId).isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found.");
+        return historyRepo.findAllByApplicationIdOrderByChangedAtAscIdAsc(applicationId).stream()
+                .map(h -> new ApplicationStageHistoryDto(h.getId(), h.getApplicationId(), h.getPreviousStage(), h.getNewStage(), h.getChangedByRecruiterId(), h.getChangedAt(), h.getNote())).toList();
+    }
+
+    public Path recruiterResumePath(Long applicationId, Long recruiterId) {
+        application app = repo.findById(applicationId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found."));
+        if (app.getJobId() == null || jobRepo.findByIdAndRecruiterId(app.getJobId(), recruiterId).isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found.");
+        Student student = app.getStudentId() == null ? null : studentRepo.findById(app.getStudentId()).orElse(null);
+        if (student == null || Boolean.FALSE.equals(student.getProfileVisible()) || student.getResume() == null || student.getResume().isBlank())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resume not found.");
+        Path directory = Paths.get("uploads/resume/").toAbsolutePath().normalize();
+        Path file = directory.resolve(student.getResume()).normalize();
+        if (!file.startsWith(directory) || !Files.isRegularFile(file)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resume not found.");
+        return file;
     }
 
 

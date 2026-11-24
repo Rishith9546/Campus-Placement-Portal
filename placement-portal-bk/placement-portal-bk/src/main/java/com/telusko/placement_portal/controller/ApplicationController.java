@@ -84,13 +84,12 @@ public class ApplicationController {
 
 
     @PutMapping("/shortlist/{id}")
-    public application shortlistApplication(@PathVariable Long id) {
-
-        return service.shortlistApplication(id);
+    public application shortlistApplication(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal user) {
+        return service.shortlistApplication(id, user.getId());
     }
     @PutMapping("/rejected/{id}")
-    public application rejectedApplication(@PathVariable Long id) {
-        return service.rejectApplication(id);
+    public application rejectedApplication(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal user) {
+        return service.rejectApplication(id, user.getId());
     }
     @GetMapping("/count")
     public long getApplicationCount(

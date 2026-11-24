@@ -24,9 +24,14 @@ export default function AdminAuth() {
         setMessage(data.message || (response.status === 401 ? "Invalid email or password." : "Admin access was denied."));
         return;
       }
+      if (data.role !== "ROLE_ADMIN" || !data.token) {
+        setMessage("This account does not have administrator access.");
+        return;
+      }
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
-      navigate("/adminDashboard");
+      localStorage.setItem("adminEmail", form.email.trim());
+      navigate("/admin");
     } catch {
       setMessage("Unable to connect to the server.");
     } finally {

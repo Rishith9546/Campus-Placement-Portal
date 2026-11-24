@@ -195,6 +195,7 @@ public class AuthController {
         );
 
         user.setRole("RECRUITER");
+        user.setVerificationStatus("PENDING");
 
         userRepository.save(user);
 

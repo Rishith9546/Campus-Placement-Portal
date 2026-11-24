@@ -6,7 +6,11 @@ import {
   BriefcaseBusiness,
   CalendarClock,
   CheckCircle2,
+  CircleCheck,
   Clock3,
+  FileCheck2,
+  Handshake,
+  MessageSquareText,
   UsersRound,
 } from "lucide-react";
 import "./RecruiterOverview.css";
@@ -22,6 +26,9 @@ export function RecruiterOverview({ company, onPostJob }) {
   const [applicationsLoading, setApplicationsLoading] = useState(true);
   const [jobsError, setJobsError] = useState("");
   const [applicationsError, setApplicationsError] = useState("");
+  const [analytics, setAnalytics] = useState(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(true);
+  const [analyticsError, setAnalyticsError] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -52,8 +59,21 @@ export function RecruiterOverview({ company, onPostJob }) {
       }
     };
 
+    const loadAnalytics = async () => {
+      try {
+        const result = await axios.get(`${API}/api/recruiter/analytics`, { headers });
+        if (active) setAnalytics(result.data);
+      } catch (error) {
+        console.error("Unable to load recruiter analytics:", error.response?.data || error.message);
+        if (active) setAnalyticsError("Recruitment analytics could not be loaded.");
+      } finally {
+        if (active) setAnalyticsLoading(false);
+      }
+    };
+
     loadJobs();
     loadApplications();
+    loadAnalytics();
     return () => { active = false; };
   }, []);
 
@@ -81,11 +101,26 @@ export function RecruiterOverview({ company, onPostJob }) {
   const todayLabel = now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
 
   const statCards = [
-    { label: "Active jobs", value: jobsLoading || jobsError ? "—" : activeJobs.length, note: "Open opportunities", icon: BriefcaseBusiness, style: "jobs" },
-    { label: "Applications", value: applicationsLoading || applicationsError ? "—" : applications.length, note: "Across your job posts", icon: UsersRound, style: "applications" },
-    { label: "Awaiting review", value: applicationsLoading || applicationsError ? "—" : appliedCount, note: "Need your attention", icon: Clock3, style: "pending" },
-    { label: "Shortlisted", value: applicationsLoading || applicationsError ? "—" : shortlistedCount, note: "Candidates moving forward", icon: CheckCircle2, style: "shortlisted" },
+    { label: "Total jobs posted", key: "totalJobs", note: "All your job posts", icon: BriefcaseBusiness, style: "jobs" },
+    { label: "Active jobs", key: "activeJobs", note: "No deadline or deadline not passed", icon: BriefcaseBusiness, style: "jobs" },
+    { label: "Closed jobs", key: "closedJobs", note: "Deadline has passed", icon: Clock3, style: "pending" },
+    { label: "Applications received", key: "totalApplications", note: "Across your job posts", icon: UsersRound, style: "applications" },
+    { label: "Applied", key: "applied", note: "Awaiting initial review", icon: Clock3, style: "pending" },
+    { label: "Under review", key: "underReview", note: "Currently being reviewed", icon: MessageSquareText, style: "pending" },
+    { label: "Shortlisted", key: "shortlisted", note: "Moving forward", icon: CheckCircle2, style: "shortlisted" },
+    { label: "Interview scheduled", key: "interviewScheduled", note: "Interview stage", icon: CalendarClock, style: "applications" },
+    { label: "Interviewed", key: "interviewed", note: "Interview completed", icon: Handshake, style: "shortlisted" },
+    { label: "Selected", key: "selected", note: "Selected candidates", icon: CircleCheck, style: "shortlisted" },
+    { label: "Rejected", key: "rejected", note: "Closed applications", icon: FileCheck2, style: "pending" },
   ];
+
+  const pipelineStages = [
+    ["Applied", "applied", "applied-dot"], ["Under review", "underReview", "review-dot"],
+    ["Shortlisted", "shortlisted", "shortlist-dot"], ["Interview scheduled", "interviewScheduled", "interview-dot"],
+    ["Interviewed", "interviewed", "interviewed-dot"], ["Selected", "selected", "selected-dot"],
+    ["Rejected", "rejected", "rejected-dot"],
+  ];
+  const maxMonthly = Math.max(1, ...(analytics?.monthlyApplications || []).map((item) => item.applications));
 
   return (
     <main className="recruiter-overview">
@@ -100,10 +135,37 @@ export function RecruiterOverview({ company, onPostJob }) {
 
       {(jobsError || applicationsError) && <div className="recruiter-data-notice" role="status">{[jobsError, applicationsError].filter(Boolean).join(" ")}</div>}
 
-      <section className="recruiter-stats" aria-label="Hiring summary">
-        {statCards.map(({ label, value, note, icon: Icon, style }) => <article className={`recruiter-stat ${style}`} key={label}>
-          <span className="recruiter-stat-icon"><Icon size={18} /></span><span className="recruiter-stat-label">{label}</span><strong>{value}</strong><small>{note}</small>
+      {analyticsError && <div className="recruiter-data-notice" role="alert">{analyticsError}</div>}
+      <section className="recruiter-stats analytics-kpis" aria-label="Recruitment analytics key performance indicators">
+        {statCards.map(({ label, key, note, icon: Icon, style }) => <article className={`recruiter-stat ${style}`} key={key}>
+          <span className="recruiter-stat-icon"><Icon size={18} /></span><span className="recruiter-stat-label">{label}</span><strong>{analyticsLoading ? "—" : analytics?.[key] ?? 0}</strong><small>{note}</small>
         </article>)}
+      </section>
+
+      <section className="recruiter-analytics-grid" aria-label="Recruitment analytics">
+        <article className="recruiter-panel analytics-funnel-panel">
+          <div className="recruiter-panel-heading"><div><span className="recruiter-kicker">RECRUITMENT FUNNEL</span><h2>Candidate stages</h2></div><span className="recruiter-panel-icon"><UsersRound size={18} /></span></div>
+          {analyticsLoading ? <p className="recruiter-empty">Loading pipeline analytics...</p> : analyticsError ? <p className="recruiter-empty">Pipeline analytics are unavailable.</p> : analytics?.totalApplications === 0 ? <div className="recruiter-empty"><strong>No candidate data yet</strong><p>Application stages will appear here after students apply.</p></div> : <div className="analytics-funnel">
+            {pipelineStages.map(([label, key, dotClass]) => {
+              const count = analytics?.[key] || 0;
+              const percentage = analytics?.totalApplications ? Math.round(count * 100 / analytics.totalApplications) : 0;
+              return <div className="analytics-funnel-row" key={key}><div className="analytics-funnel-label"><span className={`pipeline-dot ${dotClass}`} />{label}<strong>{count}</strong></div><div className="analytics-funnel-track" role="progressbar" aria-label={`${label} share of applications`} aria-valuenow={percentage} aria-valuemin="0" aria-valuemax="100"><span style={{ width: `${percentage}%` }} /></div><small>{percentage}%</small></div>;
+            })}
+          </div>}
+        </article>
+
+        <article className="recruiter-panel monthly-analytics-panel">
+          <div className="recruiter-panel-heading"><div><span className="recruiter-kicker">APPLICATION ACTIVITY</span><h2>Applications by month</h2></div><span className="recruiter-panel-icon"><CalendarClock size={18} /></span></div>
+          {analyticsLoading ? <p className="recruiter-empty">Loading application history...</p> : analyticsError ? <p className="recruiter-empty">Application history is unavailable.</p> : <div className="monthly-chart" role="img" aria-label="Applications received per month for the last six months">
+            {(analytics?.monthlyApplications || []).map((item) => <div className="monthly-chart-column" key={item.month}><strong>{item.applications}</strong><div className="monthly-chart-track"><span style={{ height: `${item.applications ? Math.max(8, item.applications * 100 / maxMonthly) : 0}%` }} /></div><small>{item.month}</small></div>)}
+          </div>}
+        </article>
+
+        <article className="recruiter-panel analytics-jobs-panel">
+          <div className="recruiter-panel-heading"><div><span className="recruiter-kicker">ROLE PERFORMANCE</span><h2>Applications by job</h2></div><button className="recruiter-text-action" onClick={() => navigate("/recruiter/manage-jobs")}>Manage jobs <ArrowRight size={14} /></button></div>
+          {analyticsLoading ? <p className="recruiter-empty">Loading job performance...</p> : analyticsError ? <p className="recruiter-empty">Job performance is unavailable.</p> : !analytics?.jobPerformance?.length ? <div className="recruiter-empty"><strong>No job posts yet</strong><p>Post a role to see its application activity.</p></div> : <div className="analytics-job-table-wrap"><table className="analytics-job-table"><thead><tr><th>Job</th><th>Status</th><th>Applications</th><th>Shortlisted</th><th>Interview</th><th>Selected</th></tr></thead><tbody>{analytics.jobPerformance.map((job) => <tr key={job.jobId}><td><strong>{job.title || "Untitled role"}</strong><small>{job.company || "Company not listed"}</small></td><td><span className={`recruiter-job-state${job.active ? "" : " closed"}`}>{job.active ? "Active" : "Closed"}</span></td><td>{job.applications}</td><td>{job.shortlisted}</td><td>{job.interviewScheduled + job.interviewed}</td><td>{job.selected}</td></tr>)}</tbody></table></div>}
+          {analytics && !analyticsError && <p className="analytics-data-note">Job-view tracking is unavailable, so view-to-application conversion is not shown.</p>}
+        </article>
       </section>
 
       <div className="recruiter-insights-grid">

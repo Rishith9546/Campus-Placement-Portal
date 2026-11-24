@@ -7,6 +7,36 @@
 .recruiter-primary-action:hover { transform: translateY(-2px); background: #319b80; }
 .recruiter-data-notice { margin: 0 0 14px; padding: 11px 13px; border: 1px solid rgba(255,211,144,.22); border-radius: 10px; background: rgba(240,189,105,.08); color: #f3d99f; font-size: 10px; }
 .recruiter-stats { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; }
+.recruiter-stats.analytics-kpis { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.analytics-kpis .recruiter-stat { min-height: 126px; }
+.recruiter-analytics-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 13px; margin-top: 14px; }
+.analytics-funnel-panel, .monthly-analytics-panel, .analytics-jobs-panel { min-width: 0; }
+.analytics-jobs-panel { grid-column: 1 / -1; }
+.analytics-funnel { display: grid; gap: 13px; }
+.analytics-funnel-row { display: grid; grid-template-columns: minmax(130px,1fr) minmax(70px,1.5fr) 34px; align-items: center; gap: 11px; }
+.analytics-funnel-label { display: flex; align-items: center; gap: 8px; color: #c6d2dc; font-size: 10px; }
+.analytics-funnel-label strong { margin-left: auto; color: #fff; font-size: 11px; }
+.analytics-funnel-track { height: 8px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.1); }
+.analytics-funnel-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#5ebca0,#8ee2c6); transition: width .25s ease; }
+.analytics-funnel-row > small { color: #b6c4cf; font-size: 9px; text-align: right; }
+.pipeline-dot.review-dot { background: #86b7ef; }
+.pipeline-dot.interview-dot { background: #b99af0; }
+.pipeline-dot.interviewed-dot { background: #72c9dc; }
+.pipeline-dot.selected-dot { background: #70dda0; }
+.monthly-chart { min-height: 188px; display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); align-items: end; gap: 12px; padding: 8px 4px 0; }
+.monthly-chart-column { min-width: 0; height: 100%; display: grid; grid-template-rows: 16px 1fr 26px; justify-items: center; gap: 5px; }
+.monthly-chart-column > strong { color: #f4f8fb; font-size: 10px; }
+.monthly-chart-track { width: min(28px,70%); height: 100%; display: flex; align-items: end; overflow: hidden; border-radius: 8px 8px 3px 3px; background: rgba(255,255,255,.07); }
+.monthly-chart-track span { width: 100%; min-height: 0; border-radius: 7px 7px 2px 2px; background: linear-gradient(180deg,#89dfc0,#3c9c83); transition: height .25s ease; }
+.monthly-chart-column small { color: #aebdc9; font-size: 8px; text-align: center; }
+.analytics-job-table-wrap { overflow-x: auto; }
+.analytics-job-table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
+.analytics-job-table th { padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,.12); color: #a8bac7; font-size: 8px; font-weight: 700; }
+.analytics-job-table td { padding: 11px 10px; border-bottom: 1px solid rgba(255,255,255,.07); color: #e5edf2; font-size: 9px; }
+.analytics-job-table tr:last-child td { border-bottom: 0; }
+.analytics-job-table td:first-child { min-width: 155px; display: grid; gap: 4px; }
+.analytics-job-table td:first-child small { color: #aab9c6; font-size: 8px; }
+.analytics-data-note { margin: 10px 0 0; color: #96a8b6; font-size: 8px; }
 .recruiter-stat { min-width: 0; min-height: 142px; display: flex; flex-direction: column; align-items: flex-start; padding: 17px 19px; border: 1px solid rgba(255,255,255,.13); border-radius: 15px; background: linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.045)); box-shadow: 0 10px 25px rgba(0,0,0,.11); }
 .recruiter-stat-icon { width: 33px; height: 33px; display: grid; place-items: center; margin-bottom: 10px; border-radius: 10px; background: rgba(112,183,215,.17); color: #b4e5f3; }
 .recruiter-stat.applications .recruiter-stat-icon { background: rgba(175,144,237,.17); color: #d4c0ff; }
@@ -63,15 +93,23 @@
 .deadline-date { flex: 0 0 auto; padding: 6px 8px; border-radius: 8px; background: rgba(240,189,105,.11); color: #f3d493; font-size: 8px; font-weight: 750; }
 @media (max-width: 900px) {
   .recruiter-stats { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .recruiter-stats.analytics-kpis { grid-template-columns: repeat(3,minmax(0,1fr)); }
   .recruiter-insights-grid { grid-template-columns: 1fr; }
+  .recruiter-analytics-grid { grid-template-columns: 1fr; }
+  .analytics-jobs-panel { grid-column: auto; }
 }
 @media (max-width: 560px) {
   .recruiter-overview { padding-top: 17px; }
   .recruiter-welcome { align-items: flex-start; flex-direction: column; }
   .recruiter-primary-action { width: 100%; justify-content: center; }
   .recruiter-stats { gap: 8px; }
+  .recruiter-stats.analytics-kpis { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .recruiter-stat { min-height: 130px; padding: 13px; }
+  .analytics-kpis .recruiter-stat { min-height: 116px; }
   .recruiter-stat > strong { font-size: 23px; }
+  .analytics-funnel-row { grid-template-columns: minmax(100px,1fr) minmax(48px,1.2fr) 30px; gap: 7px; }
+  .analytics-funnel-label { font-size: 9px; }
+  .monthly-chart { gap: 7px; }
   .recruiter-job-row { grid-template-columns: 30px minmax(0,1fr) auto; }
   .recruiter-job-applicants { grid-column: 2; }
   .recruiter-job-view { grid-column: 3; grid-row: 1 / span 2; }

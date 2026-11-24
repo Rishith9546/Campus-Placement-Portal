@@ -8,7 +8,7 @@ import com.telusko.placement_portal.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import tools.jackson.databind.ser.SerializationContextExt;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.util.List;
 
@@ -48,7 +48,10 @@ public class JobController {
     }
 
     @GetMapping("/{id}")
-    public Job getJobById(@PathVariable Long id) {
+    public Job getJobById(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal user) {
+       String role = user == null ? "" : user.getAuthorities().stream().map(GrantedAuthority::getAuthority).findFirst().orElse("");
+       if ("ROLE_STUDENT".equals(role)) return jobService.getStudentVisibleJob(id);
+       if ("ROLE_RECRUITER".equals(role)) return jobService.getRecruiterJobById(id, user.getId());
        return jobService.geyJobById(id);
     }
     @GetMapping("/count")
@@ -72,8 +75,8 @@ public class JobController {
         return jobService.searchJobs(keyword,user.getId());
     }
     @PutMapping("/{id}")
-    public Job updateJob(@PathVariable Long id, @RequestBody  Job job) {
-        return jobService.updateJob(id,job);
+    public Job updateJob(@PathVariable Long id, @RequestBody  Job job, @AuthenticationPrincipal UserPrincipal user) {
+        return jobService.updateJob(id,job,user.getId());
     }
     @GetMapping("/student/search")
     public List<Job> searchJobsForStudent(@RequestParam String keyword) {

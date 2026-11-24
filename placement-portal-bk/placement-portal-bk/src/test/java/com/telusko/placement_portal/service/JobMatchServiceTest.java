@@ -88,13 +88,11 @@ class JobMatchServiceTest {
     }
 
     private JobMatchDto evaluate(Student student,Job job,Optional<application> application){
-        when(students.findById(27L)).thenReturn(Optional.ofNullable(student));
-        when(jobs.findById(job.getId())).thenReturn(Optional.of(job));
-        when(applications.findByStudentIdAndJobId(27L,job.getId())).thenReturn(application);
-        JobMatchDto result=service.details(principal,job.getId());
+        String status=application.map(com.telusko.placement_portal.entity.application::getStatus).orElse(null);
+        JobMatchDto result=service.evaluateCandidate(job,student,status);
         assertTrue(result.matchScore()>=0&&result.matchScore()<=100);
         return result;
     }
     private Student student(String skills,String branch,Double cgpa,Integer backlogs,Integer gradYear){Student s=new Student();s.setId(27L);s.setSkills(skills);s.setBranch(branch);s.setCgpa(cgpa);s.setBacklogs(backlogs);s.setGraduationYear(gradYear);return s;}
-    private Job job(String skills,String eligibility){Job j=new Job();ReflectionTestUtils.setField(j,"id",44L);j.setTitle("Software Engineer");j.setCompany("Example Co");j.setSkills(skills);j.setEligibility(eligibility);return j;}
+    private Job job(String skills,String eligibility){Job j=new Job();ReflectionTestUtils.setField(j,"id",44L);j.setTitle("Software Engineer");j.setCompany("Example Co");j.setSkills(skills);j.setEligibility(eligibility);j.setApprovalStatus("APPROVED");return j;}
 }

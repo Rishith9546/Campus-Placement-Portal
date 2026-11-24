@@ -6,6 +6,7 @@ import { ArrowRight, Award, Bell, BriefcaseBusiness, CalendarDays, CheckCircle2,
 import "./StudentDashBoard.css";
 import { Headers } from "./Headers.jsx";
 import { calculatePlacementReadiness } from "./Functions/placementReadiness.js";
+import AnnouncementFeed from "../Announcements/AnnouncementFeed.jsx";
 
 const jobIsOpen = (job, now = new Date()) => !job.deadline || new Date(`${job.deadline}T23:59:59`) >= now;
 function StudentDashboard() {
@@ -671,6 +672,7 @@ function StudentDashboard() {
             <Headers />
 
             <main className="student-dashboard">
+            <AnnouncementFeed />
             {profileError && <div className="dashboard-alert" role="alert"><span>{profileError}</span><button onClick={() => window.location.reload()}>Refresh</button></div>}
             {applicationActionMessage && <div className="dashboard-action-message" role="status">{applicationActionMessage}</div>}
             <section className="student-overview" aria-labelledby="student-overview-title">
@@ -764,7 +766,7 @@ function StudentDashboard() {
                                 return <button className="recent-application" key={application.id} onClick={() => navigate("/application")}>
                                     <span className="application-mark"><BriefcaseBusiness size={17} /></span>
                                     <span className="recent-application-copy"><strong>{title}</strong><small>{company} · Applied {appliedDate}</small></span>
-                                    <span className={`application-status status-${status.toLowerCase()}`}>{status.replaceAll("_", " ")}</span>
+                                    <span className={`application-status status-${status.toLowerCase().replaceAll("_", "-")}`}>{status.replaceAll("_", " ")}</span>
                                 </button>;
                             })}
                         </div>}

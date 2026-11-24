@@ -518,6 +518,53 @@ button { -webkit-tap-highlight-color: transparent; }
 .shortlisted-header .back-btn:hover { color: white; }
 .header-content { align-items: flex-end; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,.1); }
 .page-label { color: var(--portal-mint); letter-spacing: .14em; }
+
+/* Recruiter typography system: one family and a readable, shared text scale. */
+:is(.recruiter-dashboard, .manage-jobs-page, .view-applicants-page, .shortlisted-page, .job-view-page, .auth-portal--recruiter) {
+  font-family: "Plus Jakarta Sans", "Open Sans", sans-serif !important;
+  font-size: 15px;
+}
+:is(.recruiter-dashboard, .manage-jobs-page, .view-applicants-page, .shortlisted-page, .job-view-page, .auth-portal--recruiter) * {
+  font-family: inherit !important;
+}
+:is(.recruiter-dashboard, .manage-jobs-page, .view-applicants-page, .shortlisted-page, .job-view-page) p,
+:is(.recruiter-dashboard, .manage-jobs-page, .view-applicants-page, .shortlisted-page, .job-view-page) label,
+:is(.recruiter-dashboard, .manage-jobs-page, .view-applicants-page, .shortlisted-page, .job-view-page) input,
+:is(.recruiter-dashboard, .manage-jobs-page, .view-applicants-page, .shortlisted-page, .job-view-page) select,
+:is(.recruiter-dashboard, .manage-jobs-page, .view-applicants-page, .shortlisted-page, .job-view-page) textarea,
+:is(.recruiter-dashboard, .manage-jobs-page, .view-applicants-page, .shortlisted-page, .job-view-page) td,
+:is(.recruiter-dashboard, .manage-jobs-page, .view-applicants-page, .shortlisted-page, .job-view-page) li { font-size: 14px; }
+:is(.recruiter-dashboard, .manage-jobs-page, .view-applicants-page, .shortlisted-page, .job-view-page) button { font-family: inherit; }
+:is(.recruiter-dashboard, .manage-jobs-page, .view-applicants-page, .shortlisted-page, .job-view-page) small { font-size: 12px; }
+.recruiter-dashboard .recruiter-overview-date,
+.recruiter-dashboard .recruiter-kicker,
+.recruiter-dashboard .recruiter-stat-label,
+.recruiter-dashboard .recruiter-data-notice,
+.recruiter-dashboard .recruiter-job-copy small,
+.recruiter-dashboard .recruiter-job-state,
+.recruiter-dashboard .recruiter-job-applicants,
+.recruiter-dashboard .recruiter-job-view,
+.recruiter-dashboard .recruiter-deadline small,
+.recruiter-dashboard .deadline-date,
+.recruiter-dashboard .quick-actions-heading span,
+.recruiter-dashboard .quick-action-copy small { font-size: 12px; }
+.recruiter-dashboard .recruiter-welcome p,
+.recruiter-dashboard .recruiter-stat > small,
+.recruiter-dashboard .recruiter-job-copy strong,
+.recruiter-dashboard .recruiter-deadline strong,
+.recruiter-dashboard .quick-action-copy strong { font-size: 13px; }
+.recruiter-dashboard .recruiter-welcome h1,
+.manage-jobs-page .manage-header h1,
+.view-applicants-page .view-applicants-header h1,
+.shortlisted-page .shortlisted-header h1,
+.job-view-page .job-heading h1 { font-size: clamp(30px, 4vw, 40px); }
+.recruiter-dashboard .recruiter-panel-heading h2,
+.recruiter-dashboard .recent-jobs-header h2,
+.recruiter-dashboard .quick-actions h2,
+.view-applicants-page .view-applicant-header h2,
+.shortlisted-page .candidate-name h2,
+.job-view-page .job-heading h2 { font-size: 20px; }
+.job-list-table th { font-size: 12px; }
 .shortlisted-header h1 { font-size: clamp(30px,4vw,40px); letter-spacing: -.045em; }
 .shortlisted-header p { color: #b7c6d2; }
 .header-count { min-width: 160px; border-color: var(--portal-border); border-radius: 14px; background: rgba(14,31,48,.62); }

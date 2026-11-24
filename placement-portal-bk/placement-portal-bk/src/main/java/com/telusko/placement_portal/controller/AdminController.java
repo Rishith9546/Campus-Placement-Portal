@@ -1,8 +1,9 @@
 package com.telusko.placement_portal.controller;
 
-import com.telusko.placement_portal.repository.ApplicationRepo;
-import com.telusko.placement_portal.repository.JobRepo;
-import com.telusko.placement_portal.repository.UserRepository;
+import com.telusko.placement_portal.dto.AdminDashboardOverviewDto;
+import com.telusko.placement_portal.security.UserPrincipal;
+import com.telusko.placement_portal.service.AdminDashboardService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,23 +15,28 @@ import java.util.Map;
 @RequestMapping("/api/admin")
 @CrossOrigin(origins = "http://localhost:5173")
 public class AdminController {
-    private final UserRepository users;
-    private final JobRepo jobs;
-    private final ApplicationRepo applications;
+    private final AdminDashboardService dashboard;
 
-    public AdminController(UserRepository users, JobRepo jobs, ApplicationRepo applications) {
-        this.users = users;
-        this.jobs = jobs;
-        this.applications = applications;
+    public AdminController(AdminDashboardService dashboard) {
+        this.dashboard = dashboard;
     }
 
     @GetMapping("/overview")
-    public Map<String, Long> overview() {
+    public AdminDashboardOverviewDto overview() {
+        return dashboard.getOverview();
+    }
+
+    @GetMapping("/dashboard/overview")
+    public AdminDashboardOverviewDto dashboardOverview() {
+        return dashboard.getOverview();
+    }
+
+    @GetMapping("/session")
+    public Map<String, String> session(@AuthenticationPrincipal UserPrincipal principal) {
         return Map.of(
-                "students", users.countByRole("STUDENT"),
-                "recruiters", users.countByRole("RECRUITER"),
-                "jobs", jobs.count(),
-                "applications", applications.count()
+                "name", principal.getName(),
+                "email", principal.getEmail(),
+                "role", "ROLE_ADMIN"
         );
     }
 }

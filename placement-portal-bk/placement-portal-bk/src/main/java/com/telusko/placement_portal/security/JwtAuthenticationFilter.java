@@ -113,6 +113,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         userDetailsService
                                 .loadUserByUsername(email);
 
+                if (!userDetails.isEnabled()) {
+                    SecurityContextHolder.clearContext();
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Account is deactivated");
+                    return;
+                }
+
                 System.out.println(
                         "USERNAME: "
                                 + userDetails.getUsername()

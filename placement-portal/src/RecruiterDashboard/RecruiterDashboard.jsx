@@ -4,6 +4,7 @@ import { ProfileCard } from "./ProfileCard.jsx";
 import { QuickActions } from "./QuickActions.jsx";
 import { PostJob } from "./PostJob.jsx";
 import { RecruiterOverview } from "./RecruiterOverview.jsx";
+import AnnouncementFeed from "../Announcements/AnnouncementFeed.jsx";
 
 import "./RecuriterDashbaord.css";
 
@@ -17,6 +18,8 @@ export function RecruiterDashboard() {
             <Headers />
 
             <div className="body">
+
+                <AnnouncementFeed />
 
                 <ProfileCard  setCompany={setCompany}/>
 

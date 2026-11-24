@@ -676,6 +676,8 @@ body {
 .application-status.status-shortlisted { background: rgba(105,213,162,.12); color: #9ce8c0; }
 .application-status.status-rejected { background: rgba(231,139,146,.12); color: #f1adb1; }
 .application-status.status-applied { background: rgba(240,189,105,.1); color: #f4d493; }
+.application-status.status-under-review, .application-status.status-interview-scheduled, .application-status.status-interviewed { background: rgba(217,183,117,.14); color: #f1d99d; }
+.application-status.status-selected { background: rgba(105,213,162,.12); color: #9ce8c0; }
 .overview-empty-state { color: #b8c6d2; font-size: 11px; line-height: 1.6; }
 .overview-empty-state p { margin: 0 0 10px; }
 .readiness-score { display: flex; align-items: baseline; gap: 8px; }

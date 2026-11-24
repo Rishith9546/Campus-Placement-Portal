@@ -55,9 +55,14 @@ export function StudentAuth() {
 
             if (response.ok) {
 
-                localStorage.setItem("token", data.token);
+                if (data.role !== "ROLE_STUDENT") {
+                    setMessage("This account is not a student account.");
+                    return;
+                }
 
-   
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("role", data.role);
+
                  navigate("/dashboard");
 
             } else {

@@ -8,6 +8,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.validation.Valid;
 
 import com.telusko.placement_portal.entity.Student;
 import com.telusko.placement_portal.security.UserPrincipal;
@@ -38,7 +39,7 @@ public class StudentController {
 
     @PostMapping("/profile")
     public Student createProfile(
-            @RequestBody Student student,
+            @Valid @RequestBody Student student,
             @AuthenticationPrincipal UserPrincipal user) {
 
         System.out.println("========== STUDENT PROFILE ==========");
@@ -70,7 +71,7 @@ public class StudentController {
             throw new RuntimeException("User not authenticated");
         }
 
-        return studentService.getProfile(user.getId());
+        return studentService.getOrCreateProfile(user);
     }
 
 
@@ -102,6 +103,10 @@ public class StudentController {
                 return ResponseEntity
                         .badRequest()
                         .body("No photo selected");
+            }
+
+            if (photo.getSize() > 5L * 1024 * 1024) {
+                return ResponseEntity.badRequest().body("Profile photos must be 5 MB or smaller");
             }
 
 
@@ -388,20 +393,24 @@ public class StudentController {
                 return ResponseEntity.status(401).body("User not authenticated");
             }
             if(resume == null || resume.isEmpty()) {
-                return ResponseEntity.status(401).body("No resume selected");
+                return ResponseEntity.badRequest().body("No resume selected");
             }
 
-            if(resume.getContentType()==null || !resume.getContentType().equals("application/pdf")){
+            if (resume.getSize() > 5L * 1024 * 1024) return ResponseEntity.badRequest().body("Resume must be smaller than 5 MB");
+
+            String originalName = resume.getOriginalFilename();
+            if (originalName == null || !originalName.toLowerCase().endsWith(".pdf") || resume.getContentType() == null || !resume.getContentType().equalsIgnoreCase("application/pdf")) {
                 return ResponseEntity.badRequest().body("Only PDF Files are allowed");
             }
+            byte[] signature = resume.getInputStream().readNBytes(5);
+            if (signature.length != 5 || signature[0] != '%' || signature[1] != 'P' || signature[2] != 'D' || signature[3] != 'F' || signature[4] != '-') return ResponseEntity.badRequest().body("The uploaded file is not a valid PDF");
             String uploadDir="uploads/resume/";
 
             File directory = new File(uploadDir);
             if(!directory.exists()){
                 directory.mkdirs();
             }
-            String originalFileName =
-                    resume.getOriginalFilename();
+            String originalFileName = resume.getOriginalFilename();
             if (originalFileName == null || originalFileName.isEmpty()) {
                 originalFileName = "resume.pdf";
             }

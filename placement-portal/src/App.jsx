@@ -16,6 +16,12 @@ import {ViewJobsRecruiter} from "./Recuriter-ManageJobs/ViewJobsRecruiter.jsx";
 import MockInterview from "./Student/MockInterview.jsx";
 import AdminAuth from "./AdminAuth/AdminAuth.jsx";
 import AdminDashboard from "./AdminDashboard/AdminDashboard.jsx";
+import StudentProfile from "./Student/StudentProfile.jsx";
+import DsaTracker from "./Student/DsaTracker.jsx";
+import Aptitude from "./Student/Aptitude.jsx";
+import JobMatches from "./Student/JobMatches.jsx";
+import ResumeAnalyzer from "./Student/ResumeAnalyzer.jsx";
+import PreparationRoadmap from "./Student/PreparationRoadmap.jsx";
 import { Headers } from "./Student/Headers.jsx";
 import "./ProjectPolish.css";
 
@@ -24,7 +30,7 @@ function App() {
     <Routes>
       <Route index element={<HomePage />} />
       <Route path="/adminAuth" element={<AdminAuth />} />
-      <Route path="/adminDashboard" element={<><Headers /><AdminDashboard /></>} />
+      <Route path="/adminDashboard" element={<AdminDashboard />} />
       <Route path="/studentAuth" element={<StudentAuth />} />
                   <Route
                 path="/dashboard"
@@ -36,6 +42,12 @@ function App() {
     element={<RecruiterDashboard />}
 />
         <Route path="/viewjobs" element={<ViewJobs/>} />
+        <Route path="/profile" element={<StudentProfile />} />
+        <Route path="/dsa-tracker" element={<DsaTracker />} />
+        <Route path="/aptitude" element={<Aptitude />} />
+        <Route path="/job-matches" element={<JobMatches />} />
+        <Route path="/resume-analyzer" element={<><Headers /><ResumeAnalyzer /></>} />
+        <Route path="/preparation-roadmap" element={<><Headers /><PreparationRoadmap /></>} />
         <Route path="/jobs/:id" element={<><Headers /><JobDetails /></>} />
         <Route path="/application" element={<Application/>}/>
         <Route path="/recruiter/applicants" element={<><Headers /><ViewApplicants/></>}/>

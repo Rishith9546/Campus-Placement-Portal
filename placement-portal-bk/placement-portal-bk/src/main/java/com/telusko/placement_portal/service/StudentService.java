@@ -8,6 +8,7 @@ import com.telusko.placement_portal.repository.StudentRepo;
 import com.telusko.placement_portal.security.UserPrincipal;
 
 import java.util.List;
+import java.net.URI;
 
 @Service
 public class StudentService {
@@ -40,7 +41,12 @@ public class StudentService {
             existingStudent = new Student();
 
             existingStudent.setId(userId);
+            existingStudent.setProfileVisible(true);
         }
+
+        validateUrl(student.getGithubProfile());
+        validateUrl(student.getLinkedInProfile());
+        validateUrl(student.getPortfolioUrl());
 
 
         // User table information
@@ -76,6 +82,15 @@ public class StudentService {
                 student.getSkills()
         );
 
+        if (student.getCollegeName() != null) existingStudent.setCollegeName(student.getCollegeName());
+        if (student.getDegree() != null) existingStudent.setDegree(student.getDegree());
+        if (student.getGraduationYear() != null) existingStudent.setGraduationYear(student.getGraduationYear());
+        if (student.getBacklogs() != null) existingStudent.setBacklogs(student.getBacklogs());
+        if (student.getGithubProfile() != null) existingStudent.setGithubProfile(student.getGithubProfile());
+        if (student.getLinkedInProfile() != null) existingStudent.setLinkedInProfile(student.getLinkedInProfile());
+        if (student.getPortfolioUrl() != null) existingStudent.setPortfolioUrl(student.getPortfolioUrl());
+        if (student.getProfileVisible() != null) existingStudent.setProfileVisible(student.getProfileVisible());
+
 
         // IMPORTANT:
         // Do NOT set profilePhoto here.
@@ -105,6 +120,17 @@ public class StudentService {
                 );
     }
 
+    public Student getOrCreateProfile(UserPrincipal user) {
+        return studentRepository.findById(user.getId()).orElseGet(() -> {
+            Student profile = new Student();
+            profile.setId(user.getId());
+            profile.setName(user.getName());
+            profile.setEmail(user.getEmail());
+            profile.setProfileVisible(true);
+            return studentRepository.save(profile);
+        });
+    }
+
 
     // =================================================
     // SAVE STUDENT
@@ -113,6 +139,20 @@ public class StudentService {
     public Student saveStudent(Student student) {
 
         return studentRepository.save(student);
+    }
+
+    private void validateUrl(String value) {
+        if (value == null || value.isBlank()) return;
+        try {
+            URI uri = URI.create(value.trim());
+            if (!uri.isAbsolute() || !("https".equalsIgnoreCase(uri.getScheme()) || "http".equalsIgnoreCase(uri.getScheme())) || uri.getHost() == null) {
+                throw new IllegalArgumentException();
+            }
+        } catch (IllegalArgumentException error) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "Profile links must be valid http or https URLs.");
+        }
     }
 
 }

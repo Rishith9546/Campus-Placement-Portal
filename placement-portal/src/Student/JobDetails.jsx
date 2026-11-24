@@ -167,7 +167,7 @@ export function JobDetails() {
                 studentId: users.id,
                 jobId: Number(id),
                 recruiterId: details.recruiterId,
-                appliedAt: new Date().toISOString(),
+                appliedAt: new Date().toISOString().slice(0, 19),
                 status: "APPLIED",
                 rejectionReason: null
             };

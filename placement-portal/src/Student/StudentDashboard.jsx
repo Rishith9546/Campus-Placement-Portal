@@ -2,74 +2,12 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Bell, BriefcaseBusiness, CalendarDays, CheckCircle2, Clock3, FileText, MessageCircle, Send, Sparkles, TrendingUp, UserRound } from "lucide-react";
+import { ArrowRight, Award, Bell, BriefcaseBusiness, CalendarDays, CheckCircle2, CircleAlert, CircleCheck, Clock3, FileText, MessageCircle, Send, Sparkles, TrendingUp, UserRound } from "lucide-react";
 import "./StudentDashBoard.css";
 import { Headers } from "./Headers.jsx";
+import { calculatePlacementReadiness } from "./Functions/placementReadiness.js";
 
 const jobIsOpen = (job, now = new Date()) => !job.deadline || new Date(`${job.deadline}T23:59:59`) >= now;
-const normalize = (value) => (value || "").toString().toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-
-function assessJobEligibility(job, student) {
-    const criteria = (job.eligibility || "").trim();
-    if (!criteria) return "check";
-
-    const branchGroups = [
-        ["cse", "computer science", "computer science and engineering", "computer science engineering"],
-        ["ece", "electronics", "electronics and communication"],
-        ["eee", "electrical and electronics"],
-        ["ee", "electrical engineering"],
-        ["it", "information technology"],
-        ["me", "mechanical engineering", "mechanical"],
-        ["ce", "civil engineering", "civil"]
-    ];
-    const normalizedCriteria = normalize(criteria);
-    const branchCriteria = branchGroups.filter((group) => group.some((name) => {
-        const normalizedName = normalize(name);
-        return name.length <= 3
-            ? new RegExp(`\\b${name}\\b`, "i").test(criteria)
-            : normalizedCriteria.includes(normalizedName);
-    }));
-
-    if (/branches?/i.test(criteria) && branchCriteria.length === 0) return "check";
-    if (branchCriteria.length && !student.branch) return "check";
-    if (branchCriteria.length && student.branch) {
-        const studentBranch = normalize(student.branch);
-        const matchingBranch = branchCriteria.some((group) => group.some((name) => {
-            const normalizedName = normalize(name);
-            return studentBranch === normalizedName || studentBranch.includes(normalizedName) || normalizedName.includes(studentBranch);
-        }));
-        if (!matchingBranch) return "not-eligible";
-    } else if (/branches?/i.test(criteria) && !student.branch) {
-        return "check";
-    }
-
-    const cgpaMatch = criteria.match(/(?:minimum|min\.?|at least|>=|>)\s*(?:cgpa|gpa)?\s*(\d+(?:\.\d+)?)/i)
-        || criteria.match(/(?:cgpa|gpa)\s*(?:of|is|:|>=|>|minimum|min\.?|at least)?\s*(\d+(?:\.\d+)?)/i);
-    if (cgpaMatch) {
-        if (student.cgpa === "" || student.cgpa == null) return "check";
-        const strictMinimum = /(?:^|\s)>\s*(?:cgpa|gpa)?/i.test(criteria);
-        if (strictMinimum ? Number(student.cgpa) <= Number(cgpaMatch[1]) : Number(student.cgpa) < Number(cgpaMatch[1])) return "not-eligible";
-    }
-
-    let unverifiedCriteria = criteria;
-    branchGroups.flat().forEach((name) => {
-        const pattern = name.length <= 3 ? new RegExp(`\\b${name}\\b`, "gi") : new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
-        unverifiedCriteria = unverifiedCriteria.replace(pattern, " ");
-    });
-    unverifiedCriteria = unverifiedCriteria
-        .replace(/(?:minimum|min\.?|at least|>=|>)\s*(?:cgpa|gpa)?\s*\d+(?:\.\d+)?/gi, " ")
-        .replace(/(?:cgpa|gpa)\s*(?:of|is|:|>=|>|minimum|min\.?|at least)?\s*\d+(?:\.\d+)?/gi, " ")
-        .replace(/\b(branch(?:es)?|cgpa|gpa|with|and|or|of|is|at least|minimum|min)\b/gi, " ");
-    return normalize(unverifiedCriteria) ? "check" : "eligible";
-}
-
-function getSkillMatch(job, student) {
-    const requiredSkills = (job.skills || "").split(/[,;\n]+/).map(normalize).filter(Boolean);
-    const studentSkills = (student.skills || "").split(/[,;\n]+/).map(normalize).filter(Boolean);
-    if (!requiredSkills.length || !studentSkills.length) return 0;
-    return requiredSkills.filter((required) => studentSkills.some((skill) => skill === required || skill.includes(required) || required.includes(skill))).length / requiredSkills.length;
-}
-
 function StudentDashboard() {
     const navigate = useNavigate();
 
@@ -83,7 +21,15 @@ function StudentDashboard() {
         cgpa: "",
         skills: "",
         profilePhoto: null,
-        resume: null
+        resume: null,
+        collegeName: "",
+        degree: "",
+        graduationYear: "",
+        backlogs: "",
+        githubProfile: "",
+        linkedInProfile: "",
+        portfolioUrl: "",
+        profileVisible: true
     });
 
     const [profilePhoto, setProfilePhoto] = useState(null);
@@ -112,9 +58,85 @@ function StudentDashboard() {
     const [applications, setApplications] = useState([]);
     const [applicationsLoading, setApplicationsLoading] = useState(false);
     const [applicationsError, setApplicationsError] = useState("");
+    const [applyingJobId, setApplyingJobId] = useState(null);
+    const [applicationActionMessage, setApplicationActionMessage] = useState("");
     const [jobs, setJobs] = useState([]);
     const [jobsLoading, setJobsLoading] = useState(true);
     const [jobsError, setJobsError] = useState("");
+    const [dsaStats, setDsaStats] = useState(null);
+    const [dsaStatsLoading, setDsaStatsLoading] = useState(true);
+    const [dsaStatsError, setDsaStatsError] = useState("");
+    const [aptitudeAnalytics, setAptitudeAnalytics] = useState(null);
+    const [aptitudeAnalyticsError, setAptitudeAnalyticsError] = useState("");
+    const [jobMatchSummary, setJobMatchSummary] = useState(null);
+    const [jobMatchesLoading, setJobMatchesLoading] = useState(true);
+    const [jobMatchesError, setJobMatchesError] = useState("");
+    const [latestResumeAnalysis, setLatestResumeAnalysis] = useState(null);
+    const [resumeScoreChange, setResumeScoreChange] = useState(null);
+
+    useEffect(() => {
+        let active = true;
+        const token = localStorage.getItem("token");
+        if (!token) return () => { active = false; };
+        axios.get("http://localhost:8080/api/resume-analyzer/history?limit=2", {
+            headers: { Authorization: `Bearer ${token}` }, timeout: 12000
+        }).then(({ data }) => {
+            if (!active) return;
+            const completed = (data || []).filter((item) => item.status === "COMPLETED");
+            setLatestResumeAnalysis(completed[0] || null);
+            setResumeScoreChange(completed.length > 1 ? completed[0].score - completed[1].score : null);
+        }).catch(() => { if (active) setLatestResumeAnalysis(null); });
+        return () => { active = false; };
+    }, []);
+
+    useEffect(() => {
+        let active = true;
+        const token = localStorage.getItem("token");
+        if (!token) return () => { active = false; };
+        axios.get("http://localhost:8080/api/student/aptitude/analytics", {
+            headers: { Authorization: `Bearer ${token}` }, timeout: 12000
+        }).then((result) => { if (active) setAptitudeAnalytics(result.data); })
+            .catch((error) => { if (active) setAptitudeAnalyticsError(error.response?.data?.message || "Aptitude data is unavailable right now."); });
+        return () => { active = false; };
+    }, []);
+
+    useEffect(() => {
+        if (loading) return undefined;
+        let active = true;
+        const token = localStorage.getItem("token");
+        if (!token) {
+            setJobMatchesLoading(false);
+            setJobMatchesError("Sign in as a student to load job matches.");
+            return () => { active = false; };
+        }
+        setJobMatchesError("");
+        setJobMatchesLoading(true);
+        axios.get("http://localhost:8080/api/student/job-matches/summary", {
+            headers: { Authorization: `Bearer ${token}` }, timeout: 12000
+        }).then((response) => { if (active) setJobMatchSummary(response.data); })
+            .catch((error) => { if (active) setJobMatchesError(error.response?.data?.message || "Smart job matches are unavailable right now."); })
+            .finally(() => { if (active) setJobMatchesLoading(false); });
+        return () => { active = false; };
+    }, [loading, student.skills, student.branch, student.cgpa, student.graduationYear, student.backlogs, applications.length]);
+
+    useEffect(() => {
+        let active = true;
+        const token = localStorage.getItem("token");
+        if (!token) {
+            setDsaStatsLoading(false);
+            setDsaStatsError("Sign in as a student to load DSA progress.");
+            return () => { active = false; };
+        }
+        axios.get("http://localhost:8080/api/student/dsa/stats", {
+            headers: { Authorization: `Bearer ${token}` },
+            timeout: 12000
+        }).then((result) => {
+            if (active) setDsaStats(result.data);
+        }).catch((error) => {
+            if (active) setDsaStatsError(error.response?.data?.message || "DSA progress is unavailable right now.");
+        }).finally(() => { if (active) setDsaStatsLoading(false); });
+        return () => { active = false; };
+    }, []);
 
     useEffect(() => {
         const getStudentProfile = async () => {
@@ -145,7 +167,15 @@ function StudentDashboard() {
                     cgpa: response.data.cgpa ?? "",
                     skills: response.data.skills ?? "",
                     profilePhoto: response.data.profilePhoto ?? null,
-                    resume: response.data.resume ?? null
+                    resume: response.data.resume ?? null,
+                    collegeName: response.data.collegeName ?? "",
+                    degree: response.data.degree ?? "",
+                    graduationYear: response.data.graduationYear ?? "",
+                    backlogs: response.data.backlogs ?? "",
+                    githubProfile: response.data.githubProfile ?? "",
+                    linkedInProfile: response.data.linkedInProfile ?? "",
+                    portfolioUrl: response.data.portfolioUrl ?? "",
+                    profileVisible: response.data.profileVisible !== false
                 });
 
                 setFormData({
@@ -230,13 +260,10 @@ function StudentDashboard() {
     const currentDate = now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const activeJobs = jobs.filter((job) => jobIsOpen(job, todayStart));
-    const availableJobsCount = activeJobs.filter((job) => assessJobEligibility(job, student) !== "not-eligible").length;
+    const availableJobsCount = jobMatchSummary?.eligibleCount ?? 0;
+    const matchingJobsCount = jobMatchSummary?.highMatchCount ?? 0;
     const appliedJobIds = new Set(applications.map((application) => String(application.jobId || application.job?.id || "")));
-    const recommendedJobs = activeJobs
-        .filter((job) => !appliedJobIds.has(String(job.id)) && assessJobEligibility(job, student) !== "not-eligible")
-        .sort((first, second) => getSkillMatch(second, student) - getSkillMatch(first, student)
-            || new Date(second.createdAt || 0).getTime() - new Date(first.createdAt || 0).getTime())
-        .slice(0, 3);
+    const recommendedJobs = (jobMatchSummary?.matches || []).slice(0, 3);
     const upcomingDriveJobs = activeJobs
         .filter((job) => job.deadline && new Date(`${job.deadline}T23:59:59`) >= todayStart)
         .sort((first, second) => new Date(first.deadline).getTime() - new Date(second.deadline).getTime())
@@ -261,8 +288,31 @@ function StudentDashboard() {
     const recentApplications = [...applications].sort((first, second) =>
         new Date(second.appliedAt || 0).getTime() - new Date(first.appliedAt || 0).getTime()
     ).slice(0, 4);
-    const profileFields = [student.name, student.email, student.rollNo, student.phone, student.branch, student.cgpa, student.skills, student.resume];
-    const profileCompletion = Math.round((profileFields.filter(Boolean).length / profileFields.length) * 100);
+    const readiness = calculatePlacementReadiness(student, { dsaStats, aptitudeAnalytics, resumeAnalysis: latestResumeAnalysis });
+    const profileCompletion = readiness.profileCompletion.percentage;
+    const placementReadinessScore = readiness.score;
+
+    const applyToRecommendedJob = async (job) => {
+        const jobId = job.jobId ?? job.id;
+        if (!student.id || job.eligibilityStatus !== "ELIGIBLE" || job.applied) return;
+        setApplyingJobId(jobId);
+        setApplicationActionMessage("");
+        try {
+            const result = await axios.post("http://localhost:8080/api/applications/applied", {
+                studentId: student.id,
+                jobId: Number(jobId),
+                appliedAt: new Date().toISOString().slice(0, 19),
+                status: "APPLIED",
+                rejectionReason: null
+            }, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
+            setApplications((current) => current.some((item) => String(item.jobId || item.job?.id) === String(jobId))
+                ? current
+                : [{ ...result.data, job: { ...job, id: jobId }, appliedAt: result.data.appliedAt || new Date().toISOString() }, ...current]);
+            setApplicationActionMessage(`Application submitted for ${job.title || "this role"}.`);
+        } catch (error) {
+            setApplicationActionMessage(error.response?.data?.message || "Could not submit your application. Please try again.");
+        } finally { setApplyingJobId(null); }
+    };
 
     const handleProfilePhoto = async (event) => {
         const input = event.currentTarget;
@@ -622,26 +672,72 @@ function StudentDashboard() {
 
             <main className="student-dashboard">
             {profileError && <div className="dashboard-alert" role="alert"><span>{profileError}</span><button onClick={() => window.location.reload()}>Refresh</button></div>}
+            {applicationActionMessage && <div className="dashboard-action-message" role="status">{applicationActionMessage}</div>}
             <section className="student-overview" aria-labelledby="student-overview-title">
                 <div className="overview-heading">
                     <div>
                         <span className="overview-eyebrow"><Sparkles size={14} /> {currentDate.toUpperCase()}</span>
                         <h1 id="student-overview-title">{greeting}, {student.name || "Student"}</h1>
-                        <p>Here's your placement overview. See what needs your attention next.</p>
+                        <p>Small steps add up. Keep your profile ready and make time to practice.</p>
                     </div>
                     <div className="overview-actions">
-                        <button className={`overview-button profile-icon-button${profileCompletion < 100 ? " needs-profile" : ""}`} type="button" onClick={openEdit} aria-label={profileCompletion < 100 ? "Complete your profile" : "Edit your profile"} title={profileCompletion < 100 ? "Complete your profile" : "Edit your profile"}><UserRound size={18}/>{profileCompletion < 100 && <i aria-hidden="true"/>}</button>
+                        <button className={`overview-button profile-icon-button${profileCompletion < 100 ? " needs-profile" : ""}`} type="button" onClick={() => navigate("/profile")} aria-label={profileCompletion < 100 ? "Complete your profile" : "Edit your profile"} title={profileCompletion < 100 ? "Complete your profile" : "Edit your profile"}><UserRound size={18}/>{profileCompletion < 100 && <i aria-hidden="true"/>}</button>
                         <button className="overview-button secondary" onClick={() => navigate("/application")}>My applications <ArrowRight size={16} /></button>
+                        <button className="overview-button secondary" onClick={() => navigate("/preparation-roadmap")}>Preparation roadmap <ArrowRight size={16} /></button>
                         <button className="overview-button primary" onClick={() => navigate("/viewjobs")}>Explore jobs <BriefcaseBusiness size={16} /></button>
                     </div>
                 </div>
 
                 <div className="overview-metrics" aria-label="Application summary">
                     <article className="overview-metric metric-profile"><span className="metric-icon"><FileText size={18} /></span><span className="metric-label">Profile completion</span><strong>{profileCompletion}%</strong><small>Keep your details current</small><span className="metric-mini-progress"><span style={{ width: `${profileCompletion}%` }} /></span></article>
-                    <article className="overview-metric metric-jobs"><span className="metric-icon"><BriefcaseBusiness size={18} /></span><span className="metric-label">Available jobs</span><strong>{jobsLoading || jobsError ? "—" : availableJobsCount}</strong><small>Active opportunities</small></article>
+                    <article className="overview-metric metric-jobs"><span className="metric-icon"><BriefcaseBusiness size={18} /></span><span className="metric-label">Eligible jobs</span><strong>{jobMatchesLoading || jobMatchesError ? "—" : availableJobsCount}</strong><small>Requirements confirmed by the match engine</small></article>
                     <article className="overview-metric metric-applications"><span className="metric-icon"><Send size={18} /></span><span className="metric-label">Applications</span><strong>{applicationsLoading || applicationsError ? "—" : totalApplications}</strong><small>Submitted by you</small></article>
                     <article className="overview-metric metric-shortlisted"><span className="metric-icon"><CheckCircle2 size={18} /></span><span className="metric-label">Shortlisted</span><strong>{applicationsLoading || applicationsError ? "—" : shortlistedCount}</strong><small>Recruiter interest</small></article>
                 </div>
+
+                <div className="overview-metrics overview-extra-metrics" aria-label="Readiness and opportunity metrics">
+                    <button className="overview-metric metric-readiness" onClick={() => document.getElementById("placement-readiness")?.scrollIntoView({ behavior: "smooth", block: "start" })}><span className="metric-icon"><TrendingUp size={18} /></span><span className="metric-label">Placement readiness</span><strong>{loading || dsaStatsLoading || profileError ? "—" : `${placementReadinessScore}/100`}</strong><small>{loading || dsaStatsLoading ? "Loading profile factors" : profileError ? "Profile data unavailable" : readiness.level}</small><span className="metric-mini-progress"><span style={{ width: `${loading || dsaStatsLoading || profileError ? 0 : placementReadinessScore}%` }} /></span></button>
+                    <button className="overview-metric metric-resume-score" onClick={() => navigate("/resume-analyzer")}><span className="metric-icon"><FileText size={18} /></span><span className="metric-label">Resume score</span><strong>{latestResumeAnalysis?.score != null ? `${latestResumeAnalysis.score}/100` : "Not analyzed"}</strong><small>{latestResumeAnalysis ? `${new Date(latestResumeAnalysis.analyzedAt).toLocaleDateString()}${resumeScoreChange == null ? " · First saved analysis" : ` · ${resumeScoreChange > 0 ? "+" : ""}${resumeScoreChange} since previous`}` : student.resume ? "Open analyzer to get a saved score" : "Upload a PDF resume first"}</small></button>
+                    <button className="overview-metric metric-jobs" onClick={() => navigate("/job-matches")}><span className="metric-icon"><Sparkles size={18} /></span><span className="metric-label">High match jobs</span><strong>{jobMatchesLoading || jobMatchesError ? "—" : matchingJobsCount}</strong><small>Match score of 70% or higher</small></button>
+                    <button className="overview-metric metric-interviews" onClick={() => document.getElementById("interviews-title")?.scrollIntoView({ behavior: "smooth", block: "center" })}><span className="metric-icon"><CalendarDays size={18} /></span><span className="metric-label">Upcoming interviews</span><strong>—</strong><small>Scheduling unavailable</small></button>
+                </div>
+
+                <section className="placement-readiness-card" id="placement-readiness" aria-labelledby="placement-readiness-title">
+                    <div className="readiness-feature-heading">
+                        <div><span className="panel-kicker">YOUR PREPARATION FOUNDATION</span><h2 id="placement-readiness-title">Placement readiness</h2><p>Based on your saved profile, resume, skills, and completed DSA and aptitude activity. Modules without tracked data are excluded.</p></div>
+                        <span className="readiness-feature-icon"><Award size={19}/></span>
+                    </div>
+                    {loading || dsaStatsLoading ? <div className="readiness-loading" role="status">Loading your profile and preparation factors…</div> : profileError ? <div className="readiness-load-error" role="alert"><span>{profileError}</span><button onClick={() => window.location.reload()}>Retry</button></div> : <>
+                        <div className="readiness-feature-body">
+                            <div className="readiness-score-visual">
+                                <div className="readiness-gauge" role="img" aria-label={`Placement readiness ${placementReadinessScore} out of 100`}>
+                                    <svg viewBox="0 0 120 120" aria-hidden="true"><circle className="readiness-gauge-track" cx="60" cy="60" r="49"/><circle className="readiness-gauge-value" cx="60" cy="60" r="49" style={{ strokeDasharray: `${2 * Math.PI * 49}`, strokeDashoffset: `${2 * Math.PI * 49 * (1 - placementReadinessScore / 100)}` }}/></svg>
+                                    <div><strong>{placementReadinessScore}</strong><span>OUT OF 100</span></div>
+                                </div>
+                                <span className={`readiness-level-pill level-${readiness.level.toLowerCase().replaceAll(" ", "-")}`}>{readiness.level}</span>
+                                <p>{readiness.message}</p>
+                            </div>
+                            <div className="readiness-factor-list" aria-label="Readiness score breakdown">
+                                {readiness.factors.map((factor) => <div className="readiness-factor" key={factor.id}>
+                                    <div className="readiness-factor-top"><span>{factor.label}</span><strong>{Number(factor.earnedPoints.toFixed(1)).toString()} <small>/ {factor.maximumPoints}</small></strong></div>
+                                    <div className="readiness-factor-track" role="progressbar" aria-label={`${factor.label} progress`} aria-valuenow={factor.progress} aria-valuemin="0" aria-valuemax="100"><span style={{ width: `${factor.progress}%` }}/></div>
+                                    <small>{factor.detail}</small>
+                                </div>)}
+                                <div className="readiness-formula-note"><CircleCheck size={15}/><span>Active readiness factors are normalized to 100. Aptitude readiness = 60% saved-answer accuracy + 20% topic coverage + 20% attempt consistency (accuracy stability; uses accuracy as a provisional factor until there are at least two attempts). Topics require at least five answers and below 60% accuracy to be marked weak. DSA is based on the saved coding tracker.</span></div>
+                            </div>
+                        </div>
+                        <div className="readiness-factor-status"><span><strong>Included now:</strong> {readiness.includedFactors.map((factor) => factor.label).join(" · ")}</span><span><strong>Not included yet:</strong> {readiness.excludedFactors.join(" · ")}</span></div>
+                        {dsaStatsError && <p className="readiness-dsa-unavailable" role="status">DSA tracking could not be loaded, so DSA is excluded from this score until its actual data is available. {dsaStatsError}</p>}
+                        {aptitudeAnalyticsError && <p className="readiness-dsa-unavailable" role="status">Aptitude is excluded from this score because saved aptitude analytics could not be loaded. {aptitudeAnalyticsError}</p>}
+                        <div className="readiness-next-steps">
+                            <div className="readiness-next-heading"><div><h3>Improve your readiness</h3><p>Recommendations update automatically when your saved profile changes.</p></div><span>{readiness.recommendations.length ? `${readiness.recommendations.length} suggested` : "All current factors complete"}</span></div>
+                            {readiness.recommendations.length ? <div className="readiness-recommendations">{readiness.recommendations.map((recommendation) => <article key={recommendation.id}>
+                                <span className="recommendation-icon"><CircleAlert size={16}/></span><div><strong>{recommendation.title}</strong><p>{recommendation.detail}</p></div><button onClick={() => navigate(recommendation.to)}>{recommendation.action}<ArrowRight size={14}/></button>
+                            </article>)}</div> : <div className="readiness-all-done"><CircleCheck size={16}/> Your currently tracked readiness targets are complete. More factors are included as real preparation data becomes available.</div>}
+                            {readiness.missingProfileItems.length > 0 && <p className="readiness-missing-items"><strong>Profile items still missing:</strong> {readiness.missingProfileItems.join(", ")}</p>}
+                        </div>
+                    </>}
+                </section>
 
                 <div className="overview-panels">
                     <section className="overview-panel response-panel" aria-labelledby="response-title">
@@ -680,33 +776,27 @@ function StudentDashboard() {
                         <div className="readiness-progress" role="progressbar" aria-label="Profile completeness" aria-valuenow={profileCompletion} aria-valuemin="0" aria-valuemax="100"><span style={{ width: `${profileCompletion}%` }} /></div>
                         <div className="readiness-checks"><p className={student.resume ? "is-complete" : ""}><CheckCircle2 size={15} /> Resume {student.resume ? "uploaded" : "not uploaded"}</p><p className={student.skills ? "is-complete" : ""}><CheckCircle2 size={15} /> Skills {student.skills ? "added" : "not added"}</p></div>
                         {student.resume && <p className="resume-file-summary"><FileText size={14} /> {student.resume} <small>Update date unavailable</small></p>}
-                        {student.skills && <div className="skill-chip-list">{student.skills.split(",").map((skill) => skill.trim()).filter(Boolean).slice(0, 5).map((skill) => <span key={skill}>{skill}</span>)}</div>}
+                        {readiness.skills.length > 0 && <div className="skill-chip-list">{readiness.skills.slice(0, 5).map((skill) => <span key={skill}>{skill}</span>)}</div>}
                         <div className="readiness-actions">
                             <label className="readiness-upload">{student.resume ? "Replace resume" : "Upload resume"}<input type="file" accept=".pdf,application/pdf" onChange={handleResume} /></label>
                             <button className="readiness-edit" onClick={openEdit}>Edit profile <ArrowRight size={15} /></button>
-                            <button className="readiness-edit" disabled={!student.resume} onClick={() => { setResponse(null); setAnalyzerError(""); setShowResumeAnalyzer(true); }}>Resume analyzer <ArrowRight size={15} /></button>
+                            <button className="readiness-edit" disabled={!student.resume} onClick={() => navigate("/resume-analyzer")}>Resume analyzer <ArrowRight size={15} /></button>
                         </div>
                     </section>
                 </div>
 
                 <div className="student-content-grid">
                     <section className="overview-panel recommended-jobs-panel" aria-labelledby="recommended-jobs-title">
-                        <div className="panel-heading"><div><span className="panel-kicker">MATCH YOUR NEXT MOVE</span><h2 id="recommended-jobs-title">Recommended jobs</h2></div><button className="text-link" onClick={() => navigate("/viewjobs")}>Browse all <ArrowRight size={15} /></button></div>
-                        {jobsError ? <p className="overview-empty-state" role="status">{jobsError}</p> : applicationsError ? <p className="overview-empty-state" role="status">Recommendations are paused because your application list could not be checked.</p> : jobsLoading || applicationsLoading ? <p className="overview-empty-state">Checking your applications and matching active roles...</p> : recommendedJobs.length === 0 ? <div className="overview-empty-state"><p>No new matching roles right now. We’ll show active opportunities here as they become available.</p><button onClick={() => navigate("/viewjobs")}>Browse jobs <ArrowRight size={15} /></button></div> : <div className="recommended-job-list">
-                            {recommendedJobs.map((job) => {
-                                const eligibility = assessJobEligibility(job, student);
-                                const skills = (job.skills || "").split(",").map((skill) => skill.trim()).filter(Boolean).slice(0, 4);
-                                const skillMatch = Math.round(getSkillMatch(job, student) * 100);
-                                return <article className="recommended-job-card" key={job.id}>
-                                    <div className="recommended-job-top"><span className="job-company-mark">{(job.company || "?").trim().slice(0, 1).toUpperCase()}</span><span className={`eligibility-chip ${eligibility === "not-eligible" ? "not-eligible" : eligibility === "check" ? "review" : ""}`}>{eligibility === "eligible" ? "Criteria matched" : "Review eligibility"}</span></div>
-                                    <h3>{job.title || "Role"}</h3><p className="recommended-company">{job.company || "Company"}</p>
-                                    <div className="recommended-job-meta"><span>{job.jobType || "Job type not listed"}</span><span>{job.location || "Location not listed"}</span></div>
-                                    {skills.length > 0 && <div className="skill-chip-list">{skills.map((skill) => <span key={skill}>{skill}</span>)}</div>}
-                                    {skills.length > 0 && <p className="skill-match-copy">{student.skills ? `${skillMatch}% of listed skills match your profile` : "Add skills to your profile to see your match"}</p>}
-                                    <p className="eligibility-copy"><strong>Eligibility:</strong> {job.eligibility || "No specific criteria listed; review the job details."}</p>
-                                    <div className="recommended-job-footer"><small>{job.deadline ? `Apply by ${new Date(`${job.deadline}T00:00:00`).toLocaleDateString()}` : "No deadline listed"}</small><button onClick={() => navigate(`/jobs/${job.id}`)}>View job <ArrowRight size={14} /></button></div>
-                                </article>;
-                            })}
+                        <div className="panel-heading"><div><span className="panel-kicker">MATCH YOUR NEXT MOVE</span><h2 id="recommended-jobs-title">Recommended jobs</h2><p className="panel-description">{jobMatchSummary ? jobMatchSummary.activeJobCount ? `${jobMatchSummary.averageMatchScore}% average match · ${jobMatchSummary.eligibleCount} eligible · ${jobMatchSummary.highMatchCount} high match` : "No active roles to match right now." : "Match scores use your saved profile and recruiter requirements."}</p></div><button className="text-link" onClick={() => navigate("/job-matches")}>All recommendations <ArrowRight size={15} /></button></div>
+                        {jobMatchesError ? <div className="overview-empty-state" role="status"><p>{jobMatchesError}</p><button onClick={() => window.location.reload()}>Retry <ArrowRight size={15} /></button></div> : jobMatchesLoading ? <p className="overview-empty-state">Comparing your profile with active recruiter roles...</p> : recommendedJobs.length === 0 ? <div className="overview-empty-state"><p>No active recruiter roles are available right now. Your recommendations will update when job requirements or your saved profile change.</p><button onClick={() => navigate("/job-matches")}>Open job matches <ArrowRight size={15} /></button></div> : <div className="recommended-job-list">
+                            {recommendedJobs.map((job) => <article className="recommended-job-card" key={job.jobId}>
+                                <div className="recommended-job-top"><span className="job-company-mark">{(job.company || "?").trim().slice(0, 1).toUpperCase()}</span><span className={`eligibility-chip ${job.eligibilityStatus === "NOT_ELIGIBLE" ? "not-eligible" : job.eligibilityStatus === "NEEDS_REVIEW" ? "review" : ""}`}>{job.eligibilityStatus === "ELIGIBLE" ? "Eligible" : job.eligibilityStatus === "NOT_ELIGIBLE" ? "Not eligible" : "Needs review"}</span><strong className="dashboard-match-score">{job.matchScoreAvailable ? `${job.matchScore}% match` : "Match unavailable"}</strong>{job.eligibilityStatus === "ELIGIBLE" && job.jobId === jobMatchSummary?.bestEligibleMatch?.jobId && <span className="best-eligible-tag">Best eligible match</span>}</div>
+                                <h3>{job.title || "Role"}</h3><p className="recommended-company">{job.company || "Company"}</p>
+                                <div className="recommended-job-meta"><span>{job.jobType || "Job type not listed"}</span><span>{job.location || "Location not listed"}</span><span>{job.salary || "Package not listed"}</span></div>
+                                <p className="skill-match-copy">Matched: {job.matchedSkills.length ? job.matchedSkills.slice(0, 3).join(", ") : "None listed"} · Missing: {job.missingSkills.length ? job.missingSkills.slice(0, 3).join(", ") : "None"}</p>
+                                {job.applied && <p className="eligibility-copy"><strong>Application:</strong> {job.applicationStatus || "Submitted"}</p>}
+                                <div className="recommended-job-footer"><small>{job.deadline ? `Apply by ${new Date(`${job.deadline}T00:00:00`).toLocaleDateString()}` : "No deadline listed"}</small><div><button onClick={() => navigate(`/job-matches`)}>Match details <ArrowRight size={14} /></button>{job.applied ? <button onClick={() => navigate("/application")}>View application</button> : job.eligibilityStatus === "ELIGIBLE" && <button disabled={applyingJobId === job.jobId} onClick={() => applyToRecommendedJob(job)}>{applyingJobId === job.jobId ? "Applying…" : "Apply"}</button>}</div></div>
+                            </article>)}
                         </div>}
                     </section>
 
@@ -737,6 +827,15 @@ function StudentDashboard() {
                         <div className="announcement-empty"><Bell size={14} /><span>No placement cell announcements are published through this portal.</span></div>
                     </section>
                 </div>
+
+                <section className="overview-panel preparation-panel" aria-labelledby="preparation-title">
+                    <div className="panel-heading"><div><span className="panel-kicker">BUILD YOUR MOMENTUM</span><h2 id="preparation-title">Placement preparation</h2></div><span className="panel-icon"><TrendingUp size={18}/></span></div>
+                    <p className="panel-description">Study progress is not tracked in the portal yet, so these areas are ready for you to work on without estimated completion scores.</p>
+                    <div className="preparation-topics"><div><span className={dsaStats ? "preparation-tracked" : "preparation-untracked"}/><span>DSA practice</span><small>{dsaStatsLoading ? "Loading progress…" : dsaStats ? `${dsaStats.solvedCount} solved · ${dsaStats.overallProgressPercentage}% of ${dsaStats.solvedBenchmark}-problem benchmark` : "Progress unavailable"}</small></div><button className="preparation-topic-link" onClick={() => navigate("/aptitude")}><span className={aptitudeAnalytics?.completedAttempts ? "preparation-tracked" : "preparation-untracked"}/><span>Aptitude</span><small>{aptitudeAnalytics ? `${aptitudeAnalytics.completedAttempts} attempts · ${aptitudeAnalytics.averageAccuracy}% average accuracy${aptitudeAnalytics.weakTopics?.length ? ` · focus: ${aptitudeAnalytics.weakTopics[0].topic.toLowerCase().replaceAll("_", " ")}` : ""}` : aptitudeAnalyticsError ? "Progress unavailable" : "Loading aptitude progress…"}</small></button><div><span className="preparation-untracked"/><span>Technical interviews</span><small>Not tracked</small></div><div><span className="preparation-untracked"/><span>Resume improvement</span><small>Not tracked</small></div></div>
+                    {dsaStatsError && <p className="preparation-data-error" role="status">{dsaStatsError}</p>}
+                    <button className="text-link preparation-action" onClick={() => navigate("/dsa-tracker")}>Open DSA tracker <ArrowRight size={15}/></button>
+                    <button className="text-link preparation-action" onClick={() => navigate("/viewjobs?practice=1")}>Start a mock interview <ArrowRight size={15}/></button>
+                </section>
             </section>
 
             <div className="profile-card">
@@ -830,11 +929,7 @@ function StudentDashboard() {
 
                     <button
                         className="resume-analyser-btn"
-                        onClick={() => {
-                            setResponse(null);
-                            setAnalyzerError("");
-                            setShowResumeAnalyzer(true);
-                        }}
+                        onClick={() => navigate("/resume-analyzer")}
                     >
                         ⬆️ Resume Analyser
                     </button>

@@ -33,6 +33,10 @@ public class ApplicationService {
 
     public application save(application app) {
 
+        Job job = jobRepo.findById(app.getJobId())
+                .orElseThrow(() -> new RuntimeException("Job not found"));
+        app.setRecruiterId(job.getRecruiterId());
+
         Optional<application> existing =
                 repo.findByStudentIdAndJobId(
                         app.getStudentId(),
@@ -136,6 +140,7 @@ public class ApplicationService {
             );
 
             // Get student details for each application
+            List<application> visibleApplications = new ArrayList<>();
             for (application app : jobApplications) {
 
                 System.out.println(
@@ -155,15 +160,18 @@ public class ApplicationService {
                                                 "Student not found"
                                         ));
 
+                if (Boolean.FALSE.equals(student.getProfileVisible())) continue;
+
                 // Attach student details
                 app.setStudent(student);
 
                 // Attach job details
                 app.setJob(job);
+                visibleApplications.add(app);
             }
 
             // Add applications to final list
-            applications.addAll(jobApplications);
+            applications.addAll(visibleApplications);
         }
 
         System.out.println(
@@ -202,16 +210,19 @@ public class ApplicationService {
 
     public List<application> getShortlisted(Long id) {
        List<application> applications=repo.findShortlistedByRecruiterId(id);
+       List<application> visibleApplications = new ArrayList<>();
        for (application app : applications) {
            Student student=studentRepo.findById(app.getStudentId()).orElseThrow();
+           if (Boolean.FALSE.equals(student.getProfileVisible())) continue;
            app.setStudent(student);
            Job job =
                    jobRepo.findById(app.getJobId())
                            .orElse(null);
 
            app.setJob(job);
+           visibleApplications.add(app);
        }
-        return applications;
+        return visibleApplications;
     }
 
     public List<application> searchShortlisted(
@@ -250,6 +261,8 @@ public class ApplicationService {
                     if (student == null) {
                         return false;
                     }
+
+                    if (Boolean.FALSE.equals(student.getProfileVisible())) return false;
 
                     // Attach student and job
                     app.setStudent(student);

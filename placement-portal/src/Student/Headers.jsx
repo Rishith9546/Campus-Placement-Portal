@@ -18,7 +18,13 @@ export function Headers(){
         ]
         : [
             { label: "Overview", to: "/dashboard" },
+            { label: "Profile", to: "/profile" },
+            { label: "DSA tracker", to: "/dsa-tracker" },
+            { label: "Aptitude", to: "/aptitude" },
             { label: "Find jobs", to: "/viewjobs" },
+            { label: "Job matches", to: "/job-matches" },
+            { label: "Resume analyzer", to: "/resume-analyzer" },
+            { label: "Preparation roadmap", to: "/preparation-roadmap" },
             { label: "Applications", to: "/application" },
             { label: "Interview practice", to: "/viewjobs?practice=1" },
         ];

@@ -1,0 +1,25 @@
+/* Aptitude follows the student's portal gradient and glass card palette. */
+.apt-page{background:transparent;color:#eef4f7}
+.apt-top p,.apt-kicker,.apt-metric small,.apt-topic-stat span,.apt-empty-small,.apt-history-row small,.apt-empty-inline,.apt-question-meta,.apt-session-foot,.apt-result-heading p{color:#a8bac7}
+.apt-top h1,.apt-panel-heading h2,.apt-test-head h2,.apt-question h3,.apt-review-question h3,.apt-result-heading h2,.apt-result-grid h3,.apt-question-nav>strong,.apt-history-row strong{color:#f2f7f9}
+.apt-panel,.apt-test,.apt-result,.apt-metric{background:linear-gradient(145deg,rgba(20,39,59,.94),rgba(28,43,67,.92));border-color:rgba(255,255,255,.13);box-shadow:0 18px 44px rgba(3,12,25,.2)}
+.apt-mode-toggle,.apt-question-nav,.apt-result-summary,.apt-explanation{background:rgba(7,20,32,.38);border-color:rgba(255,255,255,.1)}
+.apt-mode-toggle button{color:#afbdc9}.apt-mode-toggle button.chosen{background:rgba(255,255,255,.12);color:#a9e6d4;box-shadow:none}
+.apt-form-grid label{color:#bdcbd5}.apt-form-grid select{color:#f0f5f7;background:#122a3b;border-color:rgba(255,255,255,.17)}
+.apt-link,.apt-text-button{color:#a9e6d4}.apt-live{color:#9ce0c3}
+.apt-heading-icon,.apt-option>span,.apt-review-options>div>span{background:rgba(139,218,195,.12);color:#a9e6d4}
+.apt-metric>span,.apt-panel-heading>svg{color:#9bd9cb}.apt-metric strong{color:#f4f8fa}
+.apt-topic-stat,.apt-history-row,.apt-history-header,.apt-review-question{border-color:rgba(255,255,255,.1)}
+.apt-topic-stat>b,.apt-history-row>b,.apt-history-item b{color:#9fe1cf}
+.apt-history-row{background:transparent;color:#dce6ec}.apt-history-row strong{color:#eaf0f4}.apt-history-row:hover strong{color:#a9e6d4}.apt-history-item{color:#d3dee5}.apt-history-item:hover{background:rgba(255,255,255,.05)}
+.apt-primary{background:#187b70;color:#fff}.apt-primary:hover{background:#209386}.apt-secondary{background:rgba(255,255,255,.1);color:#e0e9ee}.apt-secondary:hover{background:rgba(255,255,255,.16)}
+.apt-setup-note,.apt-question-nav small,.apt-history-header{color:#a4b4c0}
+.apt-question-nav button{background:#173247;border-color:rgba(255,255,255,.15);color:#b6c4cf}.apt-question-nav button.answered{background:rgba(55,157,113,.2);border-color:rgba(90,202,151,.42);color:#a4e2c4}.apt-question-nav button.active{outline-color:#83d7c4}
+.apt-question-meta span+span{background:rgba(255,255,255,.09);color:#bdcbd5}
+.apt-option{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.14);color:#d9e3e9}.apt-option:hover{border-color:rgba(139,218,195,.48);background:rgba(139,218,195,.07)}.apt-option.selected{background:rgba(139,218,195,.12);border-color:#69bba9;color:#c8f2e5}.apt-option.selected>span{background:#187b70;color:#fff}
+.apt-session-foot,.apt-test-head{border-color:rgba(255,255,255,.12)}
+.apt-feedback.good{background:rgba(38,137,94,.2);color:#a7e4c4}.apt-feedback.bad{background:rgba(168,111,31,.19);color:#f1ce86}
+.apt-result-score{background:rgba(139,218,195,.13);color:#b9efdf}.apt-review-options>div{border-color:rgba(255,255,255,.12);color:#c4d0d8}.apt-review-options>div.correct-option{border-color:rgba(114,204,157,.45);background:rgba(37,139,87,.17);color:#b9e8ce}.apt-review-options>div.wrong-option{border-color:rgba(219,125,111,.42);background:rgba(169,73,59,.18);color:#efb6ae}.apt-review-options>div>svg{color:#9ee1bb}.apt-explanation{color:#bdcbd5}
+.apt-error{background:rgba(139,49,45,.28);color:#ffc3bb;border:1px solid rgba(235,143,132,.25)}.apt-notice{background:rgba(56,105,163,.24);color:#c9ddf5;border:1px solid rgba(127,174,226,.2)}
+.apt-skeleton{background:linear-gradient(100deg,rgba(20,39,59,.92) 20%,rgba(57,78,99,.7) 40%,rgba(20,39,59,.92) 60%);background-size:200% 100%}
+.apt-live i{background:#64c8a5;box-shadow:0 0 0 4px rgba(100,200,165,.18)}

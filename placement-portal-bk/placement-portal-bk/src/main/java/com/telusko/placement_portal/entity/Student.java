@@ -1,6 +1,11 @@
 package com.telusko.placement_portal.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "student")
@@ -13,19 +18,41 @@ public class Student {
 
     private String email;
 
+    @Size(max = 30)
     private String phone;
 
+    @Size(max = 80)
     private String rollNo;
 
+    @Size(max = 100)
     private String branch;
 
+    @DecimalMin("0.0")
+    @DecimalMax("10.0")
     private Double cgpa;
 
+    @Size(max = 1200)
     private String skills;
 
     private String profilePhoto;
 
     private String resume;
+
+    @Size(max = 180)
+    private String collegeName;
+    @Size(max = 120)
+    private String degree;
+    @Min(1900) @Max(2200)
+    private Integer graduationYear;
+    @Min(0) @Max(100)
+    private Integer backlogs;
+    @Size(max = 500)
+    private String githubProfile;
+    @Size(max = 500)
+    private String linkedInProfile;
+    @Size(max = 500)
+    private String portfolioUrl;
+    private Boolean profileVisible;
 
     public Student() {
     }
@@ -107,4 +134,21 @@ public class Student {
     public String getEmail() {
         return email;
     }
+
+    public String getCollegeName() { return collegeName; }
+    public void setCollegeName(String collegeName) { this.collegeName = collegeName; }
+    public String getDegree() { return degree; }
+    public void setDegree(String degree) { this.degree = degree; }
+    public Integer getGraduationYear() { return graduationYear; }
+    public void setGraduationYear(Integer graduationYear) { this.graduationYear = graduationYear; }
+    public Integer getBacklogs() { return backlogs; }
+    public void setBacklogs(Integer backlogs) { this.backlogs = backlogs; }
+    public String getGithubProfile() { return githubProfile; }
+    public void setGithubProfile(String githubProfile) { this.githubProfile = githubProfile; }
+    public String getLinkedInProfile() { return linkedInProfile; }
+    public void setLinkedInProfile(String linkedInProfile) { this.linkedInProfile = linkedInProfile; }
+    public String getPortfolioUrl() { return portfolioUrl; }
+    public void setPortfolioUrl(String portfolioUrl) { this.portfolioUrl = portfolioUrl; }
+    public Boolean getProfileVisible() { return profileVisible; }
+    public void setProfileVisible(Boolean profileVisible) { this.profileVisible = profileVisible; }
 }

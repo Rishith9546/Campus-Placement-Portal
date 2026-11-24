@@ -143,7 +143,7 @@ public class SecurityConfig {
                         // Resume Analyzer
                         .requestMatchers(
                                 "/api/resume-analyzer/**"
-                        ).hasAnyRole("STUDENT", "RECRUITER")
+                        ).hasRole("STUDENT")
 
                         // All remaining endpoints
                         .anyRequest().authenticated()

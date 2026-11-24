@@ -3,8 +3,11 @@ package com.telusko.placement_portal.controller;
 import com.telusko.placement_portal.entity.application;
 import com.telusko.placement_portal.security.UserPrincipal;
 import com.telusko.placement_portal.service.ApplicationService;
+import com.telusko.placement_portal.service.JobMatchService;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,17 +19,28 @@ import java.util.Optional;
 public class ApplicationController {
 
     private final ApplicationService service;
+    private final JobMatchService jobMatchService;
 
-    public ApplicationController(ApplicationService service) {
+    public ApplicationController(ApplicationService service, JobMatchService jobMatchService) {
         this.service = service;
+        this.jobMatchService = jobMatchService;
     }
 
     // ================= APPLY FOR JOB =================
 
     @PostMapping("/applied")
     public application addApplication(
-            @RequestBody application application) {
-
+            @RequestBody application application,
+            @AuthenticationPrincipal UserPrincipal user) {
+        ensureOwnStudent(user, application.getStudentId());
+        var match = jobMatchService.details(user, application.getJobId());
+        if (!match.active()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "This job is closed and no longer accepting applications.");
+        }
+        if ("NOT_ELIGIBLE".equals(match.eligibilityStatus())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    String.join(" ", match.eligibilityReasons()));
+        }
         return service.save(application);
     }
 
@@ -34,8 +48,9 @@ public class ApplicationController {
 
     @GetMapping("/student/{studentId}")
     public List<application> getByStudentId(
-            @PathVariable Long studentId) {
-
+            @PathVariable Long studentId,
+            @AuthenticationPrincipal UserPrincipal user) {
+        ensureOwnStudent(user, studentId);
         return service.getByStudentId(studentId);
     }
 
@@ -52,9 +67,10 @@ public class ApplicationController {
     @GetMapping("/student/{studentId}/job/{jobId}")
     public Optional<application> getApplication(
             @PathVariable Long studentId,
-            @PathVariable Long jobId
+            @PathVariable Long jobId,
+            @AuthenticationPrincipal UserPrincipal user
             ) {
-
+        ensureOwnStudent(user, studentId);
         return service.getApplication(studentId, jobId);
     }
 
@@ -110,6 +126,13 @@ public class ApplicationController {
     @GetMapping("/countById/{id}")
     public long getJobsCountById( @PathVariable int id) {
         return service.getJobsCountById(id);
+    }
+
+    private void ensureOwnStudent(UserPrincipal user, Long studentId) {
+        if (user == null || studentId == null || !studentId.equals(user.getId())
+                || user.getAuthorities().stream().noneMatch(a -> "ROLE_STUDENT".equals(a.getAuthority()))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can access only your own student applications");
+        }
     }
 
 

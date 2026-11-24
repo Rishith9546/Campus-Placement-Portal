@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./RecruiterAuth.css";
 
 export function RecruiterAuth() {
@@ -154,19 +154,23 @@ export function RecruiterAuth() {
     };
 
     return (
-        <div className="recruiter-auth">
+        <main className="auth-portal auth-portal--recruiter">
+          <div className="auth-layout">
+            <aside className="auth-story">
+              <Link className="auth-brand" to="/"><span className="auth-brand-mark">P</span><span className="auth-brand-copy"><strong>Placement Portal</strong><small>IIIT Kalyani</small></span></Link>
+              <div className="auth-story-copy"><span className="auth-story-kicker">MEET YOUR NEXT GREAT HIRE</span><h2>Build a stronger team, starting here.</h2><p>Share opportunities with campus talent and manage your hiring journey in one place.</p></div>
+              <div className="auth-story-foot"><span aria-hidden="true">+</span><span>Connect with emerging talent.</span></div>
+            </aside>
+            <section className="auth-content">
+                <Link className="auth-home-link" to="/">Back to portal selection</Link>
+                <h1 className="auth-heading">Recruiter portal</h1>
+                <p className="auth-subtitle">Sign in to manage opportunities and applicants.</p>
 
-            <div className="recruiter-auth-card">
-
-                <h1>Recruiter Portal</h1>
-
-                <p>
-                    IIIT Kalyani Placement Portal
-                </p>
-
-                <div className="auth-tabs">
+                <div className="auth-tabs" aria-label="Recruiter account access">
 
                     <button
+                        type="button"
+                        aria-pressed={isSignin}
                         className={
                             isSignin ? "active" : ""
                         }
@@ -179,6 +183,8 @@ export function RecruiterAuth() {
                     </button>
 
                     <button
+                        type="button"
+                        aria-pressed={!isSignin}
                         className={
                             !isSignin ? "active" : ""
                         }
@@ -199,6 +205,8 @@ export function RecruiterAuth() {
                         <input
                             type="email"
                             name="email"
+                            aria-label="Company email"
+                            autoComplete="username"
                             placeholder="Company Email"
                             value={signinForm.email}
                             onChange={handleSigninChange}
@@ -208,6 +216,8 @@ export function RecruiterAuth() {
                         <input
                             type="password"
                             name="password"
+                            aria-label="Password"
+                            autoComplete="current-password"
                             placeholder="Password"
                             value={signinForm.password}
                             onChange={handleSigninChange}
@@ -227,6 +237,8 @@ export function RecruiterAuth() {
                         <input
                             type="text"
                             name="companyName"
+                            aria-label="Company name"
+                            autoComplete="organization"
                             placeholder="Company Name"
                             value={signupForm.companyName}
                             onChange={handleSignupChange}
@@ -236,6 +248,8 @@ export function RecruiterAuth() {
                         <input
                             type="text"
                             name="recruiterName"
+                            aria-label="Recruiter name"
+                            autoComplete="name"
                             placeholder="Recruiter Name"
                             value={signupForm.recruiterName}
                             onChange={handleSignupChange}
@@ -245,6 +259,8 @@ export function RecruiterAuth() {
                         <input
                             type="email"
                             name="email"
+                            aria-label="Company email"
+                            autoComplete="email"
                             placeholder="Company Email"
                             value={signupForm.email}
                             onChange={handleSignupChange}
@@ -254,6 +270,8 @@ export function RecruiterAuth() {
                         <input
                             type="password"
                             name="password"
+                            aria-label="Password"
+                            autoComplete="new-password"
                             placeholder="Password"
                             value={signupForm.password}
                             onChange={handleSignupChange}
@@ -269,14 +287,15 @@ export function RecruiterAuth() {
                 )}
 
                 {message && (
-                    <p>
+                    <p className="auth-message" role="status">
                         {message}
                     </p>
                 )}
 
-            </div>
-
-        </div>
+              <nav className="auth-role-links" aria-label="Other portal sign-ins"><Link to="/studentAuth">Student</Link><Link aria-current="page" to="/recruiterAuth">Recruiter</Link><Link to="/adminAuth">Administrator</Link></nav>
+            </section>
+          </div>
+        </main>
     );
 }
 

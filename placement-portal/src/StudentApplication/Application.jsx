@@ -3,7 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Headers } from "../Student/Headers.jsx";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, Search, Send, Clock3, CheckCircle2, BriefcaseBusiness, ArrowRight, Sparkles } from "lucide-react";
 import { Filter } from "./Filter.jsx";
 
 export function Application() {
@@ -15,6 +15,7 @@ export function Application() {
 
     const [showFilter, setShowFilter] = useState(false);
     const [selectedFilter, setSelectedFilter] = useState("All");
+    const [search, setSearch] = useState("");
 
 
     useEffect(() => {
@@ -87,13 +88,16 @@ export function Application() {
        FILTER APPLICATIONS
     ========================= */
 
-    const filteredApplications =
-        selectedFilter === "All" || selectedFilter === ""
-            ? applications
-            : applications.filter(
-                (application) =>
-                    application.status === selectedFilter.toUpperCase()
-            );
+    const filteredApplications = applications.filter((application) => {
+        const statusMatches = selectedFilter === "All" || selectedFilter === ""
+            || application.status === selectedFilter.toUpperCase();
+        const query = search.trim().toLowerCase();
+        const title = application.job?.title || application.jobTitle || "Job";
+        const company = application.job?.company || application.company || "";
+        const matchesQuery = !query || [title, company, application.job?.location, application.jobType]
+            .some((value) => String(value || "").toLowerCase().includes(query));
+        return statusMatches && matchesQuery;
+    });
 
 
     if (loading) {
@@ -137,12 +141,18 @@ export function Application() {
 
 
                     <button
+                        type="button"
                         className="filter-button"
+                        aria-haspopup="dialog"
+                        aria-expanded={showFilter}
+                        aria-controls="application-filter-panel"
                         onClick={() =>
                             setShowFilter(!showFilter)
                         }
                     >
                         <SlidersHorizontal size={20} />
+                        <span>Filter</span>
+                        {selectedFilter !== "All" && <small>1</small>}
                     </button>
 
 
@@ -164,15 +174,20 @@ export function Application() {
                 ========================= */}
 
                 <div className="applications-header">
+                    <span className="applications-eyebrow"><Sparkles size={14}/> APPLICATION TRACKER</span>
+                    <div className="applications-title-row"><div><h1>My Applications</h1><p>Track every opportunity and see where you are in the process.</p></div><span className="application-total"><strong>{applications.length}</strong><small>Total applications</small></span></div>
 
-                    <h1>
-                        My Applications
-                    </h1>
+                </div>
 
-                    <p>
-                        Track all your job applications
-                    </p>
+                <section className="application-summary" aria-label="Application status summary">
+                    <article><span><Send size={17}/></span><small>Submitted</small><strong>{applications.length}</strong></article>
+                    <article><span><Clock3 size={17}/></span><small>Awaiting response</small><strong>{applications.filter((item) => (item.status || "APPLIED").toUpperCase() === "APPLIED").length}</strong></article>
+                    <article><span><CheckCircle2 size={17}/></span><small>Shortlisted</small><strong>{applications.filter((item) => (item.status || "").toUpperCase() === "SHORTLISTED").length}</strong></article>
+                </section>
 
+                <div className="applications-search-row">
+                    <label className="applications-search"><Search size={17}/><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by role, company, or location" aria-label="Search applications"/></label>
+                    <span>{filteredApplications.length} {filteredApplications.length === 1 ? "application" : "applications"}</span>
                 </div>
 
 
@@ -197,7 +212,7 @@ export function Application() {
                                 navigate("/viewjobs")
                             }
                         >
-                            View Jobs
+                            Browse jobs <ArrowRight size={15}/>
                         </button>
 
                     </div>

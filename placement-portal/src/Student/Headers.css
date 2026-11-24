@@ -1,76 +1,30 @@
-* {
-    box-sizing: border-box;
+.portal-header { position: sticky; top: 0; z-index: 50; min-height: 70px; display: grid; grid-template-columns: minmax(170px,1fr) auto minmax(100px,1fr); align-items: center; gap: 24px; padding: 0 max(24px, calc((100vw - 1100px)/2)); border-bottom: 1px solid rgba(255,255,255,.13); background: rgba(9,25,39,.83); box-shadow: 0 8px 25px rgba(0,0,0,.12); backdrop-filter: blur(16px); }
+.portal-header-brand { min-width: 0; display: inline-flex; align-items: center; gap: 10px; color: #f3f8fb; text-decoration: none; }
+.portal-header-mark { width: 36px; height: 36px; flex: 0 0 36px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.14); border-radius: 11px; background: rgba(255,255,255,.08); color: #a4e4d1; }
+.portal-header-brand > span:last-child { display: grid; gap: 2px; }
+.portal-header-brand strong { font-size: 11px; letter-spacing: -.01em; }
+.portal-header-brand small { color: #9eafbc; font-size: 8px; }
+.portal-header-nav { display: flex; align-items: center; justify-content: center; gap: 4px; }
+.portal-header-nav a { padding: 9px 11px; border: 1px solid transparent; border-radius: 9px; color: #bdcbd5; font-size: 10px; font-weight: 650; text-decoration: none; white-space: nowrap; transition: color .16s ease, background .16s ease; }
+.portal-header-nav a:hover { background: rgba(255,255,255,.06); color: #fff; }
+.portal-header-nav a[aria-current="page"] { border-color: rgba(133,218,193,.14); background: rgba(91,180,150,.12); color: #a7e5d2; }
+.portal-logout { justify-self: end; display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; border: 1px solid rgba(255,255,255,.16); border-radius: 9px; background: rgba(255,255,255,.06); color: #dbe5ec; font: inherit; font-size: 9px; font-weight: 700; cursor: pointer; transition: background .18s ease, border-color .18s ease; }
+.portal-logout:hover { border-color: rgba(255,255,255,.27); background: rgba(255,255,255,.12); }
+.portal-header a:focus-visible, .portal-logout:focus-visible { outline: 2px solid #83d8bd; outline-offset: 3px; }
+@media (max-width: 800px) {
+    .portal-header { grid-template-columns: auto 1fr auto; gap: 10px; min-height: 64px; padding: 0 14px; }
+    .portal-header-nav { justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
+    .portal-header-nav::-webkit-scrollbar { display: none; }
+    .portal-header-nav a { padding: 8px; font-size: 9px; }
+    .portal-header-brand strong { font-size: 10px; }
+    .portal-logout { padding: 8px; }
+    .portal-logout span { display: none; }
 }
-
-body {
-    margin: 0;
-
-    min-height: 100vh;
-
-    background: linear-gradient(
-            135deg,
-            #0F3040,
-            #3d415c
-    );
-
-    font-family: "Open Sans", sans-serif;
-
-    color: white;
-}
-
-
-/* ================= HEADER ================= */
-
-.header {
-    height: 70px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    padding: 0 35px;
-
-    background: rgba(10, 25, 35, 0.35);
-
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-
-    backdrop-filter: blur(10px);
-}
-
-.data {
-    width: 150px;
-}
-
-.title {
-    font-size: 20px;
-
-    font-weight: 700;
-
-    letter-spacing: 1px;
-
-    margin-right: 100px;
-}
-
-.logout-btn {
-    padding: 9px 18px;
-
-    border: 1px solid rgba(255, 255, 255, 0.25);
-
-    border-radius: 8px;
-
-    background: rgba(255, 255, 255, 0.10);
-
-    color: white;
-
-    font-weight: bold;
-
-    cursor: pointer;
-
-    transition: 0.2s;
-}
-
-.logout-btn:hover {
-    background: rgba(255, 255, 255, 0.20);
+@media (max-width: 480px) {
+    .portal-header { grid-template-columns: auto 1fr auto; gap: 5px; padding: 0 9px; }
+    .portal-header-mark { width: 31px; height: 31px; flex-basis: 31px; }
+    .portal-header-brand { gap: 6px; }
+    .portal-header-brand strong { max-width: 88px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .portal-header-brand small { font-size: 7px; }
+    .portal-header-nav a { padding: 7px 6px; font-size: 8px; }
 }

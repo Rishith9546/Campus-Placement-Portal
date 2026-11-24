@@ -1,6 +1,24 @@
 .body {
-    width: 90%;
-    max-width: 1100px;
-    margin: 0 auto;
+    width: min(1100px, calc(100% - 40px));
+    max-width: none;
+    margin: 0 auto 56px;
     box-sizing: border-box;
+}
+.recruiter-dashboard { min-height: 100vh; background: radial-gradient(ellipse at 85% 8%, rgba(68,138,153,.16), transparent 34rem), linear-gradient(135deg,#102f40,#303951); }
+.recruiter-dashboard .portal-header { padding-right: max(20px, calc((100vw - 1100px)/2)); padding-left: max(20px, calc((100vw - 1100px)/2)); }
+.recruiter-dashboard .stats-container { margin-top: 28px; margin-bottom: 34px; gap: 14px; }
+.recruiter-dashboard .stats-container .card { min-height: 142px; align-items: flex-start; padding: 20px 23px; border-radius: 17px; }
+.recruiter-dashboard .stats-container .card p { margin: 10px 0 3px; color: #d5e0e8; font-size: 12px; }
+.recruiter-dashboard .stats-container .card strong { color: #fff; font-size: 29px; }
+.recruiter-dashboard .stats-container .card .icon { font-size: 24px; }
+.recruiter-dashboard .recent-jobs, .recruiter-dashboard .quick-actions { margin-top: 28px; }
+.recruiter-dashboard .recent-jobs-header h2, .recruiter-dashboard .quick-actions h2 { color: #f6f9fc; font-size: 20px; letter-spacing: -.03em; }
+.recruiter-dashboard .recent-job-card, .recruiter-dashboard .quick-action { background: rgba(255,255,255,.075); border-color: rgba(255,255,255,.14); }
+.recruiter-dashboard .quick-action { color: #f4f8fb; }
+.recruiter-dashboard .quick-action:hover, .recruiter-dashboard .recent-job-card:hover { background: rgba(255,255,255,.12); }
+@media (max-width: 700px) {
+    .body { width: calc(100% - 28px); }
+    .recruiter-dashboard .portal-header { min-height: 64px; padding: 0 14px; }
+    .recruiter-dashboard .stats-container { grid-template-columns: 1fr; }
+    .recruiter-dashboard .stats-container .card { min-height: 110px; }
 }

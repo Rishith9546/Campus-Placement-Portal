@@ -1,42 +1,17 @@
-.quick-actions {
-    margin-top: 35px;
-    margin-bottom: 40px;
-}
-
-.quick-actions h2 {
-    margin-bottom: 18px;
-}
-
-.quick-actions-container {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 15px;
-}
-
-.quick-action {
-    padding: 20px;
-
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-
-    border-radius: 14px;
-
-    text-align: center;
-    cursor: pointer;
-
-    transition: 0.3s ease;
-}
-
-.quick-action:hover {
-    transform: translateY(-4px);
-    background: rgba(255, 255, 255, 0.12);
-}
-
-.quick-action span {
-    font-size: 24px;
-}
-
-.quick-action p {
-    margin: 10px 0 0;
-    font-size: 14px;
-}
+.quick-actions { margin: 25px 0 42px; }
+.quick-actions-heading { margin-bottom: 14px; }
+.quick-actions-heading span { color: #8bdac3; font-size: 8px; font-weight: 800; letter-spacing: .14em; }
+.quick-actions-heading h2 { margin: 5px 0 0; color: #f7fafc; font-size: 18px; letter-spacing: -.03em; }
+.quick-actions-container { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; }
+.quick-action { min-width: 0; display: flex; align-items: center; gap: 10px; padding: 14px; border: 1px solid rgba(255,255,255,.12); border-radius: 13px; background: rgba(255,255,255,.055); color: #f4f8fb; text-align: left; cursor: pointer; transition: transform .18s ease, background .18s ease, border-color .18s ease; }
+.quick-action:hover { transform: translateY(-2px); border-color: rgba(144,222,197,.3); background: rgba(255,255,255,.1); }
+.quick-action:focus-visible { outline: 2px solid #8bdac3; outline-offset: 3px; }
+.quick-action-icon { width: 34px; height: 34px; flex: 0 0 34px; display: grid; place-items: center; border-radius: 10px; background: rgba(105,213,162,.12); color: #a0e4c4; }
+.quick-action:nth-child(2) .quick-action-icon { background: rgba(112,183,215,.14); color: #b3e3f1; }
+.quick-action:nth-child(3) .quick-action-icon { background: rgba(175,144,237,.14); color: #d5c3ff; }
+.quick-action-copy { min-width: 0; display: grid; gap: 4px; }
+.quick-action-copy strong { overflow: hidden; color: #f2f6f9; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.quick-action-copy small { overflow: hidden; color: #aebdca; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.quick-action-arrow { flex: 0 0 auto; margin-left: auto; color: #91a9b6; }
+@media (max-width: 900px) { .quick-actions-container { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 520px) { .quick-actions-container { grid-template-columns: 1fr; } }

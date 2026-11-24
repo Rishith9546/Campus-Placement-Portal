@@ -14,11 +14,17 @@ import Shortlisted from "./Shortlisted/Shortlisted.jsx";
 import ManageJobs from "./Recuriter-ManageJobs/ManageJobs.jsx";
 import {ViewJobsRecruiter} from "./Recuriter-ManageJobs/ViewJobsRecruiter.jsx";
 import MockInterview from "./Student/MockInterview.jsx";
+import AdminAuth from "./AdminAuth/AdminAuth.jsx";
+import AdminDashboard from "./AdminDashboard/AdminDashboard.jsx";
+import { Headers } from "./Student/Headers.jsx";
+import "./ProjectPolish.css";
 
 function App() {
   return (
     <Routes>
       <Route index element={<HomePage />} />
+      <Route path="/adminAuth" element={<AdminAuth />} />
+      <Route path="/adminDashboard" element={<><Headers /><AdminDashboard /></>} />
       <Route path="/studentAuth" element={<StudentAuth />} />
                   <Route
                 path="/dashboard"
@@ -30,13 +36,13 @@ function App() {
     element={<RecruiterDashboard />}
 />
         <Route path="/viewjobs" element={<ViewJobs/>} />
-        <Route path="/jobs/:id" element={<JobDetails />} />
+        <Route path="/jobs/:id" element={<><Headers /><JobDetails /></>} />
         <Route path="/application" element={<Application/>}/>
-        <Route path="/recruiter/applicants" element={<ViewApplicants/>}/>
-        <Route path="/recruiter/shortlisted" element={<Shortlisted/>}/>
-        <Route path="/recruiter/manage-jobs" element={<ManageJobs/>}/>
-        <Route path="jobsRecuriter/:id" element={<ViewJobsRecruiter/>}/>
-        <Route path="mock-interview" element={<MockInterview/>}/>
+        <Route path="/recruiter/applicants" element={<><Headers /><ViewApplicants/></>}/>
+        <Route path="/recruiter/shortlisted" element={<><Headers /><Shortlisted/></>}/>
+        <Route path="/recruiter/manage-jobs" element={<><Headers /><ManageJobs/></>}/>
+        <Route path="/jobsRecuriter/:id" element={<><Headers /><ViewJobsRecruiter/></>}/>
+        <Route path="/mock-interview" element={<><Headers /><MockInterview/></>}/>
     </Routes>
   );
 }

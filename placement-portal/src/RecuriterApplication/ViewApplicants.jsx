@@ -1,9 +1,12 @@
+
 import './ViewApplicants.css';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, Search, Users, UserCheck, Clock3 } from "lucide-react";
+
+const BASE_URL = "http://localhost:8080";
 
 export function ViewApplicants() {
 
@@ -15,18 +18,17 @@ export function ViewApplicants() {
     const [showFilter, setShowFilter] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState("ALL");
     const [appliedFilter, setAppliedFilter] = useState("ALL");
-
+    const [search, setSearch] = useState("");
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
 
         const getApplicants = async () => {
-
             try {
-
                 const token = localStorage.getItem("token");
 
                 const response = await axios.get(
-                    "http://localhost:8080/api/applications/recruiter/applicants",
+                    `${BASE_URL}/api/applications/recruiter/applicants`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`
@@ -37,18 +39,18 @@ export function ViewApplicants() {
                 setApplications(response.data);
 
             } catch (error) {
-
-                console.log(error);
-
+                console.error(error);
+                toast.error("Unable to load applicants");
+            } finally {
+                setLoading(false);
             }
-
         };
 
         getApplicants();
 
     }, []);
 
-
+    // View student resume
     const viewResume = async (application) => {
 
         const filename = application.student.resume;
@@ -68,7 +70,7 @@ export function ViewApplicants() {
         try {
 
             const response = await axios.get(
-                `http://localhost:8080/api/student/resume/${encodeURIComponent(filename)}`,
+                `${BASE_URL}/api/student/resume/${encodeURIComponent(filename)}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -82,24 +84,89 @@ export function ViewApplicants() {
             window.open(pdfUrl, "_blank");
 
         } catch (error) {
-
             console.error("Error opening resume:", error);
-
             toast.error("Unable to view resume.");
-
         }
-
     };
 
+    // Send status notification email
+    const sendStatusEmail = async (application, status) => {
 
-    const shortlist = async (application) => {
+        const student = application.student;
+
+        const isShortlisted = status === "SHORTLISTED";
+
+        const subject = isShortlisted
+            ? `Congratulations! You have been shortlisted for ${application.job.title}`
+            : `Application Status Update - ${application.job.title}`;
+
+        const body = isShortlisted
+            ? `Dear ${student.name},
+
+Congratulations!
+
+We are pleased to inform you that you have been shortlisted for the following position.
+
+Job Title: ${application.job.title}
+Company: ${application.job.company}
+Application Status: SHORTLISTED
+
+Our recruitment team will contact you with further details regarding the next steps.
+
+Best wishes,
+Recruitment Team`
+            : `Dear ${student.name},
+
+Thank you for applying for the following position.
+
+Job Title: ${application.job.title}
+Company: ${application.job.company}
+Application Status: REJECTED
+
+We appreciate your interest and the time you invested in the application process.
+
+We encourage you to apply for other opportunities that match your profile.
+
+Best wishes,
+Recruitment Team`;
+
+        await axios.post(
+            `${BASE_URL}/api/email/send`,
+            {
+                to: student.email,
+                subject: subject,
+                body: body
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+    };
+
+    // Update application status and send email
+    const updateApplicationStatus = async (application, status) => {
+
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            toast.error("Please login again.");
+            return;
+        }
+
+        const isShortlisted = status === "SHORTLISTED";
+
+        const endpoint = isShortlisted
+            ? `/api/applications/shortlist/${application.id}`
+            : `/api/applications/rejected/${application.id}`;
 
         try {
 
-            const token = localStorage.getItem("token");
-
+            // Step 1: Update application status
             await axios.put(
-                `http://localhost:8080/api/applications/shortlist/${application.id}`,
+                `${BASE_URL}${endpoint}`,
                 {},
                 {
                     headers: {
@@ -108,89 +175,77 @@ export function ViewApplicants() {
                 }
             );
 
+            // Step 2: Update frontend immediately
             setApplications((prevApplications) =>
                 prevApplications.map((app) =>
                     app.id === application.id
                         ? {
                             ...app,
-                            status: "SHORTLISTED"
+                            status: status
                         }
                         : app
                 )
             );
 
-            toast.success("Applicant shortlisted");
+            // Step 3: Send email notification
+            try {
+
+                await sendStatusEmail(application, status);
+
+                toast.success(
+                    isShortlisted
+                        ? "Applicant shortlisted and email sent!"
+                        : "Applicant rejected and email sent!"
+                );
+
+            } catch (emailError) {
+
+                console.error("Email sending failed:", emailError);
+
+                toast.warning(
+                    `Status updated, but email could not be sent to ${application.student.email}`
+                );
+
+            }
 
         } catch (error) {
 
-            console.error("Error shortlisting applicant:", error);
+            console.error("Error updating application status:", error);
 
-            toast.error("Unable to shortlist applicant");
-
-        }
-
-    };
-
-
-    const reject = async (application) => {
-
-        try {
-
-            const token = localStorage.getItem("token");
-
-            await axios.put(
-                `http://localhost:8080/api/applications/rejected/${application.id}`,
-                {},
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
+            toast.error(
+                isShortlisted
+                    ? "Unable to shortlist applicant"
+                    : "Unable to reject applicant"
             );
 
-            setApplications((prevApplications) =>
-                prevApplications.map((app) =>
-                    app.id === application.id
-                        ? {
-                            ...app,
-                            status: "REJECTED"
-                        }
-                        : app
-                )
-            );
-
-            toast.success("Applicant rejected");
-
-        } catch (error) {
-
-            console.error("Error reject applicant:", error);
-
-            toast.error("Unable to reject applicant");
-
         }
-
     };
 
+    // Shortlist applicant
+    const shortlist = (application) => {
+        updateApplicationStatus(application, "SHORTLISTED");
+    };
 
+    // Reject applicant
+    const reject = (application) => {
+        updateApplicationStatus(application, "REJECTED");
+    };
+
+    // Filter applications
     const filteredApplications = applications.filter((application) => {
 
-        if (appliedFilter === "ALL") {
-            return true;
-        }
-
-        return application.status === appliedFilter;
+        const matchesStatus = appliedFilter === "ALL" || application.status === appliedFilter;
+        const needle = search.trim().toLowerCase();
+        const matchesSearch = !needle || [application.student?.name, application.student?.email, application.job?.title, application.job?.company]
+            .some((value) => String(value || "").toLowerCase().includes(needle));
+        return matchesStatus && matchesSearch;
 
     });
 
-
     const applyFilter = () => {
-
         setAppliedFilter(selectedStatus);
-
         setShowFilter(false);
-
     };
-
 
     return (
 
@@ -199,14 +254,11 @@ export function ViewApplicants() {
             <div className="button-part">
 
                 <button
-                    onClick={() => {
-                        navigate('/recruiterDashboard');
-                    }}
+                    onClick={() => navigate('/recruiterDashboard')}
                     className="back-button"
                 >
                     ← Back To Profile
                 </button>
-
 
                 <button
                     className="filter-button"
@@ -220,7 +272,7 @@ export function ViewApplicants() {
 
             </div>
 
-
+            {/* Filter Popup */}
             {showFilter && (
 
                 <div
@@ -240,9 +292,7 @@ export function ViewApplicants() {
                             ×
                         </button>
 
-
                         <h2>Filter Applicants</h2>
-
 
                         <div className="filter-option">
 
@@ -250,7 +300,6 @@ export function ViewApplicants() {
                                 <input
                                     type="radio"
                                     name="status"
-                                    value="ALL"
                                     checked={selectedStatus === "ALL"}
                                     onChange={() => setSelectedStatus("ALL")}
                                 />
@@ -261,19 +310,16 @@ export function ViewApplicants() {
                                 <input
                                     type="radio"
                                     name="status"
-                                    value="SHORTLISTED"
                                     checked={selectedStatus === "SHORTLISTED"}
                                     onChange={() => setSelectedStatus("SHORTLISTED")}
                                 />
                                 Shortlisted
                             </label>
 
-
                             <label>
                                 <input
                                     type="radio"
                                     name="status"
-                                    value="REJECTED"
                                     checked={selectedStatus === "REJECTED"}
                                     onChange={() => setSelectedStatus("REJECTED")}
                                 />
@@ -281,7 +327,6 @@ export function ViewApplicants() {
                             </label>
 
                         </div>
-
 
                         <button
                             className="apply-filter-button"
@@ -296,7 +341,7 @@ export function ViewApplicants() {
 
             )}
 
-
+            {/* Header */}
             <div className="view-applicants-header">
 
                 <h1>Applicants</h1>
@@ -307,10 +352,20 @@ export function ViewApplicants() {
 
             </div>
 
+            <section className="applicant-summary" aria-label="Applicant summary">
+                <article><span className="summary-icon"><Users size={18}/></span><div><small>Total applicants</small><strong>{applications.length}</strong></div></article>
+                <article><span className="summary-icon"><Clock3 size={18}/></span><div><small>Awaiting review</small><strong>{applications.filter((app) => app.status === "APPLIED").length}</strong></div></article>
+                <article><span className="summary-icon"><UserCheck size={18}/></span><div><small>Shortlisted</small><strong>{applications.filter((app) => app.status === "SHORTLISTED").length}</strong></div></article>
+            </section>
+            <div className="applicants-tools">
+                <label className="applicant-search"><Search size={17}/><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by candidate, role, or company" aria-label="Search applicants"/></label>
+                <span className="applicant-result-count">{filteredApplications.length} {filteredApplications.length === 1 ? "candidate" : "candidates"}</span>
+            </div>
 
+            {/* Applicant Cards */}
             <div className="view-applicants-container">
 
-                {filteredApplications.map((application) => (
+                {loading ? <div className="applicants-empty">Loading applicants…</div> : filteredApplications.map((application) => (
 
                     <div
                         className="view-applicant-card"
@@ -331,13 +386,11 @@ export function ViewApplicants() {
 
                             </div>
 
-
                             <span>
                                 {application.status}
                             </span>
 
                         </div>
-
 
                         <div className="view-job-info">
 
@@ -352,7 +405,6 @@ export function ViewApplicants() {
                             </p>
 
                         </div>
-
 
                         <div className="view-student-details">
 
@@ -389,26 +441,19 @@ export function ViewApplicants() {
 
                         </div>
 
-
                         <div className="view-applicant-actions">
 
                             <button
-                                onClick={() => {
-                                    setSelectedApplicant(application);
-                                }}
+                                onClick={() => setSelectedApplicant(application)}
                             >
                                 View Profile
                             </button>
 
-
                             <button
-                                onClick={() => {
-                                    viewResume(application);
-                                }}
+                                onClick={() => viewResume(application)}
                             >
                                 View Resume
                             </button>
-
 
                             <button
                                 onClick={() => shortlist(application)}
@@ -424,19 +469,17 @@ export function ViewApplicants() {
                                 }
                             </button>
 
-
                             <button
-                                onClick={() => {
-                                    reject(application);
-                                }}
+                                onClick={() => reject(application)}
                                 disabled={
-                                    application.status === "REJECTED"
+                                    application.status === "REJECTED" ||
+                                    application.status === "SHORTLISTED"
                                 }
                             >
                                 {
-                                    application.status !== "REJECTED"
-                                        ? "Reject"
-                                        : "Rejected"
+                                    application.status === "REJECTED"
+                                        ? "Rejected"
+                                        : "Reject"
                                 }
                             </button>
 
@@ -448,51 +491,43 @@ export function ViewApplicants() {
 
             </div>
 
+            {!loading && filteredApplications.length === 0 && (
 
-            {filteredApplications.length === 0 && (
+                <div className="applicants-empty">
 
-                <div className="view-applicants-header">
-
-                    <p>
-                        No applicants found for this filter.
-                    </p>
+                    <span className="summary-icon"><Users size={20}/></span>
+                    <h2>No applicants found</h2>
+                    <p>Try changing your search or status filter.</p>
 
                 </div>
 
             )}
 
-
+            {/* Student Profile Popup */}
             {selectedApplicant && (
 
                 <div
                     className="profile-popup-overlay"
-                    onClick={() => {
-                        setSelectedApplicant(null);
-                    }}
+                    onClick={() => setSelectedApplicant(null)}
                 >
 
                     <div
                         className="profile-popup"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                        }}
+                        onClick={(e) => e.stopPropagation()}
                     >
 
                         <button
                             className="profile-popup-close"
-                            onClick={() => {
-                                setSelectedApplicant(null);
-                            }}
+                            onClick={() => setSelectedApplicant(null)}
                         >
                             ×
                         </button>
-
 
                         {selectedApplicant.student.profilePhoto ? (
 
                             <img
                                 className="profile-popup-photo"
-                                src={`http://localhost:8080/api/student/photo/${encodeURIComponent(
+                                src={`${BASE_URL}/api/student/photo/${encodeURIComponent(
                                     selectedApplicant.student.profilePhoto
                                 )}`}
                                 alt={selectedApplicant.student.name}
@@ -506,9 +541,7 @@ export function ViewApplicants() {
 
                         )}
 
-
                         <h2>Student Profile</h2>
-
 
                         <div className="profile-popup-details">
 
@@ -544,21 +577,16 @@ export function ViewApplicants() {
 
                             <p>
                                 <strong>Applied On:</strong>{" "}
-                                {
-                                    new Date(
-                                        selectedApplicant.appliedAt
-                                    ).toLocaleDateString("en-GB")
-                                }
+                                {new Date(
+                                    selectedApplicant.appliedAt
+                                ).toLocaleDateString("en-GB")}
                             </p>
 
                         </div>
 
-
                         <button
                             className="close-profile-button"
-                            onClick={() => {
-                                setSelectedApplicant(null);
-                            }}
+                            onClick={() => setSelectedApplicant(null)}
                         >
                             Close
                         </button>
@@ -569,11 +597,9 @@ export function ViewApplicants() {
 
             )}
 
-
             <ToastContainer />
 
         </div>
 
     );
-
 }

@@ -1,0 +1,68 @@
+.auth-portal {
+  --auth-accent: #3976d5;
+  --auth-accent-soft: #eaf1ff;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  box-sizing: border-box;
+  color: #18283d;
+  background: radial-gradient(ellipse at 12% 12%, #dce9ff 0, transparent 34%), radial-gradient(ellipse at 88% 88%, #d9f2e9 0, transparent 31%), #f5f7fb;
+  font-family: "Plus Jakarta Sans", "Open Sans", sans-serif;
+}
+.auth-portal--recruiter { --auth-accent: #168467; --auth-accent-soft: #e6f5ef; }
+.auth-portal--admin { --auth-accent: #7052b4; --auth-accent-soft: #f0ebfb; }
+.auth-layout { width: min(960px, 100%); display: grid; grid-template-columns: .95fr 1.05fr; overflow: hidden; border: 1px solid #e4e9f0; border-radius: 24px; background: #fff; box-shadow: 0 28px 80px #20304a1a; }
+.auth-story { position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 520px; padding: 35px; overflow: hidden; color: white; background: linear-gradient(145deg, #162f52, #245b75); }
+.auth-portal--recruiter .auth-story { background: linear-gradient(145deg, #123d38, #1e806a); }
+.auth-portal--admin .auth-story { background: linear-gradient(145deg, #29234c, #6552a0); }
+.auth-story::after { position: absolute; right: -100px; bottom: -125px; width: 360px; height: 360px; border: 1px solid #ffffff24; border-radius: 50%; box-shadow: 0 0 0 34px #ffffff0c, 0 0 0 74px #ffffff09; content: ""; }
+.auth-brand { display: inline-flex; align-items: center; gap: 11px; color: inherit; text-decoration: none; }
+.auth-brand-mark { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid #ffffff35; border-radius: 12px; background: #ffffff17; font-size: 19px; }
+.auth-brand-copy { display: grid; gap: 3px; }
+.auth-brand-copy strong { font-size: 13px; }
+.auth-brand-copy small { color: #ffffffa8; font-size: 10px; }
+.auth-story-copy { position: relative; z-index: 1; max-width: 360px; margin: auto 0; }
+.auth-story-kicker { color: #b4e8d7; font-size: 10px; font-weight: 800; letter-spacing: .16em; }
+.auth-story-copy h2 { margin: 13px 0; font-size: clamp(30px, 4vw, 43px); line-height: 1.12; letter-spacing: -.055em; }
+.auth-story-copy p { margin: 0; color: #e1eaf1c9; font-size: 13px; line-height: 1.8; }
+.auth-story-foot { position: relative; z-index: 1; display: flex; align-items: center; gap: 9px; color: #ffffffbd; font-size: 11px; }
+.auth-content { display: flex; flex-direction: column; justify-content: center; padding: clamp(28px, 5vw, 55px); }
+.auth-home-link { align-self: flex-end; margin-bottom: 28px; color: #77859a; font-size: 11px; font-weight: 700; text-decoration: none; }
+.auth-home-link:hover { color: var(--auth-accent); }
+.auth-heading { margin: 0; color: #1d2c42; font-size: 29px; letter-spacing: -.045em; }
+.auth-subtitle, .recruiter-auth-card > p:not(.auth-message) { margin: 8px 0 23px; color: #7b8799; font-size: 12px; line-height: 1.6; }
+.auth-portal .auth-tabs { display: flex; gap: 5px; margin: 0 0 22px; padding: 4px; border: 0; border-radius: 11px; background: #f1f4f8; }
+.auth-portal .auth-tabs button { flex: 1; padding: 10px; border: 0; border-radius: 8px; background: transparent; color: #758196; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.auth-portal .auth-tabs button.active { background: #fff; color: var(--auth-accent); box-shadow: 0 2px 7px #172b4312; }
+.auth-portal form { display: flex; flex-direction: column; gap: 13px; }
+.auth-portal form input { width: 100%; min-height: 46px; padding: 12px 14px; box-sizing: border-box; border: 1px solid #dce3eb; border-radius: 10px; background: #fff; color: #26364b; font: inherit; font-size: 12px; outline: none; transition: border-color .18s, box-shadow .18s; }
+.auth-portal form input:focus { border-color: var(--auth-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--auth-accent) 13%, transparent); }
+.auth-portal form input::placeholder { color: #9aa5b4; }
+.auth-portal .submit-btn, .auth-portal form button[type="submit"] { min-height: 46px; margin-top: 4px; padding: 12px 16px; border: 0; border-radius: 10px; background: var(--auth-accent); color: #fff; font: inherit; font-size: 12px; font-weight: 750; cursor: pointer; transition: filter .18s, transform .18s; }
+.auth-portal form button[type="submit"]:hover { filter: brightness(.93); transform: translateY(-1px); }
+.auth-message, .auth-portal [role="alert"] { margin: 16px 0 0; color: #b42335; font-size: 12px; line-height: 1.5; }
+.auth-portal .auth-message:not([role="alert"]) { color: var(--auth-accent); }
+.auth-role-links { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 25px; padding-top: 18px; border-top: 1px solid #edf0f4; }
+.auth-role-links a { padding: 7px 10px; border-radius: 99px; background: #f5f7fa; color: #78869a; font-size: 10px; font-weight: 700; text-decoration: none; }
+.auth-role-links a:hover, .auth-role-links a[aria-current="page"] { background: var(--auth-accent-soft); color: var(--auth-accent); }
+.auth-admin-card { display: flex; flex-direction: column; gap: 10px; }
+.auth-admin-card .auth-story-kicker { color: var(--auth-accent); }
+.auth-admin-card .auth-heading { margin-bottom: 0; }
+.auth-admin-card .auth-subtitle { margin-bottom: 10px; }
+.auth-admin-card label { color: #425168; font-size: 11px; font-weight: 700; }
+.auth-admin-card button[type="submit"] { margin-top: 10px; }
+.auth-portal .auth-back-button { padding: 10px; border: 0; background: transparent; color: #77859a; font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+.auth-portal form button:disabled { opacity: .65; cursor: wait; }
+@media (max-width: 700px) {
+  .auth-portal { padding: 16px; }
+  .auth-layout { max-width: 470px; grid-template-columns: 1fr; }
+  .auth-story { min-height: auto; gap: 28px; padding: 23px 25px; }
+  .auth-story-copy { margin: 0; }
+  .auth-story-copy h2 { max-width: 360px; margin: 8px 0; font-size: 27px; }
+  .auth-story-copy p { font-size: 11px; }
+  .auth-story-foot { display: none; }
+  .auth-content { padding: 25px; }
+  .auth-home-link { margin-bottom: 18px; }
+}
+@media (prefers-reduced-motion: reduce) { .auth-portal *, .auth-portal *::before, .auth-portal *::after { transition-duration: .01ms !important; } }

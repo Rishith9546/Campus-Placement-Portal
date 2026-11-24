@@ -36,6 +36,11 @@ function MockInterview() {
                 setLoading(true);
                 setError("");
 
+                if (!location.state?.topic) {
+                    navigate("/viewjobs?practice=1", { replace: true });
+                    return;
+                }
+
                 if (!token) {
                     throw new Error(
                         "Please log in before starting the interview."
@@ -90,9 +95,10 @@ function MockInterview() {
         return () => {
             cancelled = true;
         };
-    }, [topic, difficulty, questionCount, token]);
+    }, [topic, difficulty, questionCount, token, location.state, navigate]);
 
     const currentQuestion = questions[currentIndex];
+    const answeredCount = Object.values(answers).filter((answer) => answer.trim()).length;
 
     const handleAnswerChange = (value) => {
         if (!currentQuestion) return;
@@ -162,10 +168,18 @@ function MockInterview() {
     if (loading) {
         return (
             <div className="mock-page">
-                <div className="mock-loading">
-                    <div className="mock-spinner"></div>
-                    <h2>Preparing your interview...</h2>
-                    <p>AI is generating your questions. Please wait.</p>
+                <div className="mock-loading" role="status" aria-live="polite">
+                    <span className="mock-prep-eyebrow">AI MOCK INTERVIEW</span>
+                    <div className="mock-prep-spinner-wrap"><div className="mock-spinner"></div><span>AI</span></div>
+                    <h1>Preparing your interview</h1>
+                    <p>Generating your questions now. This may take a moment.</p>
+                    <div className="mock-prep-settings" aria-label="Selected interview settings">
+                        <div><small>TOPIC</small><strong>{topic}</strong></div>
+                        <div><small>QUESTIONS</small><strong>{questionCount}</strong></div>
+                        <div><small>DIFFICULTY</small><strong>{difficulty}</strong></div>
+                    </div>
+                    <span className="mock-prep-note">Keep this page open while we prepare your session.</span>
+                    <button className="mock-prep-back" type="button" onClick={() => navigate("/viewjobs?practice=1", { replace: true })}>Back to interview setup</button>
                 </div>
             </div>
         );
@@ -177,8 +191,8 @@ function MockInterview() {
                 <div className="mock-error-card">
                     <h2>Unable to start interview</h2>
                     <p>{error}</p>
-                    <button onClick={() => navigate("/viewjobs")}>
-                        Back to View Jobs
+                    <button onClick={() => navigate("/viewjobs?practice=1", { replace: true })}>
+                        Back to interview setup
                     </button>
                 </div>
             </div>
@@ -189,6 +203,9 @@ function MockInterview() {
         const feedback = Array.isArray(results.answerFeedback)
             ? results.answerFeedback
             : [];
+        const maxScore = Number(results.maxScore) || 10;
+        const numericScore = Number(results.score) || 0;
+        const scorePercent = Math.max(0, Math.min(100, Math.round((numericScore / maxScore) * 100)));
 
         return (
             <div className="mock-page">
@@ -204,22 +221,25 @@ function MockInterview() {
                         <span className="mock-eyebrow">
                             INTERVIEW COMPLETED
                         </span>
-                        <h1>Your Interview Results</h1>
+                        <h1>Interview complete</h1>
                         <p>
                             {topic} · {difficulty} difficulty
                         </p>
                     </div>
 
                     <div className="score-card">
-                        <p>Overall Score</p>
-                        <div className="score-value">
-                            {results.score ?? 0}
-                            <span> / {results.maxScore ?? 10}</span>
+                        <div className="score-card-main">
+                            <div className="score-card-copy">
+                                <span className="score-overline">YOUR PERFORMANCE</span>
+                                <h2>Overall score</h2>
+                                <p>{topic} <span>·</span> {difficulty} difficulty</p>
+                            </div>
+                            <div className="score-ring" style={{ "--score-progress": `${scorePercent}%` }} role="img" aria-label={`Score ${numericScore} out of ${maxScore}`}>
+                                <div><strong>{numericScore}</strong><small>/ {maxScore}</small></div>
+                            </div>
                         </div>
-                        <p>
-                            Questions evaluated:{" "}
-                            {results.totalQuestions ?? feedback.length}
-                        </p>
+                        <div className="score-progress-track" role="progressbar" aria-label="Interview score percentage" aria-valuenow={scorePercent} aria-valuemin="0" aria-valuemax="100"><span style={{ width: `${scorePercent}%` }} /></div>
+                        <div className="score-card-footer"><span>{results.totalQuestions ?? feedback.length} questions evaluated</span><strong>{scorePercent}%</strong></div>
                     </div>
 
                     <div className="results-grid">
@@ -295,7 +315,7 @@ function MockInterview() {
                             navigate("/viewjobs", { replace: true })
                         }
                     >
-                        Finish Interview
+                        Back to View Jobs <ArrowRight size={16} />
                     </button>
                 </div>
             </div>
@@ -316,9 +336,9 @@ function MockInterview() {
     return (
         <div className="mock-page">
             <div className="mock-interview-container">
-                <button
+                    <button
                     className="mock-back-btn"
-                    onClick={() => navigate("/view-jobs")}
+                    onClick={() => navigate("/viewjobs")}
                 >
                     ← Exit Interview
                 </button>
@@ -339,9 +359,7 @@ function MockInterview() {
                             Question {currentIndex + 1} of {questions.length}
                         </span>
                         <span>
-                            {Math.round(
-                                ((currentIndex + 1) / questions.length) * 100
-                            )}%
+                            {answeredCount} of {questions.length} answered
                         </span>
                     </div>
 
@@ -357,6 +375,21 @@ function MockInterview() {
                         ></div>
                     </div>
                 </div>
+
+                <nav className="question-steps" aria-label="Interview questions">
+                    {questions.map((question, index) => {
+                        const isAnswered = Boolean((answers[index] || "").trim());
+                        return <button
+                            type="button"
+                            key={`${index}-${question.question}`}
+                            className={`${index === currentIndex ? "is-current" : ""}${isAnswered ? " is-answered" : ""}`}
+                            aria-label={`Go to question ${index + 1}${isAnswered ? ", answered" : ", not answered"}`}
+                            aria-current={index === currentIndex ? "step" : undefined}
+                            onClick={() => { setError(""); setCurrentIndex(index); }}
+                            disabled={submitting}
+                        >{isAnswered ? "✓" : index + 1}</button>;
+                    })}
+                </nav>
 
                 <div className="question-card">
                     <span className="question-number">
@@ -377,6 +410,7 @@ function MockInterview() {
                         }
                         placeholder="Write your answer here..."
                         rows={8}
+                        aria-label={`Answer to question ${currentIndex + 1}`}
                     />
 
                     <p className="answer-hint">

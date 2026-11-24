@@ -1,12 +1,14 @@
 
 import { Headers } from "./Headers.jsx";
 import "./ViewJobs.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getJobs, getUser, searchJobs } from "./Functions/viewjobs.js";
+import { ArrowRight, BriefcaseBusiness, Search, Sparkles } from "lucide-react";
 
 function ViewJobs() {
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const [jobs, setJobs] = useState([]);
     const [users, setUsers] = useState([]);
@@ -19,6 +21,13 @@ function ViewJobs() {
     const [questionCount, setQuestionCount] = useState(10);
     const [difficulty, setDifficulty] = useState("Medium");
     const [topicError, setTopicError] = useState("");
+
+    useEffect(() => {
+        if (searchParams.get("practice") === "1") {
+            setPopUp(true);
+            setSearchParams({}, { replace: true });
+        }
+    }, [searchParams, setSearchParams]);
 
     useEffect(() => {
         const fetchJobs = async () => {
@@ -79,6 +88,15 @@ function ViewJobs() {
     return (
         <>
             <Headers />
+
+            <section className="jobs-page-heading">
+                <div>
+                    <span className="jobs-page-eyebrow"><Sparkles size={14} /> CAREER OPPORTUNITIES</span>
+                    <h1>Find your next opportunity</h1>
+                    <p>Explore roles that match your skills and take the next step in your placement journey.</p>
+                </div>
+                <button type="button" className="start-interview-btn" onClick={() => setPopUp(true)}>Practice interview <ArrowRight size={16} /></button>
+            </section>
 
             <button
                 onClick={() => navigate("/dashboard")}
@@ -234,7 +252,7 @@ function ViewJobs() {
                                 className="begin-interview-btn"
                                 onClick={startInterview}
                             >
-                                Start Interview <span>→</span>
+                                Give me questions <span>→</span>
                             </button>
                         </div>
                     </div>
@@ -242,18 +260,23 @@ function ViewJobs() {
             )}
 
             {/* Existing Job Search */}
-            <div className="search-bar">
+            <div className="jobs-toolbar">
+              <label className="search-bar">
+                <Search size={18} aria-hidden="true" />
                 <input
                     type="text"
-                    placeholder="Search jobs by title, skills, or company..."
+                    placeholder="Search by role, skills, company, or location"
+                    aria-label="Search jobs"
                     value={keyWord}
                     onChange={(e) => setKeyWord(e.target.value)}
                 />
+              </label>
+              <span className="jobs-result-count"><BriefcaseBusiness size={15} /> {jobs.length} {jobs.length === 1 ? "role" : "roles"}</span>
             </div>
 
             {/* Existing Job Cards */}
             <div className="jobs-container">
-                {jobs.map((job) => {
+                {jobs.length === 0 ? <div className="jobs-empty-state"><span><BriefcaseBusiness size={22} /></span><h2>No jobs found</h2><p>Try another search, or check back soon for new opportunities.</p></div> : jobs.map((job) => {
                     const data = (job.skills || "")
                         .split(",")
                         .map((skill) => skill.trim())
@@ -282,7 +305,7 @@ function ViewJobs() {
                                     navigate(`/jobs/${job.id}`);
                                 }}
                             >
-                                View
+                                View details <ArrowRight size={14} />
                             </button>
                         </div>
                     );

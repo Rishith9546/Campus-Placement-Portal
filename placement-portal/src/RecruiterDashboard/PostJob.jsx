@@ -2,7 +2,7 @@ import "./PostJob.css";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-export function PostJob({ onClose, company }) {
+export function PostJob({ onClose, company, onPosted }) {
 
     const [addJob, setAddJob] = useState({
         title: "",
@@ -46,6 +46,7 @@ export function PostJob({ onClose, company }) {
             console.log("Job posted successfully");
             console.log(response.data);
 
+            onPosted?.(response.data);
             onClose();
 
         } catch (error) {

@@ -1,29 +1,28 @@
 import { useState } from "react";
 import { Headers } from "../Student/Headers.jsx";
 import { ProfileCard } from "./ProfileCard.jsx";
-import { StatsCard } from "./StatsCard.jsx";
-import { RecentJobs } from "./RecentJobs.jsx";
 import { QuickActions } from "./QuickActions.jsx";
 import { PostJob } from "./PostJob.jsx";
+import { RecruiterOverview } from "./RecruiterOverview.jsx";
 
 import "./RecuriterDashbaord.css";
 
 export function RecruiterDashboard() {
 
     const [showPostJob, setShowPostJob] = useState(false);
-    const[company,setCompany]=useState();
-    console.log(company);
+    const [company, setCompany] = useState("");
+    const [overviewVersion, setOverviewVersion] = useState(0);
     return (
-        <div>
+        <div className="recruiter-dashboard">
             <Headers />
 
             <div className="body">
 
                 <ProfileCard  setCompany={setCompany}/>
 
-                <StatsCard />
-
-                <RecentJobs
+                <RecruiterOverview
+                    key={overviewVersion}
+                    company={company}
                     onPostJob={() => setShowPostJob(true)}
                 />
 
@@ -38,6 +37,7 @@ export function RecruiterDashboard() {
                 <PostJob
                     onClose={() => setShowPostJob(false)}
                     company={company}
+                    onPosted={() => setOverviewVersion((version) => version + 1)}
                 />
             )}
 

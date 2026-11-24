@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./StudentAuth.css";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export function StudentAuth() {
     const navigate = useNavigate();
@@ -122,22 +122,26 @@ export function StudentAuth() {
     };
 
     return (
-        <div className="student-auth">
-
-            <div className="auth-card">
-
-                <h1>Student Portal</h1>
-
-                <p className="auth-subtitle">
-                    IIIT Kalyani Placement Portal
-                </p>
+        <main className="auth-portal auth-portal--student">
+          <div className="auth-layout">
+            <aside className="auth-story">
+              <Link className="auth-brand" to="/"><span className="auth-brand-mark">P</span><span className="auth-brand-copy"><strong>Placement Portal</strong><small>IIIT Kalyani</small></span></Link>
+              <div className="auth-story-copy"><span className="auth-story-kicker">YOUR CAREER STARTS HERE</span><h2>Make room for your next opportunity.</h2><p>Find roles that fit your goals, apply with confidence, and keep your placement journey moving.</p></div>
+              <div className="auth-story-foot"><span aria-hidden="true">+</span><span>One campus. More possibilities.</span></div>
+            </aside>
+            <section className="auth-content">
+                <Link className="auth-home-link" to="/">Back to portal selection</Link>
+                <h1 className="auth-heading">Student portal</h1>
+                <p className="auth-subtitle">Sign in to continue your placement journey.</p>
 
                 {/* Sign In / Sign Up buttons */}
 
-                <div className="auth-tabs">
+                <div className="auth-tabs" aria-label="Student account access">
 
                     <button
                         className={isSignin ? "active" : ""}
+                        type="button"
+                        aria-pressed={isSignin}
                         onClick={() => {
                             setIsSignin(true);
                             setMessage("");
@@ -148,6 +152,8 @@ export function StudentAuth() {
 
                     <button
                         className={!isSignin ? "active" : ""}
+                        type="button"
+                        aria-pressed={!isSignin}
                         onClick={() => {
                             setIsSignin(false);
                             setMessage("");
@@ -167,6 +173,8 @@ export function StudentAuth() {
                         <input
                             type="email"
                             name="email"
+                            aria-label="Email address"
+                            autoComplete="username"
                             placeholder="Email"
                             value={signinForm.email}
                             onChange={handleSigninChange}
@@ -176,6 +184,8 @@ export function StudentAuth() {
                         <input
                             type="password"
                             name="password"
+                            aria-label="Password"
+                            autoComplete="current-password"
                             placeholder="Password"
                             value={signinForm.password}
                             onChange={handleSigninChange}
@@ -200,6 +210,8 @@ export function StudentAuth() {
                         <input
                             type="text"
                             name="name"
+                            aria-label="Full name"
+                            autoComplete="name"
                             placeholder="Full Name"
                             value={signupForm.name}
                             onChange={handleSignupChange}
@@ -209,6 +221,8 @@ export function StudentAuth() {
                         <input
                             type="email"
                             name="email"
+                            aria-label="Email address"
+                            autoComplete="email"
                             placeholder="Email"
                             value={signupForm.email}
                             onChange={handleSignupChange}
@@ -218,6 +232,8 @@ export function StudentAuth() {
                         <input
                             type="password"
                             name="password"
+                            aria-label="Password"
+                            autoComplete="new-password"
                             placeholder="Password"
                             value={signupForm.password}
                             onChange={handleSignupChange}
@@ -235,14 +251,15 @@ export function StudentAuth() {
                 )}
 
                 {message && (
-                    <p className="auth-message">
+                    <p className="auth-message" role="status">
                         {message}
                     </p>
                 )}
 
-            </div>
-
-        </div>
+              <nav className="auth-role-links" aria-label="Other portal sign-ins"><Link aria-current="page" to="/studentAuth">Student</Link><Link to="/recruiterAuth">Recruiter</Link><Link to="/adminAuth">Administrator</Link></nav>
+            </section>
+          </div>
+        </main>
     );
 }
 

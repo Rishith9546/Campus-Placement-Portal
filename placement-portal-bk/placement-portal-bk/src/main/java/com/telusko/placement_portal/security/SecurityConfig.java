@@ -89,7 +89,8 @@ public class SecurityConfig {
                                 "/",
                                 "/api/auth/signup",
                                 "/api/auth/recruiter/signup",
-                                "/api/auth/login"
+                                "/api/auth/login",
+                                "/api/auth/admin/login"
                         ).permitAll()
 
                         // Public student profile photos

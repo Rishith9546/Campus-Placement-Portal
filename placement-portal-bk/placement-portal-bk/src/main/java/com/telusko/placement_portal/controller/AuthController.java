@@ -138,6 +138,26 @@ public class AuthController {
         );
     }
 
+    @PostMapping("/admin/login")
+    public ResponseEntity<?> adminLogin(@RequestBody SigninRequest request) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+        );
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+        if (!isAdmin) {
+            return ResponseEntity.status(403).body(Map.of("message", "This account is not an administrator."));
+        }
+
+        String token = jwtService.generateToken(authentication.getName());
+        return ResponseEntity.ok(Map.of(
+                "message", "Admin login successful",
+                "token", token,
+                "role", "ROLE_ADMIN"
+        ));
+    }
+
     // ==============================
     // RECRUITER SIGNUP
     // ==============================

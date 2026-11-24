@@ -1,3 +1,4 @@
+
 import "./shortlisted.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -8,18 +9,23 @@ import {
 } from "./API/shortlistedApi.js";
 import axios from "axios";
 import { ViewProfile } from "./ViewProfile.jsx";
+import { Mail } from "./Mail.jsx";
 
 function Shortlisted() {
 
     const [shortlisted, setShortlisted] = useState(0);
-    const [allShortData, setAllShortData] = useState([]); // Master list of all shortlisted items
-    const [shortData, setShortData] = useState([]); // Filtered list for display/search
+    const [allShortData, setAllShortData] = useState([]);
+    const [shortData, setShortData] = useState([]);
+
+    // Separate popup states
     const [selectedApplicant, setSelectedApplicant] = useState(null);
+    const [selectedMailApplicant, setSelectedMailApplicant] = useState(null);
+    const [mailOpen, setMailOpen] = useState(false);
 
     const [search, setSearch] = useState("");
     const [jobId, setJobId] = useState("");
-    const [branch, setBranch] = useState("All"); // Added branch state
-    const [status, setStatus] = useState("All"); // Added status state
+    const [branch, setBranch] = useState("All");
+    const [status, setStatus] = useState("All");
 
     const navigate = useNavigate();
 
@@ -39,7 +45,6 @@ function Shortlisted() {
         }
 
         try {
-
             const response = await axios.get(
                 `http://localhost:8080/api/student/resume/${encodeURIComponent(filename)}`,
                 {
@@ -58,7 +63,7 @@ function Shortlisted() {
         }
     };
 
-    // Get shortlisted count & initial data
+    // Get shortlisted count and data
     useEffect(() => {
 
         const getCount = async () => {
@@ -87,19 +92,17 @@ function Shortlisted() {
 
     }, []);
 
-    // Search candidates (handles API search when jobId is present, otherwise filters locally or prompts)
+    // Search candidates
     const handleSearch = async (value) => {
 
         setSearch(value);
 
         if (value.trim() === "") {
-            // Reset to full master list or current job filter
             setShortData(allShortData);
             return;
         }
 
         if (!jobId) {
-            // If no job selected, perform client-side search across all loaded candidates
             return;
         }
 
@@ -108,25 +111,33 @@ function Shortlisted() {
                 jobId,
                 value.trim()
             );
+
             setShortData(data || []);
+
         } catch (error) {
             console.log(error);
             setShortData([]);
         }
     };
 
-    // Get unique jobs for dropdown
+    // Get unique jobs
     const uniqueJobs = [];
+
     allShortData.forEach((data) => {
         if (!data.job) return;
-        const exists = uniqueJobs.some((job) => job.id === data.job.id);
+
+        const exists = uniqueJobs.some(
+            (job) => job.id === data.job.id
+        );
+
         if (!exists) {
             uniqueJobs.push(data.job);
         }
     });
 
-    // Job selection handler
+    // Job selection
     const handleJobChange = async (e) => {
+
         const selectedJobId = e.target.value;
         setJobId(selectedJobId);
 
@@ -137,36 +148,52 @@ function Shortlisted() {
 
         if (search.trim() !== "") {
             try {
-                const data = await searchShortlisted(selectedJobId, search.trim());
+                const data = await searchShortlisted(
+                    selectedJobId,
+                    search.trim()
+                );
+
                 setShortData(data || []);
+
             } catch (error) {
                 console.log(error);
                 setShortData([]);
             }
+
         } else {
-            // Filter master list by selected job locally
-            const filtered = allShortData.filter(item => item.job && item.job.id.toString() === selectedJobId);
+
+            const filtered = allShortData.filter(
+                item =>
+                    item.job &&
+                    item.job.id.toString() === selectedJobId
+            );
+
             setShortData(filtered);
         }
     };
 
-    // Comprehensive filtering (Branch, Status, Search fallback if no jobId api search was triggered)
+    // Filter candidates
     const filteredProfiles = shortData.filter((data) => {
+
         if (!data.student || !data.job) return false;
 
-        // Branch Filter
-        if (branch !== "All" && data.student.branch !== branch) {
+        if (
+            branch !== "All" &&
+            data.student.branch !== branch
+        ) {
             return false;
         }
 
-        // Status Filter (Assuming status is 'Shortlisted' or similar property, adjust if needed)
         if (status !== "All") {
-            // Add your status condition check here if status exists in data, e.g., data.status === status
+            // Add status filtering here if required.
         }
 
-        // Client-side search fallback (if searching without a backend API job filter constraint)
         if (search.trim() !== "" && !jobId) {
-            const matchesName = data.student.name.toLowerCase().includes(search.toLowerCase());
+
+            const matchesName = data.student.name
+                .toLowerCase()
+                .includes(search.toLowerCase());
+
             if (!matchesName) return false;
         }
 
@@ -204,21 +231,13 @@ function Shortlisted() {
                     </div>
 
                     <div className="header-count">
-
-                        <span>
-                            Shortlisted
-                        </span>
-
-                        <strong>
-                            {shortlisted}
-                        </strong>
-
+                        <span>Shortlisted</span>
+                        <strong>{shortlisted}</strong>
                     </div>
 
                 </div>
 
             </div>
-
 
             {/* Main Content */}
             <div className="shortlisted-container">
@@ -229,9 +248,7 @@ function Shortlisted() {
                     <div className="filter-title">
                         <div>
                             <h3>Candidate Search</h3>
-                            <p>
-                                Find shortlisted candidates quickly
-                            </p>
+                            <p>Find shortlisted candidates quickly</p>
                         </div>
                     </div>
 
@@ -239,11 +256,14 @@ function Shortlisted() {
 
                         <div className="search-box">
                             <span>⌕</span>
+
                             <input
                                 type="text"
                                 placeholder="Search by candidate name..."
                                 value={search}
-                                onChange={(e) => handleSearch(e.target.value)}
+                                onChange={(e) =>
+                                    handleSearch(e.target.value)
+                                }
                             />
                         </div>
 
@@ -252,11 +272,13 @@ function Shortlisted() {
                             value={jobId}
                             onChange={handleJobChange}
                         >
-                            <option value="">
-                                All Jobs
-                            </option>
+                            <option value="">All Jobs</option>
+
                             {uniqueJobs.map((job) => (
-                                <option key={job.id} value={job.id}>
+                                <option
+                                    key={job.id}
+                                    value={job.id}
+                                >
                                     {job.title}
                                 </option>
                             ))}
@@ -286,20 +308,19 @@ function Shortlisted() {
 
                 </div>
 
-
                 {/* Candidate Heading */}
                 <div className="candidate-heading">
+
                     <div>
-                        <h2>
-                            Shortlisted Students
-                        </h2>
+                        <h2>Shortlisted Students</h2>
+
                         <p>
                             {filteredProfiles.length} candidate
                             {filteredProfiles.length !== 1 ? "s" : ""} found
                         </p>
                     </div>
-                </div>
 
+                </div>
 
                 {/* Candidate List */}
                 <div className="candidate-list">
@@ -312,9 +333,7 @@ function Shortlisted() {
                                 👤
                             </div>
 
-                            <h2>
-                                No shortlisted candidates
-                            </h2>
+                            <h2>No shortlisted candidates</h2>
 
                             {search.trim() !== "" ? (
                                 <p>
@@ -362,11 +381,18 @@ function Shortlisted() {
                                             </div>
 
                                             <div className="candidate-name">
-                                                <h2>{data.student.name}</h2>
+
+                                                <h2>
+                                                    {data.student.name}
+                                                </h2>
+
                                                 <span className="status">
-                                                    <span className="status-dot">●</span>
+                                                    <span className="status-dot">
+                                                        ●
+                                                    </span>
                                                     Shortlisted
                                                 </span>
+
                                             </div>
 
                                         </div>
@@ -376,7 +402,6 @@ function Shortlisted() {
                                         </div>
 
                                     </div>
-
 
                                     {/* Candidate Information */}
                                     <div className="candidate-details">
@@ -388,7 +413,9 @@ function Shortlisted() {
 
                                         <div className="detail-item">
                                             <span>PHONE</span>
-                                            <p>{data.student.phone || "Not provided"}</p>
+                                            <p>
+                                                {data.student.phone || "Not provided"}
+                                            </p>
                                         </div>
 
                                         <div className="detail-item">
@@ -398,54 +425,67 @@ function Shortlisted() {
 
                                         <div className="detail-item">
                                             <span>CGPA</span>
-                                            <p className="cgpa">{data.student.cgpa}</p>
+                                            <p className="cgpa">
+                                                {data.student.cgpa}
+                                            </p>
                                         </div>
 
                                     </div>
-
 
                                     {/* Job Information */}
                                     <div className="job-section">
 
                                         <div className="job-title">
-                                            <span className="job-icon">💼</span>
+
+                                            <span className="job-icon">
+                                                💼
+                                            </span>
+
                                             <div>
                                                 <span>APPLIED FOR</span>
                                                 <h3>{data.job.title}</h3>
                                             </div>
+
                                         </div>
 
                                         <div className="job-meta">
 
                                             <div>
                                                 <span>Applied On</span>
+
                                                 <p>
                                                     {data.appliedAt
-                                                        ? new Date(data.appliedAt).toLocaleDateString("en-GB", {
-                                                            day: "2-digit",
-                                                            month: "short",
-                                                            year: "numeric"
-                                                        })
+                                                        ? new Date(data.appliedAt).toLocaleDateString(
+                                                            "en-GB",
+                                                            {
+                                                                day: "2-digit",
+                                                                month: "short",
+                                                                year: "numeric"
+                                                            }
+                                                        )
                                                         : "N/A"}
                                                 </p>
                                             </div>
 
                                             <div>
                                                 <span>Skills</span>
-                                                <p>{skills || "Not specified"}</p>
+                                                <p>
+                                                    {skills || "Not specified"}
+                                                </p>
                                             </div>
 
                                         </div>
 
                                     </div>
 
-
                                     {/* Actions */}
                                     <div className="candidate-actions">
 
                                         <button
                                             className="resume-btn"
-                                            onClick={() => viewResume(data.student.resume)}
+                                            onClick={() =>
+                                                viewResume(data.student.resume)
+                                            }
                                         >
                                             <span>📄</span>
                                             View Resume
@@ -453,10 +493,23 @@ function Shortlisted() {
 
                                         <button
                                             className="profile-btn"
-                                            onClick={() => setSelectedApplicant(data)}
+                                            onClick={() => {
+                                                setSelectedApplicant(data);
+                                            }}
                                         >
                                             <span>👁</span>
                                             View Profile
+                                        </button>
+
+                                        <button
+                                            className="profile-btn"
+                                            onClick={() => {
+                                                setSelectedMailApplicant(data);
+                                                setMailOpen(true);
+                                            }}
+                                        >
+                                            <span>📩</span>
+                                            Send Email
                                         </button>
 
                                     </div>
@@ -473,12 +526,19 @@ function Shortlisted() {
 
             </div>
 
-
             {/* Profile Popup */}
             {selectedApplicant && (
                 <ViewProfile
                     selectedApplicant={selectedApplicant}
                     setSelectedApplicant={setSelectedApplicant}
+                />
+            )}
+
+            {/* Email Popup */}
+            {mailOpen && selectedMailApplicant && (
+                <Mail
+                    selectedApplicant={selectedMailApplicant}
+                    setOpenMail={setMailOpen}
                 />
             )}
 

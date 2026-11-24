@@ -1,0 +1,178 @@
+
+.mail-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 15, 25, 0.75);
+    backdrop-filter: blur(6px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.mail-popup {
+    width: 100%;
+    max-width: 520px;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: mailPopupIn 0.25s ease;
+}
+
+@keyframes mailPopupIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.mail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 25px;
+}
+
+.mail-header h2 {
+    color: #0f3040;
+    font-size: 23px;
+    margin: 0 0 7px;
+    font-weight: 700;
+}
+
+.mail-header p {
+    color: #718096;
+    font-size: 13px;
+    margin: 0;
+}
+
+.mail-close {
+    border: none;
+    background: #f1f5f9;
+    color: #475569;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    font-size: 17px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.mail-close:hover {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.mail-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.mail-field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.mail-field input,
+.mail-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid #dbe3eb;
+    border-radius: 9px;
+    outline: none;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1e293b;
+    background: #f8fafc;
+    transition: 0.2s;
+}
+
+.mail-field input:focus,
+.mail-field textarea:focus {
+    border-color: #0f5268;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(15, 82, 104, 0.1);
+}
+
+.mail-field input[readonly] {
+    background: #f1f5f9;
+    color: #64748b;
+    cursor: not-allowed;
+}
+
+.mail-field textarea {
+    resize: vertical;
+    min-height: 130px;
+}
+
+.mail-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.mail-cancel,
+.mail-send {
+    padding: 11px 20px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.mail-cancel {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.mail-cancel:hover {
+    background: #e2e8f0;
+}
+
+.mail-send {
+    background: linear-gradient(135deg, #0f3040, #3d415c);
+    color: white;
+    border: none;
+}
+
+.mail-send:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(15, 48, 64, 0.25);
+}
+
+.mail-send:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@media (max-width: 600px) {
+    .mail-popup {
+        padding: 20px;
+    }
+
+    .mail-header h2 {
+        font-size: 20px;
+    }
+
+    .mail-actions {
+        flex-direction: column-reverse;
+    }
+
+    .mail-actions button {
+        width: 100%;
+    }
+}

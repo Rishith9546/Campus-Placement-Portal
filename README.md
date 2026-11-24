@@ -454,7 +454,4 @@ GitHub: **Rishith9546**
 
 
 
-1. Eligibility Checker ⭐⭐⭐
-2. Placement Readiness Score ⭐⭐⭐
-3. Candidate Comparison ⭐⭐
-4. Offer Management ⭐⭐
+1. I recommend AI Placement Prediction System for your Campus Placement Portal.

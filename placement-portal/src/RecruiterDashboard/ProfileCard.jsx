@@ -5,6 +5,8 @@ import "./ProfileCard.css";
 export function ProfileCard({ setCompany }) {
 
     const [recruiter, setRecruiter] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
 
@@ -24,6 +26,7 @@ export function ProfileCard({ setCompany }) {
                 );
 
                 setRecruiter(response.data);
+                setErrorMessage("");
 
             } catch (error) {
 
@@ -31,6 +34,9 @@ export function ProfileCard({ setCompany }) {
                     "Error fetching recruiter profile:",
                     error
                 );
+                setErrorMessage("We couldn't load your recruiter profile. Refresh to try again.");
+            } finally {
+                setLoading(false);
 
             }
         };
@@ -38,9 +44,6 @@ export function ProfileCard({ setCompany }) {
         getRecruiterProfile();
 
     }, []);
-    console.log(recruiter)
-
-
     // This hook MUST be before the if return
     useEffect(() => {
 
@@ -52,43 +55,56 @@ export function ProfileCard({ setCompany }) {
 
 
     // Conditional return AFTER all hooks
-    if (!recruiter) {
-        return <p>Loading profile...</p>;
+    if (loading) {
+        return <section className="recruiter-profile recruiter-profile-state" role="status">Loading your profile...</section>;
     }
+
+    if (!recruiter) {
+        return <section className="recruiter-profile recruiter-profile-state" role="alert">{errorMessage || "Recruiter profile is unavailable."}</section>;
+    }
+
+    const initials = (recruiter.name || recruiter.companyName || "R")
+        .trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
 
 
     return (
-        <div className="recruiter-profile">
-
-            <h2>Recruiter Profile</h2>
+        <section className="recruiter-profile">
+            <header className="recruiter-profile-header">
+                <span className="recruiter-avatar" aria-label={`${recruiter.name || "Recruiter"} initials`}>{initials}</span>
+                <div className="recruiter-profile-intro">
+                    <span className="recruiter-profile-eyebrow">RECRUITER WORKSPACE</span>
+                    <h2>{recruiter.name ? `Welcome, ${recruiter.name}` : "Welcome back"}</h2>
+                    <p>{recruiter.companyName || "Your hiring workspace"}</p>
+                </div>
+                <span className="recruiter-role-chip">Recruiter</span>
+            </header>
 
             <div className="profile-details">
 
                 <div className="detail-item">
                     <span>Name</span>
-                    <strong>{recruiter.name}</strong>
+                    <strong>{recruiter.name || "Not provided"}</strong>
                 </div>
 
                 <div className="detail-item">
                     <span>Company</span>
-                    <strong>{recruiter.companyName}</strong>
+                    <strong>{recruiter.companyName || "Not provided"}</strong>
                 </div>
 
                 <div className="detail-item">
                     <span>Email</span>
-                    <strong>{recruiter.email}</strong>
+                    <strong>{recruiter.email || "Not provided"}</strong>
                 </div>
 
                 <div className="detail-item">
                     <span>Role</span>
                     <strong className="role-badge">
-                        {recruiter.role}
+                        Recruiter
                     </strong>
                 </div>
 
             </div>
-
-        </div>
+        </section>
     );
 }
 

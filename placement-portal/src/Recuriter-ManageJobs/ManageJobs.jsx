@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { PostJob } from "./PostJob.jsx";
 import "./ManageJobs.css";
 import axios from "axios";
+import { BriefcaseBusiness, Search, Users, Plus } from "lucide-react";
 
 const ManageJobs = () => {
 
@@ -13,6 +14,7 @@ const ManageJobs = () => {
     const [applicantCounts, setApplicantCounts] = useState({});
     const [status, setStatus] = useState("All Jobs");
     const [search, setSearch] = useState("");
+    const [loading, setLoading] = useState(true);
 
     // EDIT POPUP
     const [editJob, setEditJob] = useState(null);
@@ -20,6 +22,7 @@ const ManageJobs = () => {
     useEffect(() => {
 
         const getAllJobs = async () => {
+            setLoading(true);
 
             try {
 
@@ -44,12 +47,12 @@ const ManageJobs = () => {
                 );
 
                 setJobs([]);
-
-            }
+            } finally { setLoading(false); }
         };
 
 
         const getClosedJobs = async () => {
+            setLoading(true);
 
             try {
 
@@ -74,12 +77,12 @@ const ManageJobs = () => {
                 );
 
                 setJobs([]);
-
-            }
+            } finally { setLoading(false); }
         };
 
 
         const getActiveJobs = async () => {
+            setLoading(true);
 
             try {
 
@@ -104,8 +107,7 @@ const ManageJobs = () => {
                 );
 
                 setJobs([]);
-
-            }
+            } finally { setLoading(false); }
         };
 
 
@@ -126,44 +128,12 @@ const ManageJobs = () => {
     }, [status]);
 
 
-    // SEARCH
-    useEffect(() => {
-
-        const searchJobs = async () => {
-
-            try {
-
-                const token = localStorage.getItem("token");
-
-                const response = await axios.get(
-                    `http://localhost:8080/api/jobs/search?keyword=${search}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
-                );
-
-                setJobs(response.data);
-
-            } catch (error) {
-
-                console.error(
-                    "Error searching jobs:",
-                    error
-                );
-
-                setJobs([]);
-
-            }
-        };
-
-        if (search.trim() !== "") {
-            searchJobs();
-        }
-
-    }, [search]);
-
+    const filteredJobs = jobs.filter((job) => {
+        const query = search.trim().toLowerCase();
+        return !query || [job.title, job.company, job.location, job.skills, job.jobType]
+            .some((value) => String(value || "").toLowerCase().includes(query));
+    });
+    const activeCount = jobs.filter((job) => job.deadline && new Date(`${job.deadline}T23:59:59`) >= new Date()).length;
 
     // APPLICANT COUNT
     useEffect(() => {
@@ -295,6 +265,7 @@ const ManageJobs = () => {
 
                 <div>
 
+                    <span className="manage-eyebrow">RECRUITER WORKSPACE</span>
                     <h1>
                         Manage Jobs
                     </h1>
@@ -312,7 +283,7 @@ const ManageJobs = () => {
                         setPostJob(true)
                     }
                 >
-                    + Post New Job
+                    <Plus size={17} /> Post New Job
                 </button>
 
 
@@ -375,6 +346,12 @@ const ManageJobs = () => {
             </div>
 
 
+            <section className="manage-summary" aria-label="Job posting summary">
+                <article><span><BriefcaseBusiness size={18}/></span><div><small>Postings in this view</small><strong>{jobs.length}</strong></div></article>
+                <article><span><BriefcaseBusiness size={18}/></span><div><small>Active postings</small><strong>{activeCount}</strong></div></article>
+                <article><span><Users size={18}/></span><div><small>Total applicants</small><strong>{Object.values(applicantCounts).reduce((sum, value) => sum + Number(value || 0), 0)}</strong></div></article>
+            </section>
+
             {/* JOB TABLE */}
 
             <div className="job-table-wrapper">
@@ -406,7 +383,9 @@ const ManageJobs = () => {
 
                     <tbody>
 
-                    {jobs.length === 0 ? (
+                    {loading ? (
+                        <tr><td colSpan="7" className="no-jobs">Loading your job postings…</td></tr>
+                    ) : filteredJobs.length === 0 ? (
 
                         <tr>
 
@@ -428,7 +407,7 @@ const ManageJobs = () => {
 
                     ) : (
 
-                        jobs.map((job) => {
+                        filteredJobs.map((job) => {
 
                             const today = new Date();
 

@@ -7,6 +7,17 @@ import "./StudentProfile.css";
 import { getProfileCompletion } from "./Functions/placementReadiness.js";
 
 const API = "http://localhost:8080/api";
+const apiErrorMessage = (error, fallback) => {
+  const body = error?.response?.data;
+  if (typeof body === "string" && body.trim()) return body.trim();
+  const detail = body?.detail || body?.message || body?.title;
+  if (detail) return detail;
+  if (body?.error || body?.status) return [body.status, body.error, body.path].filter(Boolean).join(" · ");
+  if (!error?.response) return error?.code === "ECONNABORTED"
+    ? "Resume analysis timed out. Check the backend log and retry."
+    : "Could not reach the server. Check that the backend is running and retry.";
+  return fallback;
+};
 const blankEntry = { type: "PROJECT", title: "", organization: "", role: "", description: "", technologies: "", repositoryUrl: "", liveUrl: "", credentialUrl: "", startDate: "", endDate: "", issueDate: "" };
 
 function StudentProfile() {
@@ -68,6 +79,31 @@ function StudentProfile() {
     finally { setSaving(false); }
   };
 
+  const saveAcademicDetails = async () => {
+    const academicRequired = [draft?.collegeName, draft?.rollNo, draft?.branch, draft?.degree, draft?.graduationYear, draft?.cgpa];
+    if (academicRequired.some((value) => value === null || value === undefined || String(value).trim() === "")) {
+      setError("Complete your college, roll number, branch, degree, graduation year, and CGPA before saving academic details.");
+      return;
+    }
+    const cgpa = Number(draft.cgpa);
+    const year = Number(draft.graduationYear);
+    const backlogs = draft.backlogs === "" || draft.backlogs == null ? null : Number(draft.backlogs);
+    if (!Number.isFinite(cgpa) || cgpa < 0 || cgpa > 10 || !Number.isInteger(year) || year < 2000 || year > 2100 || (backlogs !== null && (!Number.isInteger(backlogs) || backlogs < 0 || backlogs > 100))) {
+      setError("Enter a CGPA from 0 to 10, a valid graduation year, and a non-negative whole backlog count.");
+      return;
+    }
+    setSaving(true); setError(""); setNotice("");
+    try {
+      const result = await axios.put(`${API}/student/profile/academic`, {
+        collegeName: draft.collegeName.trim(), rollNo: draft.rollNo.trim(), branch: draft.branch.trim(),
+        degree: draft.degree.trim(), graduationYear: year, cgpa, backlogs
+      }, { headers: { ...auth, "Content-Type": "application/json" } });
+      setProfile(result.data); setDraft(result.data); setNotice("Academic details saved successfully.");
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || "Academic details could not be saved. Please try again.");
+    } finally { setSaving(false); }
+  };
+
   const uploadPhoto = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -127,8 +163,8 @@ function StudentProfile() {
     event.preventDefault(); if (!profile?.resume || !jobDescription.trim()) return;
     const form = new FormData(); form.append("resume", profile.resume); form.append("jobDescription", jobDescription.trim());
     setAnalyzing(true); setAnalysis(""); setError("");
-    try { const result = await axios.post(`${API}/resume-analyzer/analyze`, form, { headers: auth }); setAnalysis(result.data.analysis || "Analysis completed without a summary."); }
-    catch (requestError) { setError(requestError.response?.data?.message || "Resume analysis failed. Check that the AI service is available."); }
+    try { const result = await axios.post(`${API}/resume-analyzer/analyze`, form, { headers: auth }); const feedback = result.data.analysis; setAnalysis(typeof feedback === "string" ? feedback : JSON.stringify(feedback || { summary: "Analysis completed without a summary." }, null, 2)); }
+    catch (requestError) { setError(apiErrorMessage(requestError, "Resume analysis failed. Check that the AI service is available and try again.")); }
     finally { setAnalyzing(false); }
   };
 
@@ -173,6 +209,7 @@ function StudentProfile() {
               <label>CGPA (out of 10)<input name="cgpa" type="number" min="0" max="10" step="0.01" value={draft?.cgpa ?? ""} onChange={updateDraft}/></label>
               <label>Active backlogs<input name="backlogs" type="number" min="0" value={draft?.backlogs ?? ""} onChange={updateDraft}/></label>
             </div>
+            <button className="profile-save-button academic-save-button" type="button" disabled={saving} onClick={saveAcademicDetails}>{saving ? <LoaderCircle className="spin" size={16}/> : <Save size={16}/>}Save academic details</button>
             <div className="profile-section-title academic-title" id="skills"><span className="profile-section-icon"><Award size={18}/></span><div><h2>Skills</h2><p>Separate each skill with a comma</p></div></div>
             <label className="profile-full-field">Skills<input name="skills" value={draft?.skills || ""} onChange={updateDraft} placeholder="Java, SQL, React"/></label>
             <div className="profile-skill-chips">{(draft?.skills || "").split(/[,;]+/).map((skill) => skill.trim()).filter(Boolean).map((skill) => <span key={skill}>{skill}</span>)}</div>

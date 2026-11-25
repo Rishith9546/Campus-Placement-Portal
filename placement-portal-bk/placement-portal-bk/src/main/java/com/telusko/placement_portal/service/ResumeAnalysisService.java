@@ -24,7 +24,7 @@ public class ResumeAnalysisService {
     public ResumeAnalysisViewDto analyze(UserPrincipal user,String requestedFilename,String pastedJobDescription,Long jobId,String requestKey){
         Student student=students.getOrCreateProfile(user);String filename=student.getResume();if(filename==null||filename.isBlank())throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Upload a PDF resume to analyze it.");
         if(requestedFilename!=null&&!requestedFilename.isBlank()&&!requestedFilename.equals(filename))throw new ResponseStatusException(HttpStatus.FORBIDDEN,"You can analyze only the resume saved to your own profile.");
-        if(!filename.matches("[a-zA-Z0-9._-]{1,255}"))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"The saved resume filename is invalid.");
+        if(!isSafeFilename(filename))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"The saved resume filename is invalid. Upload the PDF again from your profile.");
         String key=validRequestKey(requestKey)?requestKey:UUID.randomUUID().toString();Optional<ResumeAnalysis> previous=analyses.findByStudent_IdAndRequestKey(user.getId(),key);
         if(previous.isPresent()){ResumeAnalysis prior=previous.get();if(prior.getStatus()==ResumeAnalysis.Status.COMPLETED)return view(prior);if(prior.getStatus()==ResumeAnalysis.Status.PROCESSING)throw new ResponseStatusException(HttpStatus.CONFLICT,"This analysis request is already processing.");prior.setStatus(ResumeAnalysis.Status.PROCESSING);prior.setUserMessage(null);prior.setAnalyzedAt(LocalDateTime.now());analyses.save(prior);return run(prior,student,pastedJobDescription,jobId);}
         String jobDescription=pastedJobDescription;String jobTitle=null,company=null;
@@ -42,7 +42,12 @@ public class ResumeAnalysisService {
         catch(Exception e){record.setStatus(ResumeAnalysis.Status.FAILED);record.setUserMessage("Resume analysis could not be saved. Please retry.");analyses.save(record);throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,"Resume analysis could not be completed. Please retry.");}}
     private String jobText(Job job){return "Job title: "+safe(job.getTitle())+"\nCompany: "+safe(job.getCompany())+"\nJob type: "+safe(job.getJobType())+"\nRequired skills listed: "+safe(job.getSkills())+"\nEligibility: "+safe(job.getEligibility())+"\nDescription: "+safe(job.getDescription())+"\nResponsibilities: "+safe(job.getResponsibilities());}
     private String safe(String s){return s==null?"Not listed":s;}
-    private String safeMessage(ResponseStatusException e){return e.getStatusCode().is4xxClientError()?Optional.ofNullable(e.getReason()).orElse("Resume could not be analyzed."):"Resume analysis could not be completed. Please retry.";}
+    private boolean isSafeFilename(String filename){
+        if(filename==null||filename.isBlank()||filename.length()>255||filename.contains("/")||filename.contains("\\"))return false;
+        try{return !filename.equals(".")&&!filename.equals("..")&&Path.of(filename).getFileName().toString().equals(filename);}
+        catch(InvalidPathException ex){return false;}
+    }
+    private String safeMessage(ResponseStatusException e){return Optional.ofNullable(e.getReason()).filter(reason->!reason.isBlank()).orElse("Resume analysis could not be completed. Please retry.");}
     private boolean validRequestKey(String key){return key!=null&&key.length()>=8&&key.length()<=100&&key.matches("[A-Za-z0-9._:-]+");}
     private String sha256(byte[] b){try{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(b));}catch(Exception e){throw new IllegalStateException(e);}}
 

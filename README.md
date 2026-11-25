@@ -285,6 +285,15 @@ Open a terminal and navigate to the backend:
 cd Backend
 ```
 
+The admin sign-in page requires an administrator account in the database. On the first backend start, create one by setting both environment variables (the password must be at least 12 characters):
+
+```powershell
+$env:APP_ADMIN_EMAIL = "admin@your-campus.edu"
+$env:APP_ADMIN_PASSWORD = "use-a-unique-password-of-at-least-12-characters"
+```
+
+Keep these values private. The backend hashes the password and creates the account once; subsequent starts leave its password unchanged. Sign in at `http://localhost:5173/adminAuth`. If the configured email already belongs to a non-admin account, startup stops instead of changing that account's role.
+
 Run the Spring Boot application:
 
 ```powershell

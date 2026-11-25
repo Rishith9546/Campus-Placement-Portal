@@ -20,6 +20,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     long countByRole(String role);
     long countByRoleIgnoreCase(String role);
+    long countByRoleIgnoreCaseAndEnabledTrue(String role);
+    long countByRoleIgnoreCaseAndEnabledFalse(String role);
 
     @Query("select count(distinct u.companyName) from User u where upper(u.role) = 'RECRUITER' and u.companyName is not null and trim(u.companyName) <> ''")
     long countRecruiterCompanies();

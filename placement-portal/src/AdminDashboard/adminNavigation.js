@@ -21,7 +21,7 @@ export const adminModuleDetails = {
   jobs: { title: "Job Management", description: "Job review and management workflows will be added in a later step." },
   applications: { title: "Applications & Placements", description: "Application oversight and placement tracking." },
   announcements: { title: "Announcements", description: "Official placement notices and updates." },
-  analytics: { title: "Analytics & Reports", description: "Administrative reports will be added in a later step." },
-  auditLogs: { title: "Audit Logs", description: "Administrative audit history will be added in a later step." },
-  settings: { title: "Settings", description: "Portal-wide administration settings will be added in a later step." },
+  analytics: { title: "Analytics & Reports", description: "Live placement system statistics and reports." },
+  auditLogs: { title: "Audit Logs", description: "Append-only history of administrative changes." },
+  settings: { title: "Settings", description: "Administrator profile and portal configuration." },
 };

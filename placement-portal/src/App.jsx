@@ -23,6 +23,9 @@ import RecruiterManagement from "./AdminDashboard/RecruiterManagement.jsx";
 import AdminJobManagement from "./AdminDashboard/AdminJobManagement.jsx";
 import AdminApplicationMonitoring from "./AdminDashboard/AdminApplicationMonitoring.jsx";
 import AnnouncementManagement from "./AdminDashboard/AnnouncementManagement.jsx";
+import AdminAnalytics from "./AdminDashboard/AdminAnalytics.jsx";
+import AdminAuditLogs from "./AdminDashboard/AdminAuditLogs.jsx";
+import AdminSettings from "./AdminDashboard/AdminSettings.jsx";
 import StudentProfile from "./Student/StudentProfile.jsx";
 import DsaTracker from "./Student/DsaTracker.jsx";
 import Aptitude from "./Student/Aptitude.jsx";
@@ -49,9 +52,9 @@ function App() {
         <Route path="jobs" element={<AdminJobManagement />} />
         <Route path="applications" element={<AdminApplicationMonitoring />} />
         <Route path="announcements" element={<AnnouncementManagement />} />
-        <Route path="analytics" element={<AdminModulePlaceholder moduleKey="analytics" />} />
-        <Route path="audit-logs" element={<AdminModulePlaceholder moduleKey="auditLogs" />} />
-        <Route path="settings" element={<AdminModulePlaceholder moduleKey="settings" />} />
+        <Route path="analytics" element={<AdminAnalytics />} />
+        <Route path="audit-logs" element={<AdminAuditLogs />} />
+        <Route path="settings" element={<AdminSettings />} />
       </Route>
 
       <Route path="/studentAuth" element={<StudentAuth />} />

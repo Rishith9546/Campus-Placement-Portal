@@ -17,7 +17,7 @@ export default function AdminAuth() {
       const response = await fetch("http://localhost:8080/api/auth/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ email: form.email.trim(), password: form.password }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -54,7 +54,7 @@ export default function AdminAuth() {
         <h1 className="auth-heading">Welcome back</h1>
         <p className="auth-subtitle">Sign in with your administrator account to continue.</p>
         <label htmlFor="admin-email">Email</label>
-        <input id="admin-email" type="email" autoComplete="username" required value={form.email}
+        <input id="admin-email" type="email" autoComplete="username" autoCapitalize="none" spellCheck="false" required value={form.email}
           onChange={(event) => setForm({ ...form, email: event.target.value })} />
         <label htmlFor="admin-password">Password</label>
         <input id="admin-password" type="password" autoComplete="current-password" required value={form.password}

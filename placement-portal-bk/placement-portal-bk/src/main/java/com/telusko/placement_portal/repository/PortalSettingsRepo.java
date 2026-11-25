@@ -1,0 +1,1 @@
+package com.telusko.placement_portal.repository; import com.telusko.placement_portal.entity.PortalSettings;import org.springframework.data.jpa.repository.JpaRepository;public interface PortalSettingsRepo extends JpaRepository<PortalSettings,Long>{}

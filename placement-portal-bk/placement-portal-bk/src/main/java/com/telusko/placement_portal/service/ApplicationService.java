@@ -12,6 +12,9 @@ import com.telusko.placement_portal.repository.ApplicationStageHistoryRepo;
 import com.telusko.placement_portal.repository.ApplicationRepo;
 import com.telusko.placement_portal.repository.JobRepo;
 import com.telusko.placement_portal.repository.StudentRepo;
+import com.telusko.placement_portal.repository.PortalSettingsRepo;
+import com.telusko.placement_portal.entity.PortalSettings;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +34,7 @@ public class ApplicationService {
     private final JobRepo jobRepo;
     private final StudentRepo studentRepo;
     private final ApplicationStageHistoryRepo historyRepo;
+    private final PortalSettingsRepo portalSettings;
 
     public ApplicationService(
             ApplicationRepo repo,
@@ -38,15 +42,27 @@ public class ApplicationService {
             StudentRepo studentRepo,
             ApplicationStageHistoryRepo historyRepo) {
 
+        this(repo, jobRepo, studentRepo, historyRepo, null);
+    }
+
+    @Autowired
+    public ApplicationService(ApplicationRepo repo, JobRepo jobRepo, StudentRepo studentRepo,
+                              ApplicationStageHistoryRepo historyRepo, PortalSettingsRepo portalSettings) {
+
         this.repo = repo;
         this.jobRepo = jobRepo;
         this.studentRepo = studentRepo;
         this.historyRepo = historyRepo;
+        this.portalSettings = portalSettings;
     }
 
     // ================= APPLY =================
 
     public application save(application app) {
+
+        if (portalSettings != null && portalSettings.findAll().stream().findFirst().map(PortalSettings::isApplicationsEnabled).orElse(true) == false) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Student applications are temporarily disabled by the placement office.");
+        }
 
         Job job = jobRepo.findById(app.getJobId())
                 .orElseThrow(() -> new RuntimeException("Job not found"));

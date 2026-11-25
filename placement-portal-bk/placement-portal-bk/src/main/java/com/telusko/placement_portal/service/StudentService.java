@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import com.telusko.placement_portal.entity.Student;
 import com.telusko.placement_portal.repository.StudentRepo;
 import com.telusko.placement_portal.security.UserPrincipal;
+import com.telusko.placement_portal.dto.StudentAcademicRequest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.net.URI;
@@ -102,6 +104,26 @@ public class StudentService {
         return studentRepository.save(
                 existingStudent
         );
+    }
+
+    @Transactional
+    public Student updateAcademicProfile(StudentAcademicRequest request, UserPrincipal user) {
+        Student student = studentRepository.findById(user.getId()).orElseGet(() -> {
+            Student profile = new Student();
+            profile.setId(user.getId());
+            profile.setName(user.getName());
+            profile.setEmail(user.getEmail());
+            profile.setProfileVisible(true);
+            return profile;
+        });
+        student.setCollegeName(request.collegeName().trim());
+        student.setRollNo(request.rollNo().trim());
+        student.setBranch(request.branch().trim());
+        student.setDegree(request.degree().trim());
+        student.setGraduationYear(request.graduationYear());
+        student.setCgpa(request.cgpa());
+        student.setBacklogs(request.backlogs() == null ? 0 : request.backlogs());
+        return studentRepository.save(student);
     }
 
 

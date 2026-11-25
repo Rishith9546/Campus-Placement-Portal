@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import com.telusko.placement_portal.entity.Student;
 import com.telusko.placement_portal.security.UserPrincipal;
 import com.telusko.placement_portal.service.StudentService;
+import com.telusko.placement_portal.dto.StudentAcademicRequest;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -56,6 +57,14 @@ public class StudentController {
         System.out.println("=====================================");
 
         return studentService.createProfile(student, user);
+    }
+
+    @PutMapping("/profile/academic")
+    public Student updateAcademicProfile(@Valid @RequestBody StudentAcademicRequest request,
+                                         @AuthenticationPrincipal UserPrincipal user) {
+        if (user == null) throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.UNAUTHORIZED, "Sign in to update your academic profile.");
+        return studentService.updateAcademicProfile(request, user);
     }
 
 
@@ -411,9 +420,12 @@ public class StudentController {
                 directory.mkdirs();
             }
             String originalFileName = resume.getOriginalFilename();
-            if (originalFileName == null || originalFileName.isEmpty()) {
-                originalFileName = "resume.pdf";
-            }
+            if (originalFileName == null || originalFileName.isEmpty()) originalFileName = "resume.pdf";
+            // Keep a readable basename while preventing client supplied path components.
+            originalFileName = originalFileName.replace('\\', '/');
+            originalFileName = Paths.get(originalFileName).getFileName().toString()
+                    .replaceAll("[^\\p{L}\\p{N}._ -]", "_");
+            if (originalFileName.isBlank()) originalFileName = "resume.pdf";
             String fileName =
                     user.getId()
                             + "_"

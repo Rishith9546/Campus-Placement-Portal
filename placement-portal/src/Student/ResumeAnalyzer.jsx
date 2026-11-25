@@ -8,6 +8,17 @@ const CATEGORY_LABELS = { skillsRelevance: "Skills relevance and quality", proje
 const SECTION_LABELS = { contactInformation: "Contact information", professionalSummary: "Professional summary", education: "Education", technicalSkills: "Technical skills", projects: "Projects", experience: "Internship / experience", certifications: "Certifications", achievements: "Achievements", github: "GitHub", linkedin: "LinkedIn", portfolio: "Portfolio" };
 const requestId = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const list = (x) => Array.isArray(x) ? x : [];
+const requestErrorMessage = (error, fallback) => {
+  const body = error?.response?.data;
+  if (typeof body === "string" && body.trim()) return body.trim();
+  const detail = body?.detail || body?.message || body?.title;
+  if (detail) return detail;
+  if (body?.error || body?.status) return [body.status, body.error, body.path].filter(Boolean).join(" · ");
+  if (!error?.response) return error?.code === "ECONNABORTED"
+    ? "Resume analysis timed out. The AI service may be taking too long; check the backend log and retry."
+    : "Could not reach the server. Check that the backend is running and retry.";
+  return fallback;
+};
 
 export default function ResumeAnalyzer() {
   const [token] = useState(() => localStorage.getItem("token"));
@@ -56,9 +67,18 @@ export default function ResumeAnalyzer() {
     try {
       const body = new FormData(); body.append("resume", profile.resume);
       if (jobId) body.append("jobId", jobId); else if (jobDescription.trim()) body.append("jobDescription", jobDescription.trim());
-      const result = await axios.post(`${API}/analyze`, body, { headers: { ...auth, "Idempotency-Key": requestId() }, timeout: 180000 });
+      const result = await axios.post(`${API}/analyze`, body, { headers: { ...auth, "Idempotency-Key": requestId() }, timeout: 330000 });
       setLatest(result.data); setSelected(result.data); setNotice("Analysis saved to your resume history."); await load();
-    } catch (e) { setError(e.response?.data?.message || "Analysis could not be completed. Check that the PDF is available and Ollama is running, then retry."); }
+    } catch (e) {
+      let message = requestErrorMessage(e, "Analysis could not be completed. Check the server error details and retry.");
+      try {
+        const { data = [] } = await axios.get(`${API}/history?limit=50`, { headers: auth });
+        setHistory(data);
+        const failed = data.find((item) => item.status === "FAILED" && item.resumeFilename === profile.resume);
+        if (failed?.userMessage) message = failed.userMessage;
+      } catch { /* Keep the original request error if history cannot be refreshed. */ }
+      setError(message);
+    }
     finally { setBusy(false); }
   };
   const openAnalysis = async (item) => {

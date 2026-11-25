@@ -13,6 +13,7 @@ export default function AdminLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [portalName, setPortalName] = useState("Placement Portal");
   const [sessionState, setSessionState] = useState("loading");
   const [sessionError, setSessionError] = useState("");
   const page = useMemo(() => {
@@ -39,6 +40,8 @@ export default function AdminLayout() {
       const profile = await response.json();
       if (profile.role !== "ROLE_ADMIN") throw new Error("This account does not have administrator access.");
       setUser(profile);
+      const settingsResponse = await fetch(`${API}/admin/settings`, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }).catch(() => null);
+      if (settingsResponse?.ok) { const settings = await settingsResponse.json(); if (settings.portalName) setPortalName(settings.portalName); }
       localStorage.setItem("adminEmail", profile.email || "");
       setSessionState("ready");
     } catch (error) {
@@ -69,7 +72,7 @@ export default function AdminLayout() {
     <aside className="admin-sidebar" aria-label="Admin navigation">
       <div className="admin-sidebar-brand-row">
         <Link className="admin-brand" to="/admin" onClick={closeMobile} aria-label="Campus Placement Portal admin overview">
-          <span className="admin-brand-mark">P</span><span className="admin-brand-text"><strong>Placement Portal</strong><small>ADMIN CONSOLE</small></span>
+          <span className="admin-brand-mark">{portalName.slice(0,1).toUpperCase()}</span><span className="admin-brand-text"><strong>{portalName}</strong><small>ADMIN CONSOLE</small></span>
         </Link>
         <button className="admin-mobile-close" onClick={closeMobile} aria-label="Close navigation"><X size={19} /></button>
       </div>

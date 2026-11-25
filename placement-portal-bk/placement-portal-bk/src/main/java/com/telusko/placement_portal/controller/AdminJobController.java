@@ -2,9 +2,13 @@ package com.telusko.placement_portal.controller;
 
 import com.telusko.placement_portal.dto.*;
 import com.telusko.placement_portal.service.AdminJobService;
+import com.telusko.placement_portal.service.AdminAuditService;
+import com.telusko.placement_portal.security.UserPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -14,8 +18,9 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:5173")
 public class AdminJobController {
     private final AdminJobService jobs;
+    private final AdminAuditService audit;
 
-    public AdminJobController(AdminJobService jobs) { this.jobs = jobs; }
+    public AdminJobController(AdminJobService jobs, AdminAuditService audit) { this.jobs = jobs; this.audit=audit; }
 
     @GetMapping
     public AdminJobPageDto list(@RequestParam(defaultValue = "0") int page,
@@ -43,41 +48,49 @@ public class AdminJobController {
     public AdminJobDetailsDto details(@PathVariable Long id) { return jobs.details(id); }
 
     @PatchMapping("/{id}/approve")
-    public Map<String, Object> approve(@PathVariable Long id) {
-        return Map.of("id", id, "approvalStatus", jobs.approve(id), "message", "Job approved.");
+    @Transactional public Map<String, Object> approve(@PathVariable Long id,@AuthenticationPrincipal UserPrincipal admin) {
+        String status=jobs.approve(id); audit.record(admin,"JOB_APPROVED","JOB",id,"Job approved",null,"approvalStatus="+status);
+        return Map.of("id", id, "approvalStatus", status, "message", "Job approved.");
     }
 
     @PatchMapping("/{id}/reject")
-    public Map<String, Object> reject(@PathVariable Long id, @Valid @RequestBody AdminJobRejectionRequest request) {
-        return Map.of("id", id, "approvalStatus", jobs.reject(id, request.reason()), "message", "Job rejected. The reason is saved for recruiter review.");
+    @Transactional public Map<String, Object> reject(@PathVariable Long id, @Valid @RequestBody AdminJobRejectionRequest request,@AuthenticationPrincipal UserPrincipal admin) {
+        String status=jobs.reject(id, request.reason()); audit.record(admin,"JOB_REJECTED","JOB",id,"Job rejected",request.reason(),"approvalStatus="+status);
+        return Map.of("id", id, "approvalStatus", status, "message", "Job rejected. The reason is saved for recruiter review.");
     }
 
     @PatchMapping("/{id}/review")
-    public Map<String, Object> returnToReview(@PathVariable Long id) {
-        return Map.of("id", id, "approvalStatus", jobs.returnToReview(id), "message", "Job returned to pending review.");
+    @Transactional public Map<String, Object> returnToReview(@PathVariable Long id,@AuthenticationPrincipal UserPrincipal admin) {
+        String status=jobs.returnToReview(id);audit.record(admin,"JOB_RETURNED_TO_REVIEW","JOB",id,"Job returned to review",null,"approvalStatus="+status);
+        return Map.of("id", id, "approvalStatus", status, "message", "Job returned to pending review.");
     }
 
     @PatchMapping("/{id}/close")
-    public Map<String, Object> close(@PathVariable Long id) {
+    @Transactional public Map<String, Object> close(@PathVariable Long id,@AuthenticationPrincipal UserPrincipal admin) {
         jobs.close(id);
+        audit.record(admin,"JOB_CLOSED","JOB",id,"Job closed",null,"closed=true");
         return Map.of("id", id, "message", "Job closed. Existing applications were preserved.");
     }
 
     @PatchMapping("/{id}/reopen")
-    public Map<String, Object> reopen(@PathVariable Long id) {
+    @Transactional public Map<String, Object> reopen(@PathVariable Long id,@AuthenticationPrincipal UserPrincipal admin) {
         jobs.reopen(id);
+        audit.record(admin,"JOB_REOPENED","JOB",id,"Job reopened",null,"closed=false");
         return Map.of("id", id, "message", "Job reopened and can accept applications if the deadline remains valid.");
     }
 
     @PatchMapping("/{id}/flag")
-    public Map<String, Object> flag(@PathVariable Long id, @Valid @RequestBody AdminJobFlagRequest request) {
+    @Transactional public Map<String, Object> flag(@PathVariable Long id, @Valid @RequestBody AdminJobFlagRequest request,@AuthenticationPrincipal UserPrincipal admin) {
         jobs.flag(id, request.reason());
+        audit.record(admin,"JOB_FLAGGED","JOB",id,"Job flagged for review",request.reason(),"moderationFlagged=true");
         return Map.of("id", id, "moderationFlagged", true, "message", "Job flagged for Admin investigation.");
     }
 
     @PatchMapping("/{id}/unflag")
-    public Map<String, Object> unflag(@PathVariable Long id) {
+    @Transactional public Map<String, Object> unflag(@PathVariable Long id,@AuthenticationPrincipal UserPrincipal admin) {
         jobs.unflag(id);
+        audit.record(admin,"JOB_UNFLAGGED","JOB",id,"Job moderation flag removed",null,"moderationFlagged=false");
         return Map.of("id", id, "moderationFlagged", false, "message", "Moderation flag removed.");
     }
 }
+
